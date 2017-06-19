@@ -43,7 +43,7 @@ def find_energy(tp, tq, p, q, tg, gamma):
                     val = j
                 j = j + 1
             min_energy_values[counter][k] = minimum
-            aux_array[counter][k] = val
+            aux_array[counter+1][k] = val
             k = k + 1
         counter = counter + 1
     print(min_energy_values)
@@ -56,19 +56,19 @@ def find_gamma(tp, tq, p, q, tg, gamma):
     min_energy_values, aux_array = find_energy(tp, tq, p,q,tg,gamma)
     min_energy = min(min_energy_values[len(min_energy_values)-2])
     index_min = np.argmin(min_energy_values[len(min_energy_values)-2])
-    print(index_min, "a")
+    print(index_min)
     n = len(gamma)
     print(aux_array)
-    path = []
-    counter = n-2
-    minumum = np.inf
-    while counter > 0:
-        minimum = np.inf
+    path = np.zeros(n)
+    path[0] = 0
+    path[n-1] = 1
+    counter = n-1
+    while counter >= 0:
         index = index_min
-        path.append(tg[int(aux_array[counter][index])])
+        path[counter] = tg[int(aux_array[counter][index])]
         index = int(aux_array[counter][index])
         counter = counter - 1
-    print(path)
+
     return path
 
 

@@ -3,17 +3,15 @@ import numpy as np
 from elasticity_n_4 import *
 import examples as ex
 
-n = 5
+n = 17
 t = np.linspace(0.,1., n)
 t1 = np.zeros(n)
-p = np.array(np.sin(t))
+p = np.array(-1 * np.cos(t) + 1)
 q = np.array(np.sin(t))
+tg = np.linspace(0.,1.,20)
+gamma = np.linspace(0., 1., 20)
 
-print(len(p), len(q))
-tg = np.linspace(0.,1.,10)
-gamma = np.linspace(0., 1., 10)
-
-gamma = [0] + find_gamma(t, t, p, q, tg, gamma) + [1]
+gamma = find_gamma(t, t, p, q, tg, gamma)
 
 print(gamma)
 g, g_deriv = ex.gamma_example('sine',0.05)
