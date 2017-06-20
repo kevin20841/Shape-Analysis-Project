@@ -6,8 +6,8 @@ import examples as ex
 n = 17
 t = np.linspace(0.,1., n)
 t1 = np.zeros(n)
-p = np.array(-1 * np.cos(t) + 1)
-q = np.array(np.sin(t))
+p = np.array(t**4)
+q = np.array(t)
 tg = np.linspace(0.,1.,20)
 gamma = np.linspace(0., 1., 20)
 
