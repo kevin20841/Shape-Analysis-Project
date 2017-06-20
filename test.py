@@ -13,7 +13,6 @@ gamma = np.linspace(0., 1., 20)
 
 gamma = find_gamma(t, t, p, q, tg, gamma)
 
-print(gamma)
 g, g_deriv = ex.gamma_example('sine',0.05)
 
 plt.plot(t, p)
