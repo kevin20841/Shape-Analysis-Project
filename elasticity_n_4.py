@@ -63,5 +63,21 @@ def find_gamma(tp, tq, p, q, tg, gamma):
         counter = counter - 1
     return path
 
+"""
+gammar ----- real gamma
+
+gammat ----- gamma to be tested
+"""
+
+
+def find_error(tg, gammar, gammat):
+    n = len(tg)
+    error = 1.0 / 2 * (tg[1] - tg[0]) * (gammar[1] - gammat[1]) ** 2 \
+          + 1.0 / 2 * (tg[n-1] - tg[n-2]) * (gammar[n-1] - gammat[n-1]) ** 2
+    k = 2
+    while k < n-1:
+        error = 1 / 2 * error + (gammar[k] - gammat[k]) ** 2 *(tg[k] - tg[k-1]) ** 2
+        k = k + 1
+    return error
 
 
