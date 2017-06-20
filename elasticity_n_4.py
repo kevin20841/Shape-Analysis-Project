@@ -1,3 +1,4 @@
+
 import numpy as np
 
 """
@@ -30,6 +31,7 @@ def find_energy(tp, tq, p, q, tg, gamma):
     min_energy_values = np.zeros([n, n])
     aux_array = np.zeros([n, n])
     counter = 0
+    val = 0
     while counter < n - 1:
         k = 0
         while k < n:
@@ -43,7 +45,6 @@ def find_energy(tp, tq, p, q, tg, gamma):
                 j = j + 1
             min_energy_values[counter][k] = minimum
             aux_array[counter+1][k] = val
-            print(counter+1, val, k)
             k = k + 1
         counter = counter + 1
     return min(min_energy_values[len(min_energy_values) - 2]), min_energy_values, aux_array
