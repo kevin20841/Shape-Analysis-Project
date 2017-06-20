@@ -1,23 +1,37 @@
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 from elasticity_n_4 import *
 import examples as ex
 
-n = 130
+n = 50
 t = np.linspace(0.,1., n)
-t1 = np.zeros(n)
-p = np.array(np.sin(t))
-q = np.array(np.exp(t)-1)
-tg = np.linspace(0.,1.,130)
-gamma = np.linspace(0., 1., 130)
+
+g = ex.curve_example('superellipse', t)[0]
+
+
+p = g
+
+g = ex.curve_example('circle', t)[0]
+q = g
+
+p = p[0]
+q = q[0]
+
+p = -p + p[0]
+q = -q + q[0]
+#
+# p = np.array(np.sin(t))
+# q = np.array(np.exp(t)-1)
+tg = np.linspace(0.,1.,n)
+gamma = np.linspace(0., 1., n)
 
 gamma = find_gamma(t, t, p, q, tg, gamma)
 
 g, g_deriv = ex.gamma_example('sine',0.05)
 
 x = np.interp(gamma, t, q)
-# plt.plot(t, p, 'b')
-# plt.plot(t, q, 'g')
-# plt.plot(t, x, 'y')
-# plt.plot(tg, gamma, "r")
-# plt.show()
+plt.plot(t, p, 'b')
+plt.plot(t, q, 'g')
+plt.plot(t, x, 'y')
+plt.plot(tg, gamma, "r")
+plt.show()
 

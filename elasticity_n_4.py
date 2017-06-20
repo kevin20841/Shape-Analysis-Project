@@ -1,6 +1,4 @@
-
 import numpy as np
-
 """
 Variables:
     p ---------- curve 1
@@ -32,18 +30,18 @@ def find_energy(tp, tq, p, q, tg, gamma):
     aux_array = np.zeros([n, n])
     counter = 0
     val = 0
-    while counter < n - 1:
+    while counter < n - 2:
         k = 0
         while k < n:
             minimum = np.inf
-            j = 0
-            while j < n:
-                E = f_linear(counter, counter+1, gamma[k], gamma[j], tg, tp, tq, p, q) + min_energy_values[counter][j]
+            j = k
+            while j >= 0:
+                E = f_linear(counter, counter+1, gamma[j], gamma[k], tg, tp, tq, p, q) + min_energy_values[counter][j]
                 if E < minimum:
                     minimum = E
                     val = j
-                j = j + 1
-            min_energy_values[counter][k] = minimum
+                j = j - 1
+            min_energy_values[counter+1][k] = minimum
             aux_array[counter+1][k] = val
             k = k + 1
         counter = counter + 1
@@ -57,9 +55,9 @@ def find_gamma(tp, tq, p, q, tg, gamma):
     path = np.zeros(n)
     path[0] = 0
     path[n-1] = 1
-    counter = n-1
+    counter = n-2
     index = index_min
-    while counter >= 0:
+    while counter >= 1:
         path[counter] = tg[int(aux_array[counter][index])]
         index = int(aux_array[counter][index])
         counter = counter - 1

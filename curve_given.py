@@ -6,7 +6,8 @@ from scipy.interpolate import InterpolatedUnivariateSpline
 n = 128
 t = np.linspace(0.,1.,n)
 
-b, b_deriv = ex.curve_example('hippopede',n)
-g, g_deriv = ex.gamma_example('sine',0.05)
-plt.plot(t,g(t))
+g = ex.curve_example('bumps', t)[0]
+print(len(g[0]))
+
+plt.plot(t,g[0])
 plt.show()
