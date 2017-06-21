@@ -1,45 +1,51 @@
+print("Loading.....")
 import matplotlib.pyplot as plt
-from elasticity_n_4 import *
+from shapedist.elastic_global import *
 import examples as ex
 from scipy.interpolate import InterpolatedUnivariateSpline
-from scipy.interpolate import interp1d
-m = 80
-n = 200
+print("Calculating......")
+m = 50
+n = 300
 t = np.linspace(0.,1., m)
 
 p = [0,0]
 
-q = ex.curve_example('bumps', t)[0]
+q = ex.curve_example('flower', t)[0]
 
 x_function = InterpolatedUnivariateSpline(t, q[0])
 y_function = InterpolatedUnivariateSpline(t, q[1])
 
-p[0] = x_function(ex.gamma_example("steep")[0](t))
-p[1] = y_function(ex.gamma_example("steep")[0](t))
 
 test = ex.gamma_example("steep")[0](t)
-i = 1
-while i < len(test):
-    if (test[i]-test[i-1]) / (t[i]-t[i-1]) < 0:
-        print("Example Gamma Curve is bad")
-    i = i + 1
+#
+# test = np.zeros(m)
+#
+# i = 1
+# while i < m:
+#     test[i] = np.random.random_sample()
+#     i = i + 1
+# test.sort()
+# test[m-1] = 1
+# test[0] = 0
 
+p[0] = x_function(test)
+p[1] = y_function(test)
 
 # p = np.array(np.sin(t))
 # q = np.array(np.exp(t)-1)
 tg = np.linspace(0.,1.,n)
 gamma = np.linspace(0., 1., n)
 
-gammay = find_gamma(t, t, p[1], q[1], tg, gamma, InterpolatedUnivariateSpline)
+gammay, gammayE = find_gamma([t, p[1]], [t, q[1]], [tg, gamma])
 
-gammax = find_gamma(t, t, p[0], q[0], tg, gamma, InterpolatedUnivariateSpline)
+gammax, gammaxE = find_gamma([t, p[0]], [t, q[0]], [tg, gamma])
 
-
-plt.plot(p[0], p[1], 'b')
+print("Finished!")
+plt.plot(p[0], p[1], 'k')
 plt.plot(q[0], q[1], 'g')
-plt.plot(x_function(gammax), y_function(gammay), ".-")
+plt.plot(x_function(gammax), y_function(gammay), ".")
 plt.plot(t, gammax, ".-r")
-plt.plot(t, ex.gamma_example("steep")[0](t), ".-y")
+plt.plot(t, test, ".-y")
 
 plt.show()
 
