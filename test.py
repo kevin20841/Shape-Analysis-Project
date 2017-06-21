@@ -21,7 +21,7 @@ test = ex.gamma_example("steep")[0](t)
 i = 1
 while i < len(test):
     if (test[i]-test[i-1]) / (t[i]-t[i-1]) < 0:
-        print("BAD THINGS")
+        print("Example Gamma Curve is bad")
     i = i + 1
 
 
