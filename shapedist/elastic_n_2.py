@@ -1,5 +1,5 @@
 """
-Functions for finding the globally optimum solution to the shape energy problem. Call find_gamma() in order
+Functions for finding a local solution to the shape energy problem. Call find_gamma() in order
 to produce the gamma curve, and find_energy in order to produce the minimum shape energy. Do not call
 find_gamma(find_energy()).
 
@@ -8,7 +8,6 @@ import numpy as np
 from numba import jit, jitclass
 
 
-@jitclass
 class SizeError(Exception):
     def __init__(self, m, n):
         self.m = str(m)
@@ -20,14 +19,26 @@ class SizeError(Exception):
                + "the domain of gamma."
 
 
+class StripHeightError(Exception):
+    def __init__(self, n, strip_height):
+        self.strip_height = str(strip_height)
+        self.n = str(n)
+
+    def __str__(self):
+        return "The height (" + self.strip_height + ") of the limiting strip on the grid is " + \
+               " larger than the size (" + self.n + ") of " \
+               + "the range of gamma."
+
+
 @jit(cache=True)
-def find_energy(p, q, g):
+def find_energy(p, q, g, strip_height=10):
     """
     Finds a the shape energy E such that E = integral from 0 to 1 of 1/2 * (p(t) - q(gamma(t))^2 is minimized.
     :param p: A 2-dimensional numpy array representing a curve P(t), with p[0] as t and p[1] as P(t)
     :param q: A 2-dimensional numpy array representing a curve Q(t), with q[0] as t and q[1] as Q(t)
     :param g: A 2-dimensional numpy array representing the parameters of the output gamma, with g[0] as the domain of
     the output gamma function and g[1] as the candidate values for the gamma function
+    :param strip_height: The height of the limiting strip that runs across the grid's diagonal
     :return: Returns the energy, the array of minimum energy values, and the position array in that order
     """
     tp, tq, py, qy, tg, gamma = p[0], q[0], p[1], q[1], g[0], g[1]
@@ -35,6 +46,8 @@ def find_energy(p, q, g):
     n = gamma.size
     if m > n:
         raise SizeError(m, n)
+    if strip_height > n:
+        raise StripHeightError(n, strip_height)
     min_energy_values = np.zeros([m, n])
     aux_array = np.zeros([m, n])
     counter = 0
@@ -42,7 +55,7 @@ def find_energy(p, q, g):
     e = 0
     while counter < m - 1:
         k = counter + 1
-        while k < n:
+        while k < counter + strip_height + 1 and k < n:
             minimum = np.inf
             j = k - 1
             while j >= counter:
@@ -67,31 +80,38 @@ def find_energy(p, q, g):
     i = 0
     minimum = np.inf
     while i < m:
-        if min_energy_values[counter][i] < minimum and min_energy_values[counter][i]!=0:
-            index = i
+        if min_energy_values[counter][i] < minimum and min_energy_values[counter][i] != 0.0:
             minimum = min_energy_values[counter][i]
         i = i + 1
     return minimum, min_energy_values, aux_array
 
 
 @jit(cache=True)
-def find_gamma(p, q, g): #INTERPOLATION TODO
+def find_gamma(p, q, g, strip_height=10): #INTERPOLATION TODO
     """
     Finds a discrete function gamma such that the E = integral from 0 to 1 of 1/2 * (p(t) - q(gamma(t))^2 is minimized.
     :param p: A 2-dimensional numpy array representing a curve P(t), with p[0] as t and p[1] as P(t)
     :param q: A 2-dimensional numpy array representing a curve Q(t), with q[0] as t and q[1] as Q(t)
     :param g: A 2-dimensional numpy array representing the parameters of the output gamma, with g[0] as the domain of
     the output gamma function and g[1] as the candidate values for the gamma function
+    :param strip_height: The height of the limiting strip that runs across the grid's diagonal
     :return: Returns the y - values of the gamma function corresponding to the domain and two curves implemented. Also
     returns the minimum shape energy.
     """
     tp, tq, py, qy, tg, gamma = p[0], q[0], p[1], q[1], g[0], g[1]
-    min_energy, min_energy_values, aux_array = find_energy(p, q, g)
+    min_energy, min_energy_values, aux_array = find_energy(p, q, g, strip_height)
     n = tp.size
     m = gamma.size
     path = np.zeros(n)
     counter = n-2
-    index = m-1
+    index = m-2
+    i = 0
+    minimum = np.inf
+    while i < m:
+        if min_energy_values[counter][i] < minimum and min_energy_values[counter][i]!=0:
+            index = i
+            minimum = min_energy_values[counter][i]
+        i = i + 1
     path[0] = 0
     path[n-1] = 1
     while counter >= 0:
