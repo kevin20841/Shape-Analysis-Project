@@ -30,7 +30,7 @@ class StripHeightError(Exception):
                + "the range of gamma."
 
 
-@jit(cache=True)
+#@jit(cache=True)
 def find_energy(p, q, g, strip_height=10):
     """
     Finds a the shape energy E such that E = integral from 0 to 1 of 1/2 * (p(t) - q(gamma(t))^2 is minimized.
@@ -56,6 +56,7 @@ def find_energy(p, q, g, strip_height=10):
     while counter < m - 1:
         k = counter + 1
         while k < counter + strip_height + 1 and k < n:
+            print(k, counter + strip_height + 1, n)
             minimum = np.inf
             j = k - 1
             while j >= counter:
@@ -83,18 +84,19 @@ def find_energy(p, q, g, strip_height=10):
         if min_energy_values[counter][i] < minimum and min_energy_values[counter][i] != 0.0:
             minimum = min_energy_values[counter][i]
         i = i + 1
+    print(aux_array)
     return minimum, min_energy_values, aux_array
 
 
-@jit(cache=True)
-def find_gamma(p, q, g, strip_height=10): #INTERPOLATION TODO
+#@jit(cache=True)
+def find_path(p, q, g, strip_height=10):
     """
     Finds a discrete function gamma such that the E = integral from 0 to 1 of 1/2 * (p(t) - q(gamma(t))^2 is minimized.
     :param p: A 2-dimensional numpy array representing a curve P(t), with p[0] as t and p[1] as P(t)
-    :param q: A 2-dimensional numpy array representing a curve Q(t), with q[0] as t and q[1] as Q(t)
+    :param q: A 2-dimensional numpy array representing a curve Q(t), with q[0] as t and q[1] as Q(t).
     :param g: A 2-dimensional numpy array representing the parameters of the output gamma, with g[0] as the domain of
-    the output gamma function and g[1] as the candidate values for the gamma function
-    :param strip_height: The height of the limiting strip that runs across the grid's diagonal
+    the output gamma function and g[1] as the candidate values for the gamma function.
+    :param strip_height: The height of the limiting strip that runs across the grid's diagonal. Default is 10.
     :return: Returns the y - values of the gamma function corresponding to the domain and two curves implemented. Also
     returns the minimum shape energy.
     """
@@ -108,14 +110,14 @@ def find_gamma(p, q, g, strip_height=10): #INTERPOLATION TODO
     i = 0
     minimum = np.inf
     while i < m:
-        if min_energy_values[counter][i] < minimum and min_energy_values[counter][i]!=0:
+        if min_energy_values[counter][i] < minimum and min_energy_values[counter][i] != 0:
             index = i
             minimum = min_energy_values[counter][i]
         i = i + 1
     path[0] = 0
-    path[n-1] = 1
+    path[n-1] = m-1
     while counter >= 0:
-        path[counter] = tg[int(aux_array[counter][index])]
+        path[counter] = int(aux_array[counter][index])
         index = int(aux_array[counter][index])
         counter = counter - 1
     # func = func(tp, path)
@@ -123,7 +125,17 @@ def find_gamma(p, q, g, strip_height=10): #INTERPOLATION TODO
     return path, min_energy
 
 
-@jit(cache=True)
+#@jit(cache=True)
+def find_gamma(p, q, g, strip_height=10):
+    path, min_energy = find_path(p, q, g, strip_height)
+    i = 0
+    while i < path.size:
+        path[i] = g[0][int(path[i])]
+        i = i + 1
+    return path, min_energy
+
+
+#@jit(cache=True)
 def find_error(tg, gammar, gammat):
     """
     Function that finds the error between two gamma curves for checking

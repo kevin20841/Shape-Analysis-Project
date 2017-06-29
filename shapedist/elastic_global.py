@@ -5,10 +5,9 @@ find_gamma(find_energy()).
 
 """
 import numpy as np
-from numba import jit, jitclass
+from numba import jit
 
 
-@jitclass
 class SizeError(Exception):
     def __init__(self, m, n):
         self.m = str(m)
@@ -75,13 +74,13 @@ def find_energy(p, q, g):
 
 
 @jit(cache=True)
-def find_gamma(p, q, g): #INTERPOLATION TODO
+def find_gamma(p, q, g):
     """
     Finds a discrete function gamma such that the E = integral from 0 to 1 of 1/2 * (p(t) - q(gamma(t))^2 is minimized.
-    :param p: A 2-dimensional numpy array representing a curve P(t), with p[0] as t and p[1] as P(t)
-    :param q: A 2-dimensional numpy array representing a curve Q(t), with q[0] as t and q[1] as Q(t)
+    :param p: A 2-dimensional numpy array representing a curve P(t), with p[0] as t and p[1] as P(t).
+    :param q: A 2-dimensional numpy array representing a curve Q(t), with q[0] as t and q[1] as Q(t).
     :param g: A 2-dimensional numpy array representing the parameters of the output gamma, with g[0] as the domain of
-    the output gamma function and g[1] as the candidate values for the gamma function
+    the output gamma function and g[1] as the candidate values for the gamma function.
     :return: Returns the y - values of the gamma function corresponding to the domain and two curves implemented. Also
     returns the minimum shape energy.
     """
@@ -106,11 +105,11 @@ def find_gamma(p, q, g): #INTERPOLATION TODO
 @jit(cache=True)
 def find_error(tg, gammar, gammat):
     """
-    Function that finds the error between two gamma curves for checking
-    :param tg: The domain of the two gamma curves
-    :param gammar: The y-values of the known gamma curve
-    :param gammat: he y-values of gamma curve to be tested
-    :return: The weighted error
+    Function that finds the error between two gamma curves for checking.
+    :param tg: The domain of the two gamma curves.
+    :param gammar: The y-values of the known gamma curve.
+    :param gammat: he y-values of gamma curve to be tested.
+    :return: The weighted error.
     """
     n = tg.size
     error = 1 / 2 * (tg[1] - tg[0]) * (gammar[1] - gammat[1]) ** 2 + 1 / 2 * (tg[n-1] - tg[n-2]) * (gammar[n-1] - gammat[n-1]) ** 2
