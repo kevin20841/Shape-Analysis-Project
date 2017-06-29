@@ -1,10 +1,10 @@
 print("Loading.....")
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from shapedist.elastic_linear import *
 import examples as ex
 from scipy.interpolate import InterpolatedUnivariateSpline
 print("Calculating......")
-m = 1024
+m = 2048
 n = 1024
 t = np.linspace(0.,1., m)
 
@@ -50,14 +50,14 @@ print("Errors:")
 #print("y:", find_error(domain_y, ex.gamma_example("sine")[0](domain_y), gammay))
 print("Finished!")
 
-plt.plot(p[0], p[1], 'k')
-plt.plot(q[0], q[1], 'g')
-
-plt.plot(x_function(gammax), y_function(gammay), ".-")
-plt.plot(domain_y, gammay, ".-r")
-plt.plot(t, test1, ".-y")
-    # plt.plot(tg, gammax, "-c")
-    # plt.plot(t, test, "-m")
-
-plt.show()
+# plt.plot(p[0], p[1], 'k')
+# plt.plot(q[0], q[1], 'g')
+#
+# plt.plot(x_function(gammax), y_function(gammay), ".-")
+# plt.plot(domain_y, gammay, ".-r")
+# plt.plot(t, test1, ".-y")
+# plt.plot(tg, gammax, "-c")
+# plt.plot(t, test, "-m")
+#
+# plt.show()
 

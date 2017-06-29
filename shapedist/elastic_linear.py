@@ -3,18 +3,15 @@ from numba import jit, types, float64, int16
 
 
 @jit([(float64, float64[:], float64[:])], cache=True, nopython=True)
-def interp_linear(t, x, y):
-    i = 0
-    while i < x.size:
-        if x[i] > t:
-            i = i - 1
-            break
-        i = i + 1
-    return (t - x[i]) * (y[i+1] - y[i]) / (x[i+1] - x[i]) + y[i]
-
-
-@jit([(float64, float64[:], float64[:])], cache=True, nopython=True)
 def interp(t, x, y):
+    """
+    Linear interpolation function. Uses binary search to find which values of x to interpolate over.
+    Does not work if interpolation is out of bounds
+    :param t: The input of the function
+    :param x: The domain of the function to be interpolated
+    :param y: The range of the function to be interpolated
+    :return: The calculated value
+    """
     lower = 0
     upper = x.size -1
     while lower < upper:  # use < instead of <=
@@ -34,13 +31,24 @@ def interp(t, x, y):
 @jit([types.Tuple((float64[:], float64[:], float64))(float64[:, :], float64[:, :], int16, int16)],
      cache=True, nopython=True)
 def find_gamma(p, q, height, max_iteration):
+    """
+    Finds the gamma such that E = integral from 0 to 1 of 1/2 * (p(t) - q(gamma(t))^2 is minimized
+    :param p: The first input curve, an array with 2 elements: the domain of p as an array and the range of
+    p as an array in that order. Both arrays must be the same size as q
+    :param q: The first second curve, an array with 2 elements: the domain of q as an array and the range of
+    q as an array in that order. Both arrays must be the same length as p
+    :param height: The height of the adapting strip. Generally advised to be 1/3 or 1/4 of 2**max_iteration
+    :param max_iteration: The resolution of the algorithm. Actual resolution is 2**max_iteration
+    :return: The domain of gamma as an array of floats, the range of gamma as an array, of floats,
+    and the minimum energy calculated as a float.
+    """
     tp = p[0]
     tq = q[0]
     py = p[1]
     qy = q[1]
     path_length = tp.size
     candidates = height
-    iteration = 7
+    iteration = max_iteration-3
     minimum = 0
 
     step_size = 0
@@ -123,6 +131,13 @@ def find_gamma(p, q, height, max_iteration):
 
 @jit(float64(float64[:], float64[:], float64[:]), cache=True, nopython=True)
 def find_error(tg, gammar, gammat):
+    """
+    Function that finds the error between two gamma curves for checking.
+    :param tg: The domain of the two gamma curves.
+    :param gammar: The y-values of the known gamma curve.
+    :param gammat: The y-values of gamma curve to be tested.
+    :return: The weighted error.
+    """
     n = tg.size
     error = 1 / 2 * (tg[1] - tg[0]) * (gammar[1] - gammat[1]) ** 2 + 1 / 2 * (tg[n-1] - tg[n-2]) * (gammar[n-1] - gammat[n-1]) ** 2
     k = 2
