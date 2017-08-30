@@ -30,7 +30,7 @@ class StripHeightError(Exception):
                + "the range of gamma."
 
 
-#@jit(cache=True)
+@jit(cache=True)
 def find_energy(p, q, g, strip_height=10):
     """
     Finds a the shape energy E such that E = integral from 0 to 1 of 1/2 * (p(t) - q(gamma(t))^2 is minimized.
@@ -88,7 +88,7 @@ def find_energy(p, q, g, strip_height=10):
     return minimum, min_energy_values, aux_array
 
 
-#@jit(cache=True)
+@jit(cache=True)
 def find_path(p, q, g, strip_height=10):
     """
     Finds a discrete function gamma such that the E = integral from 0 to 1 of 1/2 * (p(t) - q(gamma(t))^2 is minimized.
