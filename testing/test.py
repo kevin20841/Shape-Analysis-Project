@@ -1,8 +1,10 @@
 print("Loading.....")
 import matplotlib.pyplot as plt
-from shapedist.elastic_linear import *
-import examples as ex
 from scipy.interpolate import InterpolatedUnivariateSpline
+
+from shapedist.elastic_linear import *
+from testing import examples as ex
+
 print("Calculating......")
 m = 2048
 n = 2048

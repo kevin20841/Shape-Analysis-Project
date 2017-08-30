@@ -1,7 +1,7 @@
-import examples as ex
-import numpy as np
 import matplotlib.pyplot as plt
-from scipy.interpolate import InterpolatedUnivariateSpline
+import numpy as np
+
+from testing import examples as ex
 
 n = 128
 t = np.linspace(0.,1.,n)

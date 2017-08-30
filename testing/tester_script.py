@@ -1,11 +1,12 @@
 import cProfile
 import pstats
-from shapedist import elastic_linear
 from io import StringIO
-import numpy as np
-from shapedist.elastic_linear import *
-import examples as ex
+
 from scipy.interpolate import InterpolatedUnivariateSpline
+
+from shapedist import elastic_linear
+from shapedist.elastic_linear import *
+from testing import examples as ex
 
 readFile = open("test_cases", "r")
 text = readFile.read()
