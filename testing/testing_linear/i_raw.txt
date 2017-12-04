@@ -1,0 +1,225 @@
+Minimum Energy: 2.33488256317426e-34 Error: 7.450625004649902e-18
+
+
+Wed Nov 15 15:26:02 2017    statsfile
+
+         6 function calls in 0.026 seconds
+
+   Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    0.026    0.026 {built-in method builtins.exec}
+        1    0.000    0.000    0.026    0.026 <string>:1(<module>)
+        1    0.026    0.026    0.026    0.026 /Users/Kevin/PycharmProjects/2dShapeDistance/shapedist/elastic_linear.py:112(find_gamma)
+        2    0.000    0.000    0.000    0.000 {built-in method numpy.core.multiarray.array}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+
+
+Wed Nov 15 15:26:02 2017    statsfile
+
+         6 function calls in 0.029 seconds
+
+   Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    0.029    0.029 {built-in method builtins.exec}
+        1    0.000    0.000    0.029    0.029 <string>:1(<module>)
+        1    0.029    0.029    0.029    0.029 /Users/Kevin/PycharmProjects/2dShapeDistance/shapedist/elastic_linear.py:112(find_gamma)
+        2    0.000    0.000    0.000    0.000 {built-in method numpy.core.multiarray.array}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+
+
+Wed Nov 15 15:26:02 2017    statsfile
+
+         6 function calls in 0.027 seconds
+
+   Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    0.027    0.027 {built-in method builtins.exec}
+        1    0.000    0.000    0.027    0.027 <string>:1(<module>)
+        1    0.027    0.027    0.027    0.027 /Users/Kevin/PycharmProjects/2dShapeDistance/shapedist/elastic_linear.py:112(find_gamma)
+        2    0.000    0.000    0.000    0.000 {built-in method numpy.core.multiarray.array}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+
+
+Minimum Energy: 2.3319827166053754e-34 Error: 0.0
+
+
+Wed Nov 15 15:26:02 2017    statsfile
+
+         6 function calls in 0.059 seconds
+
+   Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    0.059    0.059 {built-in method builtins.exec}
+        1    0.000    0.000    0.058    0.058 <string>:1(<module>)
+        1    0.058    0.058    0.058    0.058 /Users/Kevin/PycharmProjects/2dShapeDistance/shapedist/elastic_linear.py:112(find_gamma)
+        2    0.000    0.000    0.000    0.000 {built-in method numpy.core.multiarray.array}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+
+
+Wed Nov 15 15:26:03 2017    statsfile
+
+         6 function calls in 0.066 seconds
+
+   Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    0.066    0.066 {built-in method builtins.exec}
+        1    0.000    0.000    0.065    0.065 <string>:1(<module>)
+        1    0.065    0.065    0.065    0.065 /Users/Kevin/PycharmProjects/2dShapeDistance/shapedist/elastic_linear.py:112(find_gamma)
+        2    0.000    0.000    0.000    0.000 {built-in method numpy.core.multiarray.array}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+
+
+Wed Nov 15 15:26:03 2017    statsfile
+
+         6 function calls in 0.071 seconds
+
+   Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    0.071    0.071 {built-in method builtins.exec}
+        1    0.000    0.000    0.071    0.071 <string>:1(<module>)
+        1    0.071    0.071    0.071    0.071 /Users/Kevin/PycharmProjects/2dShapeDistance/shapedist/elastic_linear.py:112(find_gamma)
+        2    0.000    0.000    0.000    0.000 {built-in method numpy.core.multiarray.array}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+
+
+Minimum Energy: 1.2702511809311607e-34 Error: 0.0
+
+
+Wed Nov 15 15:26:03 2017    statsfile
+
+         6 function calls in 0.121 seconds
+
+   Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    0.121    0.121 {built-in method builtins.exec}
+        1    0.000    0.000    0.121    0.121 <string>:1(<module>)
+        1    0.121    0.121    0.121    0.121 /Users/Kevin/PycharmProjects/2dShapeDistance/shapedist/elastic_linear.py:112(find_gamma)
+        2    0.000    0.000    0.000    0.000 {built-in method numpy.core.multiarray.array}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+
+
+Wed Nov 15 15:26:03 2017    statsfile
+
+         6 function calls in 0.117 seconds
+
+   Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    0.117    0.117 {built-in method builtins.exec}
+        1    0.000    0.000    0.117    0.117 <string>:1(<module>)
+        1    0.117    0.117    0.117    0.117 /Users/Kevin/PycharmProjects/2dShapeDistance/shapedist/elastic_linear.py:112(find_gamma)
+        2    0.000    0.000    0.000    0.000 {built-in method numpy.core.multiarray.array}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+
+
+Wed Nov 15 15:26:03 2017    statsfile
+
+         6 function calls in 0.118 seconds
+
+   Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    0.118    0.118 {built-in method builtins.exec}
+        1    0.000    0.000    0.118    0.118 <string>:1(<module>)
+        1    0.118    0.118    0.118    0.118 /Users/Kevin/PycharmProjects/2dShapeDistance/shapedist/elastic_linear.py:112(find_gamma)
+        2    0.000    0.000    0.000    0.000 {built-in method numpy.core.multiarray.array}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+
+
+Minimum Energy: 1.5667053405956321e-34 Error: 0.0
+
+
+Wed Nov 15 15:26:04 2017    statsfile
+
+         6 function calls in 0.266 seconds
+
+   Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    0.266    0.266 {built-in method builtins.exec}
+        1    0.000    0.000    0.266    0.266 <string>:1(<module>)
+        1    0.266    0.266    0.266    0.266 /Users/Kevin/PycharmProjects/2dShapeDistance/shapedist/elastic_linear.py:112(find_gamma)
+        2    0.000    0.000    0.000    0.000 {built-in method numpy.core.multiarray.array}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+
+
+Wed Nov 15 15:26:04 2017    statsfile
+
+         6 function calls in 0.274 seconds
+
+   Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    0.274    0.274 {built-in method builtins.exec}
+        1    0.000    0.000    0.274    0.274 <string>:1(<module>)
+        1    0.274    0.274    0.274    0.274 /Users/Kevin/PycharmProjects/2dShapeDistance/shapedist/elastic_linear.py:112(find_gamma)
+        2    0.000    0.000    0.000    0.000 {built-in method numpy.core.multiarray.array}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+
+
+Wed Nov 15 15:26:04 2017    statsfile
+
+         6 function calls in 0.277 seconds
+
+   Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    0.277    0.277 {built-in method builtins.exec}
+        1    0.000    0.000    0.277    0.277 <string>:1(<module>)
+        1    0.277    0.277    0.277    0.277 /Users/Kevin/PycharmProjects/2dShapeDistance/shapedist/elastic_linear.py:112(find_gamma)
+        2    0.000    0.000    0.000    0.000 {built-in method numpy.core.multiarray.array}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+
+
+Minimum Energy: 1.0794500177166362e-34 Error: 0.0
+
+
+Wed Nov 15 15:26:05 2017    statsfile
+
+         6 function calls in 0.668 seconds
+
+   Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    0.668    0.668 {built-in method builtins.exec}
+        1    0.000    0.000    0.668    0.668 <string>:1(<module>)
+        1    0.668    0.668    0.668    0.668 /Users/Kevin/PycharmProjects/2dShapeDistance/shapedist/elastic_linear.py:112(find_gamma)
+        2    0.000    0.000    0.000    0.000 {built-in method numpy.core.multiarray.array}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+
+
+Wed Nov 15 15:26:06 2017    statsfile
+
+         6 function calls in 0.675 seconds
+
+   Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    0.675    0.675 {built-in method builtins.exec}
+        1    0.000    0.000    0.675    0.675 <string>:1(<module>)
+        1    0.675    0.675    0.675    0.675 /Users/Kevin/PycharmProjects/2dShapeDistance/shapedist/elastic_linear.py:112(find_gamma)
+        2    0.000    0.000    0.000    0.000 {built-in method numpy.core.multiarray.array}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+
+
+Wed Nov 15 15:26:07 2017    statsfile
+
+         6 function calls in 0.661 seconds
+
+   Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    0.661    0.661 {built-in method builtins.exec}
+        1    0.000    0.000    0.661    0.661 <string>:1(<module>)
+        1    0.661    0.661    0.661    0.661 /Users/Kevin/PycharmProjects/2dShapeDistance/shapedist/elastic_linear.py:112(find_gamma)
+        2    0.000    0.000    0.000    0.000 {built-in method numpy.core.multiarray.array}
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+
+

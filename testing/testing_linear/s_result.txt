@@ -1,0 +1,25 @@
+sine 64
+Minimum Energy: 1.3381951625310373e-06 Error: 0.00023745299350687508
+         6 function calls in 0.027 seconds
+         6 function calls in 0.026 seconds
+         6 function calls in 0.025 seconds
+sine 128
+Minimum Energy: 1.5044349542775116e-06 Error: 0.00042048127973085496
+         6 function calls in 0.056 seconds
+         6 function calls in 0.054 seconds
+         6 function calls in 0.056 seconds
+sine 256
+Minimum Energy: 7.732251729921822e-07 Error: 0.0002675319774530231
+         6 function calls in 0.117 seconds
+         6 function calls in 0.123 seconds
+         6 function calls in 0.124 seconds
+sine 512
+Minimum Energy: 9.403676287618014e-07 Error: 0.00047347699556154273
+         6 function calls in 0.265 seconds
+         6 function calls in 0.271 seconds
+         6 function calls in 0.272 seconds
+sine 1024
+Minimum Energy: 9.72970618549816e-07 Error: 0.0004654088368938756
+         6 function calls in 0.691 seconds
+         6 function calls in 0.680 seconds
+         6 function calls in 0.699 seconds
