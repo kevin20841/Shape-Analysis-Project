@@ -1,0 +1,314 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  
+  <!-- Licensed under the Apache 2.0 License -->
+  <link rel="stylesheet" type="text/css" href="_static/fonts/open-sans/stylesheet.css" />
+  <!-- Licensed under the SIL Open Font License -->
+  <link rel="stylesheet" type="text/css" href="_static/fonts/source-serif-pro/source-serif-pro.css" />
+  <link rel="stylesheet" type="text/css" href="_static/css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="_static/css/bootstrap-theme.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <title>Linear Elasticity Algorithm &#8212; 2dShapeDistance 0.2 documentation</title>
+    <link rel="stylesheet" href="_static/guzzle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="N^2 Elasticity Algorithm" href="elastic_n_2.html" />
+    <link rel="prev" title="Welcome to 2dShapeDistance’s documentation!" href="index.html" />
+  
+   
+
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="elastic_n_2.html" title="N^2 Elasticity Algorithm"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to 2dShapeDistance’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">2dShapeDistance 0.2 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="container-wrapper">
+
+      <div id="mobile-toggle">
+        <a href="#"><span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span></a>
+      </div>
+  <div id="left-column">
+    <div class="sphinxsidebar">
+        <a href="
+    index.html" class="text-logo">2DShapeDistance</a>
+        
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <h2>Table Of Contents</h2>
+  </div>
+  <div class="sidebar-toc">
+    
+    
+      <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Linear Elasticity Algorithm</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#examples">Examples:</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="elastic_n_2.html">N^2 Elasticity Algorithm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="elastic_n_4.html">N^4 Elasticity Algorithm</a></li>
+</ul>
+
+    
+  </div>
+</div>
+        
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <div id="main-search">
+      <form class="form-inline" action="search.html" method="GET" role="form">
+        <div class="input-group">
+          <input name="q" type="text" class="form-control" placeholder="Search...">
+        </div>
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div>
+    </div>
+  </div>
+        <div id="right-column">
+          
+          <div role="navigation" aria-label="breadcrumbs navigation">
+            <ol class="breadcrumb">
+              <li><a href="index.html">Docs</a></li>
+              
+              <li>Linear Elasticity Algorithm</li>
+            </ol>
+          </div>
+          
+          <div class="document clearer body">
+            
+  <div class="section" id="linear-elasticity-algorithm">
+<h1>Linear Elasticity Algorithm<a class="headerlink" href="#linear-elasticity-algorithm" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<span class="target" id="module-shapedist.elastic_linear"></span><p>Implementation of linear algorithm to determine shape elasticity as described by Bernal et al.</p>
+<dl class="function">
+<dt id="shapedist.elastic_linear.interp">
+<code class="descclassname">shapedist.elastic_linear.</code><code class="descname">interp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#shapedist.elastic_linear.interp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linear interpolation function. Uses binary search to find which values of x to interpolate over.
+Does not work if interpolation is out of bounds</p>
+<dl class="docutils field-list" frame="void" rules="none">
+<dt class="field-name">Parameters</dt><dd class="field-body"><p class="first"><strong>t</strong> : float</p>
+<blockquote>
+<div><p>The input of the function</p>
+</div></blockquote>
+<p><strong>x</strong> : numpy array of floats</p>
+<blockquote>
+<div><p>The domain of the function to be interpolated</p>
+</div></blockquote>
+<p><strong>y</strong> : numpy array of floats</p>
+<blockquote>
+<div><p>The range of the function to be interpolated</p>
+</div></blockquote>
+</dd>
+<dt class="field-name">Returns</dt><dd class="field-body"><p class="first">float</p>
+<blockquote class="last">
+<div><p>The calculated value</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="shapedist.elastic_linear.find_gamma">
+<code class="descclassname">shapedist.elastic_linear.</code><code class="descname">find_gamma</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#shapedist.elastic_linear.find_gamma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the discretized function gamma, and the minimum energy.</p>
+<dl class="docutils field-list" frame="void" rules="none">
+<dt class="field-name">Parameters</dt><dd class="field-body"><p class="first"><strong>p</strong> : array of two arrays of floats</p>
+<blockquote>
+<div><p>The first input curve, an array with 2 elements: the domain of p as an array and the range of
+p as an array in that order. Both arrays must be the same size as q</p>
+</div></blockquote>
+<p><strong>q</strong> : array of two arrays of floats</p>
+<blockquote>
+<div><p>The first second curve, an array with 2 elements: the domain of q as an array and the range of
+q as an array in that order. Both arrays must be the same length as p</p>
+</div></blockquote>
+<p><strong>height</strong> : int</p>
+<blockquote>
+<div><p>The height of the adapting strip. Generally advised to be 1/3 or 1/4 of 2**max_iteration. -1 uses the value
+max_iteration * 30.</p>
+</div></blockquote>
+<p><strong>max_iteration</strong> : int</p>
+<blockquote>
+<div><p>The resolution of the algorithm. Actual resolution is 2**max_iteration. Default value is 10. -1 uses that value</p>
+</div></blockquote>
+</dd>
+<dt class="field-name">Returns</dt><dd class="field-body"><p class="first">array of floats, array of floats, float</p>
+<blockquote class="last">
+<div><p>The domain of gamma as an array of floats, the range of gamma as an array, of floats,
+and the minimum energy calculated as a float.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="shapedist.elastic_linear.find_error">
+<code class="descclassname">shapedist.elastic_linear.</code><code class="descname">find_error</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#shapedist.elastic_linear.find_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that finds the error between two gamma curves for checking.</p>
+<dl class="docutils field-list" frame="void" rules="none">
+<dt class="field-name">Parameters</dt><dd class="field-body"><p class="first"><strong>tg</strong> : array of floats</p>
+<blockquote>
+<div><p>The domain of the two gamma curves.</p>
+</div></blockquote>
+<p><strong>gammar</strong> : array of floats</p>
+<blockquote>
+<div><p>The y-values of the known gamma curve.</p>
+</div></blockquote>
+<p><strong>gammat</strong> : array of floats</p>
+<blockquote>
+<div><p>The y-values of gamma curve to be tested.</p>
+</div></blockquote>
+</dd>
+<dt class="field-name">Returns</dt><dd class="field-body"><p class="first">float</p>
+<blockquote class="last">
+<div><p>The weighted error.</p>
+</div></blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="section" id="examples">
+<h2>Examples:<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<p>Below is an example. We construct an artificial gamma, and use p = q(gamma(t)) and q(t) in order to find a calculated
+gamma(t). The calculated gamma(t) is plotted and compared to the artificial gamma(t). If they are the same, the algorithm
+is functioning correctly.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="s2">&quot;Loading.....&quot;</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">InterpolatedUnivariateSpline</span>
+
+<span class="kn">from</span> <span class="nn">shapedist.elastic_linear</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">testing</span> <span class="kn">import</span> <span class="n">examples</span> <span class="k">as</span> <span class="n">ex</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Calculating......&quot;</span><span class="p">)</span>
+<span class="n">m</span> <span class="o">=</span> <span class="mi">128</span>
+<span class="n">n</span> <span class="o">=</span> <span class="mi">128</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span><span class="mf">1.</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+
+<span class="n">p</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+<span class="n">q</span> <span class="o">=</span> <span class="n">ex</span><span class="o">.</span><span class="n">curve_example</span><span class="p">(</span><span class="s1">&#39;bumps&#39;</span><span class="p">,</span> <span class="n">t</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">x_function</span> <span class="o">=</span> <span class="n">InterpolatedUnivariateSpline</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">y_function</span> <span class="o">=</span> <span class="n">InterpolatedUnivariateSpline</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+
+<span class="n">test</span> <span class="o">=</span> <span class="n">ex</span><span class="o">.</span><span class="n">gamma_example</span><span class="p">(</span><span class="s2">&quot;steep&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">](</span><span class="n">t</span><span class="p">)</span>
+<span class="n">test1</span> <span class="o">=</span> <span class="n">ex</span><span class="o">.</span><span class="n">gamma_example</span><span class="p">(</span><span class="s2">&quot;steep&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">](</span><span class="n">t</span><span class="p">)</span>
+
+<span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_function</span><span class="p">(</span><span class="n">test</span><span class="p">)</span>
+<span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_function</span><span class="p">(</span><span class="n">test1</span><span class="p">)</span>
+
+<span class="n">tg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span><span class="mf">1.</span><span class="p">,</span><span class="n">n</span><span class="p">)</span>
+<span class="n">gamma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+
+<span class="n">domain_y</span><span class="p">,</span> <span class="n">gammay</span><span class="p">,</span> <span class="n">miney</span> <span class="o">=</span> <span class="n">find_gamma</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">t</span><span class="p">,</span> <span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]]),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">domain_x</span><span class="p">,</span> <span class="n">gammax</span><span class="p">,</span> <span class="n">minex</span> <span class="o">=</span> <span class="n">find_gamma</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">t</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">t</span><span class="p">,</span> <span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">]]),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Minimum Energies:&quot;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;x:&quot;</span><span class="p">,</span> <span class="n">miney</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;y:&quot;</span><span class="p">,</span> <span class="n">minex</span><span class="p">)</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Finished!&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;.-k&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">q</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;.-g&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_function</span><span class="p">(</span><span class="n">gammax</span><span class="p">),</span> <span class="n">y_function</span><span class="p">(</span><span class="n">gammay</span><span class="p">),</span> <span class="s2">&quot;.-&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">domain_y</span><span class="p">,</span> <span class="n">gammay</span><span class="p">,</span> <span class="s2">&quot;.-r&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">test1</span><span class="p">,</span> <span class="s2">&quot;.-y&quot;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+            
+  <div class="footer-relations">
+    
+      <div class="pull-left">
+        <a class="btn btn-default" href="index.html" title="previous chapter (use the left arrow)">Welcome to 2dShapeDistance’s documentation!</a>
+      </div>
+    
+      <div class="pull-right">
+        <a class="btn btn-default" href="elastic_n_2.html" title="next chapter (use the right arrow)">N^2 Elasticity Algorithm</a>
+      </div>
+    </div>
+    <div class="clearer"></div>
+  
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="elastic_n_2.html" title="N^2 Elasticity Algorithm"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to 2dShapeDistance’s documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">2dShapeDistance 0.2 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+<script type="text/javascript">
+  $("#mobile-toggle a").click(function () {
+    $("#left-column").toggle();
+  });
+</script>
+<script type="text/javascript" src="_static/js/bootstrap.js"></script>
+  <div class="footer">
+    &copy; Copyright 2017, Kevin Su. Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>

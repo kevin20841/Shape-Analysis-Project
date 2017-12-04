@@ -1,148 +1,170 @@
 """
-Functions for finding a local solution to the shape energy problem. Call find_gamma() in order
-to produce the gamma curve, and find_energy in order to produce the minimum shape energy. Do not call
-find_gamma(find_energy()).
-
+Implementation of linear algorithm to determine shape elasticity as described by Bernal et al.
 """
 import numpy as np
-from numba import jit, jitclass
+from numba import jit, types, float64, int16
 
 
-class SizeError(Exception):
-    def __init__(self, m, n):
-        self.m = str(m)
-        self.n = str(n)
-
-    def __str__(self):
-        return "The size (" + self.m + ") of the domain for the curves p and q" + \
-               " is larger than the size (" + self.n + ") of " \
-               + "the domain of gamma."
-
-
-class StripHeightError(Exception):
-    def __init__(self, n, strip_height):
-        self.strip_height = str(strip_height)
-        self.n = str(n)
-
-    def __str__(self):
-        return "The height (" + self.strip_height + ") of the limiting strip on the grid is " + \
-               " larger than the size (" + self.n + ") of " \
-               + "the range of gamma."
-
-
-@jit(cache=True)
-def find_energy(p, q, g, strip_height=10):
+@jit([float64(float64, float64[:], float64[:], int16, int16)], cache=True, nopython=True)
+def interp(t, x, y, lower, upper):
     """
-    Finds a the shape energy E such that E = integral from 0 to 1 of 1/2 * (p(t) - q(gamma(t))^2 is minimized.
-    :param p: A 2-dimensional numpy array representing a curve P(t), with p[0] as t and p[1] as P(t)
-    :param q: A 2-dimensional numpy array representing a curve Q(t), with q[0] as t and q[1] as Q(t)
-    :param g: A 2-dimensional numpy array representing the parameters of the output gamma, with g[0] as the domain of
-    the output gamma function and g[1] as the candidate values for the gamma function
-    :param strip_height: The height of the limiting strip that runs across the grid's diagonal
-    :return: Returns the energy, the array of minimum energy values, and the position array in that order
+    Linear interpolation function. Uses binary search to find which values of x to interpolate over.
+    Does not work if interpolation is out of bounds
+
+    Parameters
+    ----------
+    t : float
+        The input of the function
+    x : numpy array of floats
+        The domain of the function to be interpolated
+    y : numpy array of floats
+        The range of the function to be interpolated
+
+    Returns
+    -------
+    float
+        The calculated value
     """
-    tp, tq, py, qy, tg, gamma = p[0], q[0], p[1], q[1], g[0], g[1]
-    m = tp.size
-    n = gamma.size
-    if m > n:
-        raise SizeError(m, n)
-    if strip_height > n:
-        raise StripHeightError(n, strip_height)
-    min_energy_values = np.zeros([m, n])
-    aux_array = np.zeros([m, n])
-    counter = 0
-    val = 0
+    i = 0
+    while lower < upper:
+        i = lower + (upper - lower) // 2
+        val = x[i]
+        if t == val:
+            break
+        elif t > val:
+            if lower == i:
+                break
+            lower = i
+        elif t < val:
+            upper = i
+    return (t - x[i]) * (y[i + 1] - y[i]) / (x[i + 1] - x[i]) + y[i]
+
+
+@jit([float64(float64[:], float64[:], float64[:],float64[:], float64[:],
+              int16, int16, int16, int16)], cache=True, nopython=True)
+def integrate(tp, tq, py, qy, gamma, k, i, l, j):
     e = 0
-    while counter < m - 1:
-        k = counter + 1
-        while k < counter + strip_height + 1 and k < n:
-            print(k, counter + strip_height + 1, n)
-            minimum = np.inf
-            j = k - 1
-            while j >= counter:
-                t_i = tp[counter]
-                t_j = tp[counter+1]
-                e = (0.5 * (np.interp(t_i, tp, py) - np.interp(gamma[j], tq, qy)) ** 2
-                     + 0.5 * (np.interp(t_j, tp, py) - np.interp(gamma[k], tq, qy)) ** 2) * (t_j - t_i) * 0.5\
-                    + min_energy_values[counter][j]
-                if e < minimum:
-                    minimum = e
-                    val = j
-                elif e == minimum:
-                    if np.abs((gamma[k] - gamma[j]) / (tg[counter + 1] - tg[counter])-1) \
-                            > np.abs((gamma[k] - gamma[val]) / (tg[counter + 1] - tg[counter])-1):
-                        minimum = e
-                        val = j
-                j = j - 1
-            min_energy_values[counter+1][k] = minimum
-            aux_array[counter][k] = val
-            k = k + 1
-        counter = counter + 1
-    i = 0
-    minimum = np.inf
-    while i < m:
-        if min_energy_values[counter][i] < minimum and min_energy_values[counter][i] != 0.0:
-            minimum = min_energy_values[counter][i]
-        i = i + 1
-    print(aux_array)
-    return minimum, min_energy_values, aux_array
+    a = k
+    while a < i:
+        gammak_1 = gamma[l] + (tp[a] - tp[k]) * (gamma[j] - gamma[l]) / (tp[i] - tp[k])
+        gammak_2 = gamma[l] + (tp[a+1] - tp[k]) * (gamma[j] - gamma[l]) / (tp[i] - tp[k])
+        e = e + (0.5 * (py[a] - interp(gammak_1, tq, qy, 0, tq.size)) ** 2
+                         + 0.5 * (py[a+1] - interp(gammak_2, tq, qy, 0, tq.size)) ** 2) * (tp[a+1] - tp[a]) * 0.5
+        a = a + 1
+    return e
 
 
-@jit(cache=True)
-def find_path(p, q, g, strip_height=10):
-    """
-    Finds a discrete function gamma such that the E = integral from 0 to 1 of 1/2 * (p(t) - q(gamma(t))^2 is minimized.
-    :param p: A 2-dimensional numpy array representing a curve P(t), with p[0] as t and p[1] as P(t)
-    :param q: A 2-dimensional numpy array representing a curve Q(t), with q[0] as t and q[1] as Q(t).
-    :param g: A 2-dimensional numpy array representing the parameters of the output gamma, with g[0] as the domain of
-    the output gamma function and g[1] as the candidate values for the gamma function.
-    :param strip_height: The height of the limiting strip that runs across the grid's diagonal. Default is 10.
-    :return: Returns the y - values of the gamma function corresponding to the domain and two curves implemented. Also
-    returns the minimum shape energy.
-    """
+@jit([types.Tuple((float64[:], float64[:], float64))(float64[:, :], float64[:, :], float64[:, :], int16, int16)],
+     cache=True, nopython=True)
+def find_gamma(p, q, g, width1, width2):
     tp, tq, py, qy, tg, gamma = p[0], q[0], p[1], q[1], g[0], g[1]
-    min_energy, min_energy_values, aux_array = find_energy(p, q, g, strip_height)
-    n = tp.size
     m = gamma.size
-    path = np.zeros(n)
-    counter = n-2
-    index = m-2
-    i = 0
-    minimum = np.inf
-    while i < m:
-        if min_energy_values[counter][i] < minimum and min_energy_values[counter][i] != 0:
-            index = i
-            minimum = min_energy_values[counter][i]
+    n = tp.size
+    min_energy_values = np.zeros((n, m), dtype=np.float64)
+    path_nodes = np.zeros((n, m, 2), dtype=np.int16)
+
+    min_energy_values[0][0] = (0.5 * (py[0] - interp(gamma[0], tq, qy, 0, tq.size)) ** 2
+                         + 0.5 * (py[1] - interp(gamma[1], tq, qy, 0, tq.size)) ** 2) * (tp[1] - tp[0]) * 0.5
+    path_nodes[1][1][0] = 0
+    path_nodes[1][1][1] = 0
+    i, j, k, l = 1, 1, 1, 1
+
+    while i < n-1:
+        j = 1
+        while j < m-1:
+            min_energy_values[i][j] = integrate(tp, tq, py, qy, gamma, 0, i, 0, j)
+            k = i - width1
+            if k < 0:
+                k = 1
+            minimum = min_energy_values[i][j]
+            while k < i:
+                l = j - width2
+                if l < 0:
+                    l = 1
+                while l < j:
+                    e = min_energy_values[k, l] + integrate(tp, tq, py, qy, gamma, k, i, l, j)
+                    if e < minimum:
+                        minimum = e
+                        path_nodes[i][j][0] = k
+                        path_nodes[i][j][1] = l
+
+                    l = l + 1
+                k = k + 1
+
+            min_energy_values[i][j] = minimum
+
+            j = j + 1
         i = i + 1
-    path[0] = 0
-    path[n-1] = m-1
-    while counter >= 0:
-        path[counter] = int(aux_array[counter][index])
-        index = int(aux_array[counter][index])
-        counter = counter - 1
-    # func = func(tp, path)
-    # path = func(tg)
-    return path, min_energy
+    # !!
+    min_energy_values[i][j] = integrate(tp, tq, py, qy, gamma, 0, i, 0, j)
+    k = i - width1
+    if k <= 0:
+        k = 0
+    minimum = min_energy_values[i][j]
+    while k < i:
+        l = j - width2
+        if l <= 0:
+            l = 0
+        while l < j:
+            e = min_energy_values[k, l] + integrate(tp, tq, py, qy, gamma, k, i, l, j)
+            if e < minimum:
+                minimum = e
+                path_nodes[i][j][0] = k
+                path_nodes[i][j][1] = l
 
+            l = l + 1
+        k = k + 1
 
-#@jit(cache=True)
-def find_gamma(p, q, g, strip_height=10):
-    path, min_energy = find_path(p, q, g, strip_height)
+    min_energy_values[i][j] = minimum
+    # !!
+    path = np.zeros((n, 2), dtype=np.int16)
+    path[0][0] = n-1
+    path[0][1] = m-1
     i = 0
-    while i < path.size:
-        path[i] = g[0][int(path[i])]
+    while path[i][0] != 0 or path[i][1] != 0 and i + 1 < path.size:
+        result = path_nodes[path[i][0]][path[i][1]]
+        path[i+1][0] = result[0]
+        path[i+1][1] = result[1]
         i = i + 1
-    return path, min_energy
+
+    gamma_range = np.zeros(n)
+    i = 1
+    previous = 1
+    previousIndex = n-1
+    j = 0
+    gamma_range[path[0][0]] = gamma[path[0][1]]
+    while i < path.size // 2 and previousIndex != 0:
+        gamma_range[path[i][0]] = gamma[path[i][1]]
+        if previousIndex - path[i][0] > 1:
+            j = 0
+            step_size = (previous - gamma[path[i][1]]) / (previousIndex - path[i][0])
+            while j < previousIndex - path[i][0]:
+                gamma_range[previousIndex - j] = previous - j * step_size
+                j = j + 1
+        previousIndex = path[i][0]
+        previous = gamma[path[i][1]]
+        i = i + 1
+    return tg, gamma_range, min_energy_values[n-1][m-1]
 
 
-#@jit(cache=True)
+@jit(float64(float64[:], float64[:], float64[:]), cache=True, nopython=True)
 def find_error(tg, gammar, gammat):
     """
-    Function that finds the error between two gamma curves for checking
-    :param tg: The domain of the two gamma curves
-    :param gammar: The y-values of the known gamma curve
-    :param gammat: he y-values of gamma curve to be tested
-    :return: The weighted error
+    Function that finds the error between two gamma curves for checking.
+
+    Parameters
+    ----------
+    tg : array of floats
+        The domain of the two gamma curves.
+    gammar : array of floats
+        The y-values of the known gamma curve.
+    gammat : array of floats
+        The y-values of gamma curve to be tested.
+
+    Returns
+    -------
+    float
+        The weighted error.
     """
     n = tg.size
     error = 1 / 2 * (tg[1] - tg[0]) * (gammar[1] - gammat[1]) ** 2 + 1 / 2 * (tg[n-1] - tg[n-2]) * (gammar[n-1] - gammat[n-1]) ** 2

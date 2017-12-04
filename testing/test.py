@@ -1,63 +1,48 @@
-print("Loading.....")
-import matplotlib.pyplot as plt
+import numpy as np
+from numba.targets.arraymath import np_all
+
+from shapedist.elastic_linear import find_gamma, find_shape_distance
 from scipy.interpolate import InterpolatedUnivariateSpline
+import matplotlib.pyplot as plt
 
-from shapedist.elastic_linear import *
-from testing import examples as ex
+f = open("../data/CURVES_FeGaPd.txt", "r")
 
-print("Calculating......")
-m = 2048
-n = 2048
-t = np.linspace(0.,1., m)
+data = f.read().split("\n")
+f.close()
 
-p = [0, 0]
+t = data[0].split("  ")[1:]
 
-q = ex.curve_example('bumps', t)[0]
+t = [float(x) for x in t]
+t = np.array(t)
+t = (t - t[0]) / (t[t.size-1] - t[0])
+array_of_curves = []
 
-x_function = InterpolatedUnivariateSpline(t, q[0])
-y_function = InterpolatedUnivariateSpline(t, q[1])
+i = 1
+while i < len(data) - 1:
+    temp = data[i].split("  ")[1:]
+    temp = [float(x) for x in temp]
+    temp = np.array(temp)
+    temp = (temp - temp.min(0)) / (temp.max(0) - temp.min(0))
+    array_of_curves.append(temp)
+    i = i + 1
+array_of_curves = np.array(array_of_curves)
+shape_distance_matrix = np.zeros([len(data)-1, len(data)-1])
 
+i = 90
+j = 58
+tg_temp, gamma_temp, energy = find_gamma(np.array([t, array_of_curves[i]]),
+                  np.array([t, array_of_curves[j]]),
+                  10, 12, 6)
+q_function = InterpolatedUnivariateSpline(t, array_of_curves[j])
+gamma_function = InterpolatedUnivariateSpline(tg_temp, gamma_temp)
 
-test = ex.gamma_example("bumpy")[0](t)
-test1 = ex.gamma_example("bumpy")[0](t)
-#
-# test = np.zeros(m)
-#
-# i = 1
-# while i < m:
-#     test[i] = np.random.random_sample()
-#     i = i + 1
-# test.sort()
-# test[m-1] = 1
-# test[0] = 0
+temp = q_function(gamma_function(t))
+shape_distance_matrix[i][j] = find_shape_distance(t, array_of_curves[i], temp)
 
-p[0] = x_function(test)
-p[1] = y_function(test1)
+print(shape_distance_matrix[i][j], i, j)
 
-# p = np.array(np.sin(t))
-# q = np.array(np.exp(t)-1)
-tg = np.linspace(0.,1.,n)
-gamma = np.linspace(0., 1., n)
-
-domain_y, gammay, miney = find_gamma(np.array([t, p[1]]), np.array([t, q[1]]), -1, -1)
-
-domain_x, gammax, minex = find_gamma(np.array([t, p[0]]), np.array([t, q[0]]), -1, -1)
-
-
-print("Minimum Energies:")
-print("x:", miney)
-print("y:", minex)
-print("Errors:")
-#print("x:", find_error(domain_x, ex.gamma_example("sine")[0](domain_x), gammax))
-#print("y:", find_error(domain_y, ex.gamma_example("sine")[0](domain_y), gammay))
-print("Finished!")
-
-plt.plot(p[0], p[1], '.-k')
-plt.plot(q[0], q[1], '.-g')
-
-plt.plot(x_function(gammax), y_function(gammay), ".-")
-plt.plot(domain_y, gammay, ".-r")
-plt.plot(t, test1, ".-y")
-
+plt.plot(t, temp, ".-r")
+plt.plot(t, array_of_curves[j], ".-y")
+plt.plot(t, array_of_curves[i], ".g")
 plt.show()
 

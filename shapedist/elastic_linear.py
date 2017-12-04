@@ -1,9 +1,16 @@
+"""
+Implementation of linear algorithm to determine shape elasticity as described by Bernal et al.
+"""
 import numpy as np
 from numba import jit, types, float64, int16
 
+import shapedist.elastic_n_2
+from math import floor, pi
+np.seterr(all="raise")
 
-@jit([(float64, float64[:], float64[:])], cache=True, nopython=True)
-def interp(t, x, y):
+
+@jit([float64(float64, float64[:], float64[:], int16, int16)], cache=True, nopython=True)
+def interp(t, x, y, lower, upper):
     """
     Linear interpolation function. Uses binary search to find which values of x to interpolate over.
     Does not work if interpolation is out of bounds
@@ -22,9 +29,8 @@ def interp(t, x, y):
     float
         The calculated value
     """
-    lower = 0
-    upper = x.size - 1
-    while lower < upper:  # use < instead of <=
+    i = 0
+    while lower < upper:
         i = lower + (upper - lower) // 2
         val = x[i]
         if t == val:
@@ -35,12 +41,76 @@ def interp(t, x, y):
             lower = i
         elif t < val:
             upper = i
+
+    if i == x.size-1:
+        temp = y[i]
+    else:
+        temp = (t - x[i]) * (y[i + 1] - y[i]) / (x[i + 1] - x[i]) + y[i]
+    return temp
+
+
+
+@jit([float64(float64, float64[:], float64[:], int16, int16)], cache=True, nopython=True)
+def interp_uniform(t, x, y, lower, upper):
+    interval = x[1] - x[0]
+    i = floor(t / interval)
     return (t - x[i]) * (y[i + 1] - y[i]) / (x[i + 1] - x[i]) + y[i]
 
 
-@jit([types.Tuple((float64[:], float64[:], float64))(float64[:, :], float64[:, :], int16, int16)],
-     cache=True, nopython=True)
-def find_gamma(p, q, height, max_iteration):
+
+@jit([float64(float64, float64[:], float64, int16, int16)], cache=True, nopython=True)
+def interp_range_only(t, y, n, lower, upper):
+    """
+    Linear interpolation function. Uses binary search to find which values of x to interpolate over.
+    Does not work if interpolation is out of bounds
+
+    Parameters
+    ----------
+    t : float
+        The input of the function
+    x : numpy array of floats
+        The domain of the function to be interpolated
+    y : numpy array of floats
+        The range of the function to be interpolated
+
+    Returns
+    -------
+    float
+        The calculated value
+    """
+    i = 0
+    while lower < upper:
+        i = lower + (upper - lower) // 2
+        val = (1/n) * i
+        if t == val:
+            break
+        elif t > val:
+            if lower == i:
+                break
+            lower = i
+        elif t < val:
+            upper = i
+    return (t - (1/n) * i) * (y[i + 1] - y[i]) / ((1/n) * (i + 1) - (1/n) *(i)) + y[i]
+
+
+@jit([float64(float64[:], float64[:], float64[:], float64[:], int16, int16, int16, int16, float64)], cache=True, nopython=True)
+def integrate(tp, tq, py, qy, k, i, l, j, gamma_interval):
+    e = 0
+    a = k
+    while a < i:
+        gammak_1 = gamma_interval * l + (tp[a] - tp[k]) * \
+                                        (gamma_interval * j - gamma_interval * l) / (tp[i] - tp[k])
+        gammak_2 = gamma_interval * l + (tp[(a+1)] - tp[k]) * (gamma_interval * j - gamma_interval * l) \
+                                        / (tp[i] - tp[k])
+        e = e + (0.5 * (py[a] - interp(gammak_1, tq, qy, 0, tq.size)) ** 2
+                         + 0.5 * (py[(a+1)] - interp(gammak_2, tq, qy, 0, tq.size)) ** 2) * \
+                (tp[(a+1)] - tp[a]) * 0.5
+        a = a + 1
+    return e
+
+
+@jit([types.Tuple((float64[:], float64[:], float64))(float64[:, :], float64[:, :], int16, int16, int16)], cache=True, nopython=True)
+def find_gamma(p, q, neighborhood, strip_height, max_iteration):
     """
     Finds the discretized function gamma, and the minimum energy.
 
@@ -53,7 +123,7 @@ def find_gamma(p, q, height, max_iteration):
     q : array of two arrays of floats
         The first second curve, an array with 2 elements: the domain of q as an array and the range of
         q as an array in that order. Both arrays must be the same length as p
-    height : int
+    neighborhood : int
         The height of the adapting strip. Generally advised to be 1/3 or 1/4 of 2**max_iteration. -1 uses the value
         max_iteration * 30.
     max_iteration : int
@@ -66,103 +136,187 @@ def find_gamma(p, q, height, max_iteration):
         and the minimum energy calculated as a float.
 
     """
-    tp = p[0]
-    tq = q[0]
-    py = p[1]
-    qy = q[1]
-    path_length = tp.size
-    iteration = 0
-    candidates = 0
+    current_iteration = 4
+    tp, tq, py, qy = p[0], q[0], p[1], q[1]
+    n = tp.size
+    path = np.zeros(n + 1, dtype=np.float64)
+    i = 0
+    # !!
+    tg = np.linspace(0., 1., 2 ** current_iteration).astype(np.float64)
+    g = np.linspace(0., 1., 2 ** current_iteration).astype(np.float64)
+    domain_interval = 0
+    domain_interval = tp.size // (2 ** current_iteration)
+    temp1 = np.zeros((2, 2**current_iteration), dtype=np.float64)
+    temp2 = np.zeros((2, 2**current_iteration), dtype=np.float64)
+    temp3 = np.zeros((2, 2**current_iteration), dtype=np.float64)
 
-    if max_iteration == -1:
-        iteration = 7
-        max_iteration = 10
-    else:
-        iteration = max_iteration-3
+    while i < 2**current_iteration:
+        temp1[0][i] = tp[i * domain_interval]
+        temp1[1][i] = py[i * domain_interval]
+        temp2[0][i] = tq[i * domain_interval]
+        temp2[1][i] = qy[i * domain_interval]
+        temp3[0][i] = tg[i]
+        temp3[1][i] = g[i]
+        i = i + 1
+    tg, gamma_range, val = shapedist.elastic_n_2.find_gamma(temp1, temp2, temp3, 4, 4)
+    i = 0
+    while i < gamma_range.size:
+        path[i] = gamma_range[i]
+        i = i + 1
+    current_iteration = current_iteration + 1
+    # !!
+    i = 0
+    min_energy_values = np.zeros((n, 2 ** max_iteration), dtype=np.float64)
+    path_nodes = np.zeros((n, 2**max_iteration, 2), dtype=np.int16)
+    previous_n = gamma_range.size
+    rough_path = np.zeros(tp.size+1, dtype=np.int16)
 
-    if height == -1:
-        candidates = max_iteration * 30
-    else:
-        candidates = height
+    while current_iteration <= max_iteration:
+        if rough_path[-2] == tp.size-1:
+            break
+        m = 2 ** current_iteration
+        n = 2 ** current_iteration
+        if n > tp.size:
+            n = tp.size
+        domain_interval = tp.size // n
+        n = tp.size // domain_interval
+        if domain_interval == 0:
+            domain_interval = 1
+        i = 0
 
-    minimum = 0
+        while i < n:
+            rough_path[i] = domain_interval * i
+            i = i + 1
 
-    step_size = 0
-    n = 2 ** iteration
-    m = 2 ** (iteration-1)
-    e = 0
-    path = np.zeros(path_length, dtype=np.int16)
-    min_energy_values = np.zeros((path_length, 2 ** max_iteration), dtype=np.float64)
-    aux_array = np.zeros((path_length, 2 ** max_iteration), dtype=np.int16)
-
-    while iteration < max_iteration:
-        n = 2 ** iteration
-        m = 2 ** (iteration - 1)
-        counter = 0
-        step_size = path_length//m
-        if step_size == 0:
-            m = path_length
-            step_size = 1
+        if n < rough_path.size - 1:
+            rough_path[n] = tp.size-1
+            n = n + 1
+        gamma_interval = 1 / (m-1)
+        min_energy_values[0][0] = (0.5 * (py[0] - interp(0, tq, qy, 0, tq.size)) ** 2
+                                   + 0.5 * (py[1] - interp(gamma_interval, tq, qy, 0, tq.size)) ** 2) * (tp[1] - tp[0]) * 0.5
+        path_nodes[1][1][0] = 0
+        path_nodes[1][1][1] = 0
+        i, j, k, l = 1, 1, 1, 1
         val = 0
 
-        while counter < m - 1:
-            k = path[(counter+1)//2] - candidates
-            if k < counter + 1:
-                k = counter + 1
-            if (counter+1)//2 + 1 < path.size:
-                temp = (path[(counter+1)//2] + path[(counter+1)//2 + 1]) // 2
-            else:
-                temp = path[(counter+1)//2]
-            while k < 2 * (temp + candidates + 1) and k < n:
-                gamma_k = 1/(n-1) * k
-                minimum = np.inf
-                j = k - 1
-                while j > 2 * (path[counter//2] - candidates) and j >= counter:
-                    gamma_j = 1/(n-1) * j
-                    t_i = tp[counter * step_size]
-                    t_j = tp[(counter + 1) * step_size]
-                    e = (0.5 * (py[counter * step_size] - interp(gamma_j, tq, qy)) ** 2
-                         + 0.5 * (py[(counter + 1) * step_size]
-                                  - interp(gamma_k, tq, qy)) ** 2) * (t_j - t_i) * 0.5 \
-                        + min_energy_values[counter][j]
-                    if e < minimum:
-                        minimum = e
-                        val = j
-                    j = j - 1
-                min_energy_values[counter + 1][k] = minimum
-                aux_array[counter][k] = val
-                k = k + 1
-            counter = counter + 1
+        val2 = 0
+        while i < n-1:
+            val = interp_range_only(tp[rough_path[i]], path, previous_n, 0, previous_n)
+            j = floor(val / gamma_interval) - strip_height
+            if j <= 0:
+                j = 1
+            while j < m-1 and j * gamma_interval < val + strip_height * gamma_interval:
+                min_energy_values[i][j] = integrate(tp, tq, py, qy, 0, rough_path[i], 0, j,gamma_interval)
 
-        counter = m - 2
-        index = n - 2
-        i = 0
-        minimum = np.inf
-        while i < n:
-            if min_energy_values[counter][i] < minimum and min_energy_values[counter][i] != 0:
-                index = i
-                minimum = min_energy_values[counter][i]
+                k = i - neighborhood
+                if k <= 0:
+                    k = 1
+                minimum = min_energy_values[i][j]
+                while k < i:
+                    val2 = interp_range_only(tp[rough_path[k]], path, previous_n, 0,
+                                             previous_n)
+                    l = j - neighborhood
+                    if l <= floor(val2 / gamma_interval) - strip_height:
+                        l = floor(val2 / gamma_interval) - strip_height
+                    if l <= 0:
+                        l = 1
+                    while l < j and l * gamma_interval < val2 + strip_height * gamma_interval:
+                        e = min_energy_values[k, l] + integrate(tp, tq, py, qy, rough_path[k], rough_path[i], l, j,
+                                                                gamma_interval)
+                        if e < minimum:
+                            minimum = e
+                            path_nodes[i][j][0] = k
+                            path_nodes[i][j][1] = l
+                        l = l + 1
+                    k = k + 1
+                min_energy_values[i][j] = minimum
+                j = j + 1
             i = i + 1
-        path[0] = 0
-        path[m-1] = n - 1
-        while counter >= 0:
-            path[counter] = aux_array[counter][index]
-            index = aux_array[counter][index]
-            counter = counter - 1
-        # candidates = candidates * 2
-        iteration = iteration + 1
+
+        # !!
+        i = n-1
+        j = m-1
+        min_energy_values[i][j] = integrate(tp, tq, py, qy, 0, rough_path[i], 0, j, gamma_interval)
+
+        k = i - neighborhood
+        if k <= 0:
+            k = 1
+        minimum = min_energy_values[i][j]
+        while k < i:
+            val2 = interp_range_only(tp[rough_path[k]], path, previous_n, 0,
+                                     previous_n)
+            l = j - neighborhood
+            if l <= floor(val2 / gamma_interval) - strip_height:
+                l = floor(val2 / gamma_interval) - strip_height
+            if l <= 0:
+                l = 1
+            while l < j and l * gamma_interval < val2 + strip_height * gamma_interval:
+                e = min_energy_values[k, l] + integrate(tp, tq, py, qy, rough_path[k], rough_path[i], l, j,
+                                                        gamma_interval)
+
+                if e < minimum:
+                    minimum = e
+                    path_nodes[i][j][0] = k
+                    path_nodes[i][j][1] = l
+                l = l + 1
+            k = k + 1
+
+        min_energy_values[i][j] = minimum
+
+        # !!
+
+        path_indices = np.zeros((n, 2), dtype=np.int16)
+        path_indices[0][0] = n - 1
+        path_indices[0][1] = m - 1
+
+        i = 0
+        while path_indices[i][0] != 0 or path_indices[i][1] != 0 and i + 1 < path.size:
+            result = path_nodes[path_indices[i][0]][path_indices[i][1]]
+            path_indices[i + 1][0] = result[0]
+            path_indices[i + 1][1] = result[1]
+            i = i + 1
+        i = 0
+        previous = 1
+        previousIndex = n - 1
+        j = 1
+        path[path_indices[0][0]] = gamma_interval * path_indices[0][1]
+        while i < path_indices.size // 2 and previousIndex != 0:
+            path[path_indices[i][0]] = gamma_interval * path_indices[i][1]
+            if previousIndex - path_indices[i][0] > 1:
+                j = 0
+                step_size = (previous - gamma_interval*path_indices[i][1]) / (previousIndex - path_indices[i][0])
+                while j < previousIndex - path_indices[i][0]:
+                    path[previousIndex - j] = previous - j * step_size
+                    j = j + 1
+            previousIndex = path_indices[i][0]
+            previous = gamma_interval * path_indices[i][1]
+            i = i + 1
+        previous_n = n
+        current_iteration = current_iteration + 1
+
+    tg = np.linspace(0., 1., n).astype(np.float64)
+    return tg, path[:n], min_energy_values[n-1][m-1]
+
+
+@jit(float64(float64[:], float64[:], float64[:]), cache=True, nopython=True)
+def inner_product(t, p, q):
     i = 0
-    domain = np.linspace(0, 1, n)
-    gamma_y = np.zeros(path_length, dtype=np.float64)
-    j = path.size
-    while i < path.size:
-        gamma_y[i] = domain[path[i]]
-        if gamma_y[i] == 1:
-            j = i
+    result = 0
+    while i < p.size-1:
+        result = result + (p[i] * q[i] + p[i+1] * q[i+1]) / 2 * (t[i+1] - t[i])
         i = i + 1
-    domain_gamma = np.linspace(0, 1, j + 1)
-    j = j + 1
-    return domain_gamma, gamma_y[:j], minimum
+    return result
+
+
+@jit(float64(float64[:], float64[:], float64[:]), cache=True, nopython=True)
+def find_shape_distance(t, p, q):
+    p_q = inner_product(t, p, q)
+    p_p = inner_product(t, p, p)
+    q_q = inner_product(t, q, q)
+    temp = p_q / (p_p**0.5 * q_q ** 0.5)
+    if temp > 1:
+        temp = 1
+    return np.arccos(temp) / pi
 
 
 @jit(float64(float64[:], float64[:], float64[:]), cache=True, nopython=True)
@@ -179,8 +333,8 @@ def find_error(tg, gammar, gammat):
     gammat : array of floats
         The y-values of gamma curve to be tested.
 
-    Return
-    ------
+    Returns
+    -------
     float
         The weighted error.
     """
@@ -194,4 +348,3 @@ def find_error(tg, gammar, gammat):
         k = k + 1
     error = error ** (1/2)
     return error
-
