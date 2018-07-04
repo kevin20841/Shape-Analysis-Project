@@ -11,11 +11,11 @@ def convert(filename):
     i = 0
     while i < len(data) // 5:
         header_list.append(data[i * 5])
-        data_list.append(float(data[i * 5 + 2][29:35]) + float(data[i * 5 + 3][29:35]) + float(data[i * 5 + 4][29:35]) / 3)
+        data_list.append((float(data[i * 5 + 2][29:35]) + float(data[i * 5 + 3][29:35]) + float(data[i * 5 + 4][29:35]))/3)
         error_list.append(data[i * 5 + 1].split(" ")[4])
         i = i + 1
 
-    print(error_list)
+    print(data_list)
     f = open(filename+"_result.csv", "w")
     j = 0
     base = 0

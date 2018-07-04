@@ -4,8 +4,9 @@ from io import StringIO
 
 from scipy.interpolate import InterpolatedUnivariateSpline
 import numpy as np
-from shapedist import elastic_linear
+from shapedist.elastic_linear_old import find_gamma, find_error
 from testing import examples as ex
+import matplotlib.pyplot as plt
 def calc(filename):
     readFile = open(filename, "r")
     text = readFile.read()
@@ -28,7 +29,6 @@ def calc(filename):
         # t.sort()
         q = ex.curve_example('bumps', t)[0][0]
 
-
         x_function = InterpolatedUnivariateSpline(t, q)
 
         test = ex.gamma_example(curve_type)[0](t)
@@ -49,12 +49,19 @@ def calc(filename):
         # p = np.array(np.sin(t))
         # q = np.array(np.exp(t)-1)
         f.write(str(m) + ",")
-        i = 6
+        i = 9
         while i <= 9:
-            domain_x, gammax, val = elastic_linear.find_gamma(np.array([t, p]), np.array([t, q]), 12, 12, 7)
-            error = elastic_linear.find_error(domain_x, ex.gamma_example(curve_type)[0](domain_x), gammax)
+            x = int(np.log2(t.size) - 4)
+            domain_x, gammax, val = find_gamma(np.array([t, p]), np.array([t, q]), 6, 8, x)
+
+            error = find_error(domain_x, ex.gamma_example(curve_type)[0](domain_x), gammax)
             f.write(str(error) + ",")
             i = i + 1
+            print(error, x)
+            plt.plot(domain_x, gammax - ex.gamma_example(curve_type)[0](domain_x), "-b")
+            plt.plot(domain_x, gammax, ".-b")
+            plt.plot(domain_x, ex.gamma_example(curve_type)[0](domain_x), "-r")
+            plt.show()
         f.write("\n")
 
     f.close()

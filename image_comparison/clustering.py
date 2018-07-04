@@ -18,6 +18,7 @@ from joblib import Parallel, delayed
 from scipy import stats
 from numba import jit
 
+
 @jit(nopython = True)
 def find_nearest(value, array):
     idx = (np.abs(array-value)).argmin()
@@ -48,8 +49,6 @@ print( all_curves['MPEG7_classes'] )
 curves_nonuniform = all_curves['MPEG7_curves_coarsened']
 print(curves_nonuniform.size)
 print("hi")
-
-
 
 x = []
 y = []

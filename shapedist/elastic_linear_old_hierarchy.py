@@ -2,11 +2,24 @@
 Implementation of linear algorithm to determine shape elasticity as described by Bernal et al.
 """
 import numpy as np
-from numba import jit, types, float64, int16
+from numba import jit, types, float64, int16, boolean
 
 import shapedist.elastic_n_2
 from math import floor, pi
 np.seterr(all="raise")
+
+
+@jit([float64[:](float64[:], boolean[:])], cache=True, nopython=True)
+def reparametrize(x, bool_array):
+    output = np.zeros(x.size, dtype=np.float64)
+    i = 0
+    counter = 0
+    while i < x.size:
+        if bool_array[i]:
+            output[counter] = x[i]
+            counter = counter + 1
+        i = i + 1
+    return output
 
 
 @jit([float64(float64, float64[:], float64[:], int16, int16)], cache=True, nopython=True)
@@ -49,13 +62,11 @@ def interp(t, x, y, lower, upper):
     return temp
 
 
-
 @jit([float64(float64, float64[:], float64[:], int16, int16)], cache=True, nopython=True)
 def interp_uniform(t, x, y, lower, upper):
     interval = x[1] - x[0]
     i = floor(t / interval)
     return (t - x[i]) * (y[i + 1] - y[i]) / (x[i + 1] - x[i]) + y[i]
-
 
 
 @jit([float64(float64, float64[:], float64, int16, int16)], cache=True, nopython=True)
@@ -109,8 +120,8 @@ def integrate(tp, tq, py, qy, k, i, l, j, gamma_interval):
     return e
 
 
-@jit([types.Tuple((float64[:], float64[:], float64))(float64[:, :], float64[:, :], int16, int16, int16)], cache=True, nopython=True)
-def find_gamma(p, q, neighborhood, strip_height, max_iteration):
+@jit([types.Tuple((float64[:], float64[:], float64))(float64[:, :], float64[:, :], boolean[:, :], int16, int16)], cache=True, nopython=True)
+def find_gamma(p, q, parametrization_array, neighborhood, strip_height):
     """
     Finds the discretized function gamma, and the minimum energy.
 
@@ -136,29 +147,44 @@ def find_gamma(p, q, neighborhood, strip_height, max_iteration):
         and the minimum energy calculated as a float.
 
     """
-    current_iteration = 4
+
+    current_iteration = 0
+    i = 0
+    initial_size = 0
+    max_iteration = parametrization_array.shape[0]
+    while i < parametrization_array[0].shape[0]:
+        if parametrization_array[0][i]:
+            initial_size = initial_size + 1
+        i = i +1
+
     tp, tq, py, qy = p[0], q[0], p[1], q[1]
+
     n = tp.size
-    path = np.zeros(n + 1, dtype=np.float64)
+    index_array = np.linspace(0, n, n+1)
+    path = np.zeros(n, dtype=np.float64)
     i = 0
     # !!
-    tg = np.linspace(0., 1., 2 ** current_iteration).astype(np.float64)
-    g = np.linspace(0., 1., 2 ** current_iteration).astype(np.float64)
-    domain_interval = 0
-    domain_interval = tp.size // (2 ** current_iteration)
-    temp1 = np.zeros((2, 2**current_iteration), dtype=np.float64)
-    temp2 = np.zeros((2, 2**current_iteration), dtype=np.float64)
-    temp3 = np.zeros((2, 2**current_iteration), dtype=np.float64)
-
-    while i < 2**current_iteration:
-        temp1[0][i] = tp[i * domain_interval]
-        temp1[1][i] = py[i * domain_interval]
-        temp2[0][i] = tq[i * domain_interval]
-        temp2[1][i] = qy[i * domain_interval]
-        temp3[0][i] = tg[i]
-        temp3[1][i] = g[i]
-        i = i + 1
+    tg = np.linspace(0., 1., initial_size).astype(np.float64)
+    g = np.linspace(0., 1., initial_size).astype(np.float64)
+    temp1 = np.zeros((2, initial_size), dtype=np.float64)
+    temp2 = np.zeros((2, initial_size), dtype=np.float64)
+    temp3 = np.zeros((2, initial_size), dtype=np.float64)
+    temp1[0] = reparametrize(tp, parametrization_array[0])[:initial_size]
+    temp1[1] = reparametrize(py, parametrization_array[0])[:initial_size]
+    temp2[0] = reparametrize(tq, parametrization_array[0])[:initial_size]
+    temp2[1 ]= reparametrize(qy, parametrization_array[0])[:initial_size]
+    temp3[0] = reparametrize(tg, parametrization_array[0])[:initial_size]
+    temp3[1] = reparametrize(g, parametrization_array[0])[:initial_size]
+    # while i < 2**current_iteration:
+    #     temp1[0][i] = tp[i * domain_interval]
+    #     temp1[1][i] = py[i * domain_interval]
+    #     temp2[0][i] = tq[i * domain_interval]
+    #     temp2[1][i] = qy[i * domain_interval]
+    #     temp3[0][i] = tg[i]
+    #     temp3[1][i] = g[i]
+    #     i = i + 1
     tg, gamma_range, val = shapedist.elastic_n_2.find_gamma(temp1, temp2, temp3, 4, 4)
+
     i = 0
     while i < gamma_range.size:
         path[i] = gamma_range[i]
@@ -166,31 +192,27 @@ def find_gamma(p, q, neighborhood, strip_height, max_iteration):
     current_iteration = current_iteration + 1
     # !!
     i = 0
-    min_energy_values = np.zeros((n, 2 ** max_iteration), dtype=np.float64)
-    path_nodes = np.zeros((n, 2**max_iteration, 2), dtype=np.int16)
+    # TODO FIX GRID
+    min_energy_values = np.zeros((n, n), dtype=np.float64)
+    path_nodes = np.zeros((n, n, 2), dtype=np.int16)
     previous_n = gamma_range.size
-    rough_path = np.zeros(tp.size+1, dtype=np.int16)
+    rough_path = np.zeros(tp.size + 1, dtype=np.int16)
+    previous_parametrization_size = initial_size
+    while current_iteration < max_iteration:
 
-    while current_iteration <= max_iteration:
-        if rough_path[-2] == tp.size-1:
-            break
-        m = 2 ** current_iteration
-        n = 2 ** current_iteration
-        if n > tp.size:
-            n = tp.size
-        domain_interval = tp.size // n
-        n = tp.size // domain_interval
-        if domain_interval == 0:
-            domain_interval = 1
         i = 0
-
-        while i < n:
-            rough_path[i] = domain_interval * i
+        parametrization_size = 0
+        while i < parametrization_array.shape[1]:
+            if parametrization_array[current_iteration][i]:
+                parametrization_size = parametrization_size + 1
             i = i + 1
+        m = parametrization_size
+        n = parametrization_size
+        gamma_interval = 1 / (m-1)
 
-        if n < rough_path.size - 1:
-            rough_path[n] = tp.size-1
-            n = n + 1
+        rough_path = reparametrize(index_array, parametrization_array[current_iteration]).astype(np.int16)
+        previous_parametrization_size = parametrization_size
+
         gamma_interval = 1 / (m-1)
         min_energy_values[0][0] = (0.5 * (py[0] - interp(0, tq, qy, 0, tq.size)) ** 2
                                    + 0.5 * (py[1] - interp(gamma_interval, tq, qy, 0, tq.size)) ** 2) * (tp[1] - tp[0]) * 0.5
@@ -206,7 +228,7 @@ def find_gamma(p, q, neighborhood, strip_height, max_iteration):
             if j <= 0:
                 j = 1
             while j < m-1 and j * gamma_interval < val + strip_height * gamma_interval:
-                min_energy_values[i][j] = integrate(tp, tq, py, qy, 0, rough_path[i], 0, j,gamma_interval)
+                min_energy_values[i][j] = integrate(tp, tq, py, qy, 0, rough_path[i], 0, j, gamma_interval)
 
                 k = i - neighborhood
                 if k <= 0:

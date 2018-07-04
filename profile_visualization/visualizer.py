@@ -1,11 +1,14 @@
-import cProfile
-import pstats
+from cProfile import Profile
+from pstats import Stats
 from io import StringIO
+prof = Profile()
 
+prof.disable()  # i.e. don't time imports
 from scipy.interpolate import InterpolatedUnivariateSpline
 import numpy as np
 from shapedist import elastic_linear_old
 from testing import examples as ex
+
 def calc(filename):
     readFile = open(filename, "r")
     text = readFile.read()
@@ -49,21 +52,25 @@ def calc(filename):
         # p = np.array(np.sin(t))
         # q = np.array(np.exp(t)-1)
         num = int(np.log2(m) - 4)
-        domain_x, gammax, val = elastic_linear_old.find_gamma(np.array([t, p]), np.array([t, q]), 12, 16, num)
+        domain_x, gammax, val = elastic_linear_old.find_gamma(np.array([t, p]), np.array([t, q]), 6, 12, num)
         error = elastic_linear_old.find_error(domain_x, ex.gamma_example(curve_type)[0](domain_x), gammax)
-        print(error)
-        f.write("Minimum Energy: " + str(val) + " Error: " + str(error) + "\n\n\n")
-        for j in range(3):
-            cProfile.runctx("elastic_linear_old.find_gamma(np.array([t, p]), np.array([t, q]), 12, 16, num)", globals(),
-                            locals(), filename="statsfile")
-            stream = StringIO()
-            stats = pstats.Stats('statsfile', stream=stream).sort_stats("cumulative")
-            stats.print_stats()
+    #     f.write("Minimum Energy: " + str(val) + " Error: " + str(error) + "\n\n\n")
+    #     for j in range(3):
+    #         cProfile.runctx("elastic_linear_old.find_gamma(np.array([t, p]), np.array([t, q]), 6, 12, num)", globals(),
+    #                         locals(), filename="statsfile")
+    #         stream = StringIO()
+    #         stats = pstats.Stats('statsfile', stream=stream).sort_stats("cumulative")
+    #         stats.print_stats()
+    #
+    #         f.write(stream.getvalue())
+prof.disable()  # don't profile the generation of stats
+prof.dump_stats('mystats.stats')
 
-            f.write(stream.getvalue())
-
-    f.close()
+with open('mystats_output.txt', 'wt') as output:
+    stats = Stats('mystats.stats', stream=output)
+    stats.sort_stats('cumulative', 'time')
+    stats.print_stats()
 
 calc("test_case_i")
-calc("test_case_s")
-calc("test_case_b")
+#calc("test_case_s")
+#calc("test_case_b")

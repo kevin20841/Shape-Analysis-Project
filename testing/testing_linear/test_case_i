@@ -1,5 +1,6 @@
-identity 64
-identity 128
-identity 256
-identity 512
-identity 1024
+identity 65
+identity 131
+identity 263
+identity 527
+identity 1055
+identity 2111

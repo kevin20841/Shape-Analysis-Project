@@ -14,6 +14,7 @@ m = np.nanmax(test)
 fig = plt.figure()
 ax = fig.add_subplot(111)
 fig.subplots_adjust(top=0.85)
+test = (test + test.transpose()) / 2
 heatmap = ax.pcolor(test, cmap="hot")
 
 
@@ -35,6 +36,7 @@ m = np.nanmax(test)
 fig = plt.figure()
 ax = fig.add_subplot(111)
 fig.subplots_adjust(top=0.85)
+test = (test + test.transpose()) / 2
 heatmap = ax.pcolor(test, cmap="hot")
 
 

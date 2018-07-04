@@ -3,7 +3,6 @@ from numba.targets.arraymath import np_all
 from joblib import Parallel, delayed
 from shapedist.elastic_linear import find_gamma, find_shape_distance
 from scipy.interpolate import InterpolatedUnivariateSpline
-import matplotlib.pyplot as plt
 np.seterr(divide='ignore', invalid='ignore')
 def task(p, q, t):
     temp = p
@@ -53,18 +52,17 @@ array_of_curves = np.array(array_of_curves)
 shape_distance_matrix = np.zeros([len(data)-1, len(data)-1])
 energy_matrix = np.zeros([len(data)-1, len(data)-1])
 i = 0
-print(t.max(), t.min())
-test = [[task(x, y, t) for x in array_of_curves[:2]] for y in array_of_curves[:2]]
-#test = Parallel(n_jobs=4)(delayed(task)(x, y, t) for x in array_of_curves[:2] for y in array_of_curves[:2])
-print(test)
+#test = [[task(x, y, t) for x in array_of_curves[:2]] for y in array_of_curves[:2]]
+test = Parallel(n_jobs=8)(delayed(task)(x, y, t) for x in array_of_curves for y in array_of_curves)
 
-f = open("../data/shape_array.txt", "w")
+
+f = open("../data/material_science_distance_matrix.txt", "w")
 i = 0
-while i < (len(test)**0.5):
+temp =int(len(test)**0.5)
+while i < temp:
     j = 0
-    while j < (len(test)**0.5):
-        print(i * len(test) + j, i, j)
-        f.write(str(test[int(i * len(test)**0.5 + j)])+ "   ")
+    while j < temp:
+        f.write(str(test[int(i * temp + j)]) + "   ")
         j = j + 1
     f.write("\n")
     i = i + 1
