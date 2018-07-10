@@ -1,30 +1,30 @@
 identity 65
-Minimum Energy: 9.465447854805691e-35 Error: 0.0
-         6 function calls in 0.054 seconds
-         6 function calls in 0.055 seconds
-         6 function calls in 0.055 seconds
+Minimum Energy: 1.1831394262886999e-34 Error: 0.0
+         6 function calls in 0.029 seconds
+         6 function calls in 0.028 seconds
+         6 function calls in 0.029 seconds
 identity 131
-Minimum Energy: 1.2634886931323606e-34 Error: 6.549095745910836e-05
-         6 function calls in 0.218 seconds
-         6 function calls in 0.215 seconds
-         6 function calls in 0.206 seconds
+Minimum Energy: 1.185364702792508e-34 Error: 5.308280001182859e-17
+         6 function calls in 0.097 seconds
+         6 function calls in 0.103 seconds
+         6 function calls in 0.114 seconds
 identity 263
-Minimum Energy: 1.8569840600777448e-34 Error: 2.0361327509975598e-18
-         6 function calls in 0.536 seconds
-         6 function calls in 0.539 seconds
-         6 function calls in 0.534 seconds
+Minimum Energy: 1.676524230834033e-34 Error: 0.0005558707777431321
+         6 function calls in 0.247 seconds
+         6 function calls in 0.244 seconds
+         6 function calls in 0.250 seconds
 identity 527
-Minimum Energy: 1.4891086453692148e-34 Error: 1.0888299644494374e-18
-         6 function calls in 1.325 seconds
-         6 function calls in 1.353 seconds
-         6 function calls in 1.328 seconds
+Minimum Energy: 1.546894724986475e-34 Error: 0.0002619880867825673
+         6 function calls in 0.602 seconds
+         6 function calls in 0.600 seconds
+         6 function calls in 0.602 seconds
 identity 1055
-Minimum Energy: 1.5445182740311577e-34 Error: 8.423962198042135e-19
-         6 function calls in 3.352 seconds
-         6 function calls in 3.292 seconds
-         6 function calls in 3.259 seconds
+Minimum Energy: 1.3518419824884662e-34 Error: 3.7496329886866944e-17
+         6 function calls in 1.522 seconds
+         6 function calls in 1.544 seconds
+         6 function calls in 1.500 seconds
 identity 2111
-Minimum Energy: 1.2973538773075314e-34 Error: 1.5511931643490762e-18
-         6 function calls in 8.666 seconds
-         6 function calls in 8.659 seconds
-         6 function calls in 8.609 seconds
+Minimum Energy: 1.3025187863483404e-34 Error: 1.5040275248438864e-05
+         6 function calls in 4.002 seconds
+         6 function calls in 3.988 seconds
+         6 function calls in 4.117 seconds

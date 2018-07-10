@@ -4,7 +4,7 @@ from io import StringIO
 
 from scipy.interpolate import InterpolatedUnivariateSpline
 import numpy as np
-from shapedist.elastic_linear_old import find_gamma, find_error
+from shapedist.elastic_linear_old_hierarchy import find_gamma, find_error
 from testing import examples as ex
 import matplotlib.pyplot as plt
 def calc(filename):

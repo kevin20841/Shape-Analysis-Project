@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def calculate_tangent(x, y):
     dx_dt = np.gradient(x)
     dy_dt = np.gradient(y)
@@ -7,6 +8,7 @@ def calculate_tangent(x, y):
     ds_dt = np.sqrt(dx_dt * dx_dt + dy_dt * dy_dt)
     tangent = np.array([1 / ds_dt] * 2).transpose() * velocity
     return tangent
+
 
 def calculate_normals(x, y):
     dx_dt = np.gradient(x)
@@ -27,6 +29,7 @@ def calculate_normals(x, y):
     normal = np.array([1 / length_dT_dt] * 2).transpose() * dT_dt
     return normal
 
+
 def calculate_curvature(x, y):
     dx_dt = np.gradient(x)
     dy_dt = np.gradient(y)
@@ -35,6 +38,7 @@ def calculate_curvature(x, y):
 
     curvature = np.abs(d2x_dt2 * dy_dt - dx_dt * d2y_dt2) / (dx_dt * dx_dt + dy_dt * dy_dt) ** 1.5
     return curvature
+
 
 def calculate_angle_function(x, y):
     i = 1
@@ -82,7 +86,8 @@ def calculate_angle_function(x, y):
 
     return s, theta
 
+
 def calculate_srvf(x, y):
     dx_dt = np.gradient(x)
     dy_dt = np.gradient(y)
-
+    return dx_dt / np.sqrt(np.linalg.norm(dx_dt)), dy_dt / np.sqrt(np.linalg.norm(dy_dt))

@@ -1,30 +1,30 @@
 steep 65
-Minimum Energy: 0.00022206316014540428 Error: 0.002442224832560175
-         6 function calls in 0.031 seconds
-         6 function calls in 0.032 seconds
-         6 function calls in 0.033 seconds
+Minimum Energy: 8.804031388408473e-07 Error: 0.017560605475807452
+         6 function calls in 0.016 seconds
+         6 function calls in 0.016 seconds
+         6 function calls in 0.016 seconds
 steep 131
-Minimum Energy: 0.00010468507000537104 Error: 0.0012278373056965688
-         6 function calls in 0.165 seconds
-         6 function calls in 0.154 seconds
-         6 function calls in 0.125 seconds
+Minimum Energy: 3.4160785346019856e-05 Error: 0.01908115444146179
+         6 function calls in 0.067 seconds
+         6 function calls in 0.066 seconds
+         6 function calls in 0.065 seconds
 steep 263
-Minimum Energy: 0.00010588361297467649 Error: 0.000832996150592671
-         6 function calls in 0.388 seconds
-         6 function calls in 0.387 seconds
-         6 function calls in 0.384 seconds
+Minimum Energy: 4.4173434048676374e-05 Error: 0.020575543101600344
+         6 function calls in 0.188 seconds
+         6 function calls in 0.197 seconds
+         6 function calls in 0.189 seconds
 steep 527
-Minimum Energy: 0.00010953686796909523 Error: 0.0005655818165124179
-         6 function calls in 1.092 seconds
-         6 function calls in 1.082 seconds
-         6 function calls in 1.059 seconds
+Minimum Energy: 3.604132689626955e-05 Error: 0.017703300452265813
+         6 function calls in 0.533 seconds
+         6 function calls in 0.503 seconds
+         6 function calls in 0.513 seconds
 steep 1055
-Minimum Energy: 0.00010992212796731664 Error: 0.0003994864156597623
-         6 function calls in 2.845 seconds
-         6 function calls in 2.833 seconds
-         6 function calls in 2.861 seconds
+Minimum Energy: 3.567833405684524e-05 Error: 0.01771544610402304
+         6 function calls in 1.284 seconds
+         6 function calls in 1.285 seconds
+         6 function calls in 1.287 seconds
 steep 2111
-Minimum Energy: 0.00010991990929781779 Error: 0.00028278402366581536
-         6 function calls in 8.146 seconds
-         6 function calls in 8.016 seconds
-         6 function calls in 7.850 seconds
+Minimum Energy: 3.567948475346206e-05 Error: 0.017715373654811052
+         6 function calls in 3.646 seconds
+         6 function calls in 3.624 seconds
+         6 function calls in 3.626 seconds

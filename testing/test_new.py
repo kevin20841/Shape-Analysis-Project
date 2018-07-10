@@ -1,7 +1,7 @@
 print("Loading.....")
 import matplotlib.pyplot as plt
 from scipy.interpolate import InterpolatedUnivariateSpline
-from shapedist.elastic_linear_old import find_gamma, find_error
+from shapedist.elastic_linear_uniform import find_gamma, find_error
 from testing import examples as ex
 import numpy as np
 print("Calculating......")
@@ -60,7 +60,7 @@ i = 0
 j = 0
 
 
-tg1, gammay, energy_1 = find_gamma(np.array([t, p[1]]), np.array([t, q[1]]), 12, 16, num)
+tg1, gammay, energy_1 = find_gamma(np.array([t, p[0]]), np.array([t, q[0]]), 12, 16, num)
 print("hi")
 
 
@@ -86,7 +86,7 @@ plt.plot(t, test1, "-r")
 
 # plt.plot(tg1, gammay - test1, "-b")
 
-print( np.sqrt( 1/(m-1) * np.sum( (gammay - test1)**2 ) ) )
+print(np.sqrt(1/(m-1) * np.sum((gammay - test1)**2)))
 print(find_error(tg1, gammay, test1))
 print(find_error(tg1, ex.gamma_example("identity")[0](t), gammay))
 plt.show()

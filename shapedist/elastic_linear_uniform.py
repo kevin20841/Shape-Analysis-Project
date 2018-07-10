@@ -3,10 +3,9 @@ Implementation of linear algorithm to determine shape elasticity as described by
 """
 import numpy as np
 from numba import jit, types, float64, int16
-
 import shapedist.elastic_n_2
 from math import floor, pi
-
+import matplotlib.pyplot as plt
 @jit([float64(float64, float64[:], float64[:], int16, int16)], cache=True, nopython=True)
 def interp(t, x, y, lower, upper):
     """
@@ -86,7 +85,7 @@ def interp_range_only(t, y, n, lower, upper):
             lower = i
         elif t < val:
             upper = i
-    return (t - (1/n) * i) * (y[i + 1] - y[i]) / ((1/n) * (i + 1) - (1/n) *(i)) + y[i]
+    return (t - (1/n) * i) * (y[i + 1] - y[i]) / ((1/n) * (i + 1) - (1/n) * i) + y[i]
 
 
 @jit([float64(float64[:], float64[:], float64[:], float64[:], int16, int16, int16, int16, float64)], cache=True, nopython=True)
@@ -117,7 +116,7 @@ def integrate_efficient(tp, tq, py, qy, k, i, l, j, gamma_interval, rough_path):
         index_a_1 = rough_path[a+1]
         gammak_1 = gamma_interval * l + (tp[index_a] - tp[index_k]) * \
                                         (gamma_interval * j - gamma_interval * l) / (tp[index_i] - tp[index_k])
-        gammak_2 = gamma_interval * l + (tp[(index_a_1)] - tp[index_k]) * (gamma_interval * j - gamma_interval * l) \
+        gammak_2 = gamma_interval * l + (tp[index_a_1] - tp[index_k]) * (gamma_interval * j - gamma_interval * l) \
                                         / (tp[index_i] - tp[index_k])
         e = e + (0.5 * (py[index_a] - interp_uniform(gammak_1, tq, qy, 0, tq.size)) ** 2
                          + 0.5 * (py[index_a_1] - interp_uniform(gammak_2, tq, qy, 0, tq.size)) ** 2) * \
@@ -160,6 +159,7 @@ def find_gamma(p, q, neighborhood, strip_height, max_iteration):
     while i < max_iteration:
         max_path_length = max_path_length * 2 + 1
         i = i + 1
+
     tp, tq, py, qy = p[0], q[0], p[1], q[1]
     n = tp.size
     path = np.zeros(n + 1, dtype=np.float64)
@@ -173,7 +173,7 @@ def find_gamma(p, q, neighborhood, strip_height, max_iteration):
     temp2 = np.zeros((2, path_length), dtype=np.float64)
     temp3 = np.zeros((2, path_length), dtype=np.float64)
 
-    while i < path_length:
+    while i < path_length-1:
         temp1[0][i] = tp[i * domain_interval]
         temp1[1][i] = py[i * domain_interval]
         temp2[0][i] = tq[i * domain_interval]
@@ -181,8 +181,15 @@ def find_gamma(p, q, neighborhood, strip_height, max_iteration):
         temp3[0][i] = tg[i]
         temp3[1][i] = g[i]
         i = i + 1
+    temp1[0][path_length-1] = 1
+    temp1[1][path_length - 1] = py[py.size-1]
+    temp2[0][path_length - 1] = 1
+    temp2[1][path_length - 1] = qy[qy.size-1]
+    temp3[0][path_length-1] = 1
+    temp3[1][path_length - 1] = 1
     tg, gamma_range, val = shapedist.elastic_n_2.find_gamma(temp1, temp2, temp3, 5, 5)
-
+    # plt.plot(tg, gamma_range)
+    # plt.show()
     i = 0
     while i < gamma_range.size:
         path[i] = gamma_range[i]
@@ -217,12 +224,12 @@ def find_gamma(p, q, neighborhood, strip_height, max_iteration):
             n = n + 1
         gamma_interval = 1 / (m-1)
         min_energy_values[0][0] = (0.5 * (py[0] - interp_uniform(0, tq, qy, 0, tq.size)) ** 2
-                                   + 0.5 * (py[1] - interp_uniform(gamma_interval, tq, qy, 0, tq.size)) ** 2) * (tp[1] - tp[0]) * 0.5
+                                   + 0.5 * (py[1] - interp_uniform(gamma_interval, tq, qy, 0, tq.size)) ** 2) *\
+                                  (tp[1] - tp[0]) * 0.5
         path_nodes[1][1][0] = 0
         path_nodes[1][1][1] = 0
         i, j, k, l = 1, 1, 1, 1
         val = 0
-
         val2 = 0
         while i < n-1:
             val = interp_range_only(tp[rough_path[i]], path, previous_n, 0, previous_n)
@@ -247,6 +254,9 @@ def find_gamma(p, q, neighborhood, strip_height, max_iteration):
                     while l < j and l * gamma_interval < val2 + strip_height * gamma_interval:
                         e = min_energy_values[k, l] + integrate_efficient(tp, tq, py, qy, k, i, l, j,
                                                                 gamma_interval, rough_path)
+                        # if np.abs(e-minimum)< 0.0000001:
+                        #     print(i, j, e, minimum, e-minimum)
+
                         if e < minimum:
                             minimum = e
                             path_nodes[i][j][0] = k
@@ -317,7 +327,6 @@ def find_gamma(p, q, neighborhood, strip_height, max_iteration):
             i = i + 1
         previous_n = n
         current_iteration = current_iteration + 1
-
     tg = np.linspace(0., 1., n).astype(np.float64)
     return tg, path[:n], min_energy_values[n-1][m-1]
 

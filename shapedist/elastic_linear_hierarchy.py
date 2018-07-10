@@ -3,23 +3,63 @@ Implementation of linear algorithm to determine shape elasticity as described by
 """
 import numpy as np
 from numba import jit, types, float64, int16, boolean
-
+import shapedist.shape_distance_types
 import shapedist.elastic_n_2
 from math import floor, pi
 np.seterr(all="raise")
 
 
-@jit([float64[:](float64[:], boolean[:])], cache=True, nopython=True)
-def reparametrize(x, bool_array):
-    output = np.zeros(x.size, dtype=np.float64)
+def mark_nodes_for_coarsening(element_errors, tol):
+    N = element_errors.size + 1
+    element_markers= element_errors < tol
+    node_markers = np.ones(0, N-1) < 0
+    node_markers[1:N-2] = np.logical_and(element_markers[0:N-3], element_markers[1:N-2])
+    k = 1
+    while k < N-2:
+        if np.logical_and(node_markers[k], node_markers[k+1]):
+            node_markers[k+1] = False
+    return node_markers
+
+
+def geometric_discretization_error(b):
+    T = b[:, 1:b.size-1] - b[:, 0:b.size-2]
+    element_sizes = np.sqrt( np.sum(T**2, 1))
+    K = np.abs(curvature(b))
+    max_k = np.max(K[0:K.size-2], K[1:K.size-1])
+    e = max_k * element_sizes **2
+    return e
+
+
+def curvature(p):
+    return shapedist.shape_distance_types.calculate_curvature(p[0,:], p[1, :])
+
+
+def coarsen_curve(b, tol = 2 * 10**(-5), maxiter=5):
+    b2 = b
     i = 0
-    counter = 0
-    while i < x.size:
-        if bool_array[i]:
-            output[counter] = x[i]
-            counter = counter + 1
-        i = i + 1
-    return output
+    while i < maxiter:
+        element_errors = geometric_discretization_error(b2)
+        markers = mark_nodes_for_coarsening(element_errors, tol)
+        if not(np.any(markers)):
+            break
+        b2[:, markers] = []
+    return b2
+
+def hierarchical_curve_discretization(curves, init_coarsening_tol = 2 * 10**(-3), n_levels = 5,
+                                      max_iter = 5, interpolation_method = "linear"):
+    # Skipped condition checking, put back in?
+    single_curve = True
+    b = curves
+    hierarchy = [1, n_levels]
+    if single_curve:
+        tol = init_coarsening_tol;
+        for level in range(n_levels + 1):
+            b_coarse = coarsen_curve(b, tol, max_iter)
+
+
+
+    pass
+
 
 
 @jit([float64(float64, float64[:], float64[:], int16, int16)], cache=True, nopython=True)

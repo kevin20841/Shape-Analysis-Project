@@ -1,30 +1,30 @@
 sine 65
-Minimum Energy: 1.1949007210168565e-06 Error: 0.00023085806442572492
-         6 function calls in 0.056 seconds
-         6 function calls in 0.057 seconds
-         6 function calls in 0.062 seconds
+Minimum Energy: 7.719754425504213e-07 Error: 0.0022629380085537965
+         6 function calls in 0.032 seconds
+         6 function calls in 0.034 seconds
+         6 function calls in 0.033 seconds
 sine 131
-Minimum Energy: 2.093933762789828e-07 Error: 4.9869023945078925e-05
-         6 function calls in 0.208 seconds
-         6 function calls in 0.211 seconds
-         6 function calls in 0.215 seconds
+Minimum Energy: 1.1185110187641918e-07 Error: 0.0007851687546434078
+         6 function calls in 0.109 seconds
+         6 function calls in 0.120 seconds
+         6 function calls in 0.114 seconds
 sine 263
-Minimum Energy: 4.09671043765198e-08 Error: 1.7995687733257865e-05
-         6 function calls in 0.556 seconds
-         6 function calls in 0.551 seconds
-         6 function calls in 0.540 seconds
+Minimum Energy: 2.3734559564809066e-08 Error: 0.00042562805897823207
+         6 function calls in 0.273 seconds
+         6 function calls in 0.276 seconds
+         6 function calls in 0.264 seconds
 sine 527
-Minimum Energy: 2.709659843455583e-09 Error: 3.5986501144472737e-06
-         6 function calls in 1.352 seconds
-         6 function calls in 1.309 seconds
-         6 function calls in 1.310 seconds
+Minimum Energy: 2.062169093051326e-09 Error: 0.00010643926894932921
+         6 function calls in 0.654 seconds
+         6 function calls in 0.609 seconds
+         6 function calls in 0.594 seconds
 sine 1055
-Minimum Energy: 2.143184856701993e-09 Error: 6.794792835528507e-06
-         6 function calls in 3.284 seconds
-         6 function calls in 3.308 seconds
-         6 function calls in 3.338 seconds
+Minimum Energy: 1.2402688162394746e-09 Error: 9.260269700158105e-05
+         6 function calls in 1.533 seconds
+         6 function calls in 1.558 seconds
+         6 function calls in 1.581 seconds
 sine 2111
-Minimum Energy: 4.807837067424361e-10 Error: 2.38044637162271e-06
-         6 function calls in 8.629 seconds
-         6 function calls in 8.547 seconds
-         6 function calls in 8.711 seconds
+Minimum Energy: 2.9182085602688633e-10 Error: 4.273284114689752e-05
+         6 function calls in 4.066 seconds
+         6 function calls in 3.901 seconds
+         6 function calls in 3.973 seconds
