@@ -3,7 +3,7 @@ import numpy as np
 from numba import jit, float64
 
 
-def elastic_matcher(p, q, dim, adaptive=True, hierarchy_tol=2e-5, n_levels=3, max_iter=5, hierarchy_factor=2,
+def elastic_matcher(p, q, dim, curve_type="coord", adaptive=True, hierarchy_tol=2e-5, n_levels=3, max_iter=5, hierarchy_factor=2,
                     neighborhood=8,
                     strip_height=6, interpolation_method='linear'):
     if dim == 1 and adaptive:
@@ -21,18 +21,19 @@ def elastic_matcher(p, q, dim, adaptive=True, hierarchy_tol=2e-5, n_levels=3, ma
         return tg, gamma, energy
 
     elif dim == 2 and adaptive:
+
         original, boolean_mask, curve_hierarchy = \
             shapedist.build_hierarchy_2D.hierarchical_curve_discretization(np.array([p, q]), hierarchy_tol,
                                                                            n_levels=n_levels, max_iter=max_iter,
                                                                            hierarchy_factor=hierarchy_factor,
-                                                                           interpolation_method=interpolation_method)
+                                                                           interpolation_method=interpolation_method,
+                                                                           curve_type=curve_type)
 
         t_orig = original[0]
         b1_orig = original[1]
         b2_orig = original[2]
-
         tg, gammay, energy = shapedist.elastic_linear_hierarchy.find_gamma(t_orig, b1_orig, b2_orig, boolean_mask,
-                                                                                 neighborhood, strip_height)
+                                                                           neighborhood, strip_height)
         return tg, gammay, energy
 
 

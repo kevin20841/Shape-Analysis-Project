@@ -4,8 +4,9 @@ from io import StringIO
 from scipy.interpolate import CubicSpline
 from scipy.interpolate import InterpolatedUnivariateSpline
 import numpy as np
-from shapedist import elastic_linear_uniform
+import shapedist
 from testing import examples as ex
+import matplotlib.pyplot as plt
 def calc(filename):
     readFile = open(filename, "r")
     text = readFile.read()
@@ -19,51 +20,33 @@ def calc(filename):
         m = int(x[1])
 
         curve_type = str(x[0])
-        print(m)
+        #print(m)
         t = np.linspace(0., 1., m)
-        # t = np.random.rand(m)
-        #
-        # t[0] = 0
-        # t[t.size - 1] = 1
-        # t.sort()
         q = ex.curve_example('bumps', t)[0][1]
 
         x_function = CubicSpline(t, q)
-
         test = ex.gamma_example(curve_type)[0](t)
-
-        #
-        # test = np.zeros(m)
-        #
-        # i = 1
-        # while i < m:
-        #     test[i] = np.random.random_sample()
-        #     i = i + 1
-        # test.sort()
-        # test[m-1] = 1
-        # test[0] = 0
-
         p = x_function(test)
+        original, boolean_mask, curve_hierarchy = \
+            shapedist.build_hierarchy_1D.hierarchical_curve_discretization(np.array([[t, p], [t, q]]), 2e-5)
 
-        # p = np.array(np.sin(t))
-        # q = np.array(np.exp(t)-1)
-        num = int(np.log2(m) - 4)
-        domain_x, gammax, val = elastic_linear_uniform.find_gamma(np.array([t, p]), np.array([t, q]), 6, 4, num)
+        t_orig = original[0]
+        b1_orig = original[1]
+        b2_orig = original[2]
 
-        error = elastic_linear_uniform.find_error(domain_x, ex.gamma_example(curve_type)[0](domain_x), gammax)
-        print(error)
-        # plt.plot(domain_x, gammax, "-r")
-        # plt.show()
+        print(t_orig[boolean_mask[-1]].size)
+        domain_x, gammax, val = shapedist.elastic_linear_hierarchy.find_gamma(t_orig, b1_orig, b2_orig, boolean_mask, 8, 6)
+        error = shapedist.find_error(domain_x, ex.gamma_example(curve_type)[0](domain_x), gammax)
+        #print(error)
         f.write("Minimum Energy: " + str(val) + " Error: " + str(error) + "\n\n\n")
         for j in range(3):
-            cProfile.runctx("elastic_linear_uniform.find_gamma(np.array([t, p]), np.array([t, q]), 6, 4, num)", globals(),
+            cProfile.runctx('tg1, gammay, energy_1 = shapedist.elastic_linear_hierarchy.find_gamma(t_orig, b1_orig, b2_orig, boolean_mask, 8, 6)',
+                            globals(),
                             locals(), filename="statsfile")
             stream = StringIO()
             stats = pstats.Stats('statsfile', stream=stream).sort_stats("cumulative")
             stats.print_stats()
-
             f.write(stream.getvalue())
-
     f.close()
 
 calc("test_case_i")

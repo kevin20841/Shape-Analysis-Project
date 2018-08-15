@@ -119,18 +119,23 @@ def find_gamma(p, q, g):
     gamma_range = np.zeros(n)
     i = 1
     previous = 1
-    previousIndex = n-1
+    previousIndex_domain = n-1
+    previousIndex_gamma = n-1
     j = 0
     gamma_range[path[0][0]] = gamma[path[0][1]]
-    while i < path.size // 2 and previousIndex != 0:
+    while i < path.size // 2 and previousIndex_domain != 0:
         gamma_range[path[i][0]] = gamma[path[i][1]]
-        if previousIndex - path[i][0] > 1:
+        if previousIndex_domain - path[i][0] > 1:
             j = 0
-            step_size = (previous - gamma[path[i][1]]) / (previousIndex - path[i][0])
-            while j < previousIndex - path[i][0]:
-                gamma_range[previousIndex - j] = previous - j * step_size
+
+            while j < previousIndex_domain - path[i][0]:
+                gamma_range[previousIndex_domain - j] = previous - (tg[previousIndex_domain] -
+                                                                   tg[previousIndex_domain-j]) \
+                                                 * (gamma[previousIndex_gamma] - gamma[path[i][1]]) / \
+                                                       (tg[previousIndex_domain] - tg[path[i][0]])
                 j = j + 1
-        previousIndex = path[i][0]
+        previousIndex_domain = path[i][0]
+        previousIndex_gamma = path[i][1]
         previous = gamma[path[i][1]]
         i = i + 1
     return tg, gamma_range, min_energy_values[n-1][m-1]

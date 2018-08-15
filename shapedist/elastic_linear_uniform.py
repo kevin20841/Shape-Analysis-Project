@@ -5,7 +5,8 @@ import numpy as np
 from numba import jit, types, float64, int16
 import shapedist.elastic_n_2
 from math import floor, pi
-import matplotlib.pyplot as plt
+np.set_printoptions(precision=25)
+
 @jit([float64(float64, float64[:], float64[:], int16, int16)], cache=True, nopython=True)
 def interp(t, x, y, lower, upper):
     """
@@ -50,7 +51,11 @@ def interp(t, x, y, lower, upper):
 def interp_uniform(t, x, y, lower, upper):
     interval = x[1] - x[0]
     i = floor(t / interval)
-    return (t - x[i]) * (y[i + 1] - y[i]) / (x[i + 1] - x[i]) + y[i]
+    if i == floor(1/interval):
+        return y[i]
+    else:
+        #print((t - x[i]) * (y[i + 1] - y[i]) / interval + y[i])
+        return (t - x[i]) * (y[i + 1] - y[i]) / interval + y[i]
 
 
 @jit([float64(float64, float64[:], float64, int16, int16)], cache=True, nopython=True)
@@ -125,7 +130,8 @@ def integrate_efficient(tp, tq, py, qy, k, i, l, j, gamma_interval, rough_path):
     return e
 
 
-@jit([types.Tuple((float64[:], float64[:], float64))(float64[:, :], float64[:, :], int16, int16, int16)], cache=True, nopython=True)
+@jit([types.Tuple((float64[:], float64[:], float64))(float64[:, :], float64[:, :], int16, int16, int16)], cache=True,
+     nopython=True)
 def find_gamma(p, q, neighborhood, strip_height, max_iteration):
     """
     Finds the discretized function gamma, and the minimum energy.
@@ -161,6 +167,7 @@ def find_gamma(p, q, neighborhood, strip_height, max_iteration):
         i = i + 1
 
     tp, tq, py, qy = p[0], q[0], p[1], q[1]
+
     n = tp.size
     path = np.zeros(n + 1, dtype=np.float64)
     i = 0
@@ -188,8 +195,7 @@ def find_gamma(p, q, neighborhood, strip_height, max_iteration):
     temp3[0][path_length-1] = 1
     temp3[1][path_length - 1] = 1
     tg, gamma_range, val = shapedist.elastic_n_2.find_gamma(temp1, temp2, temp3, 5, 5)
-    # plt.plot(tg, gamma_range)
-    # plt.show()
+
     i = 0
     while i < gamma_range.size:
         path[i] = gamma_range[i]
@@ -254,9 +260,6 @@ def find_gamma(p, q, neighborhood, strip_height, max_iteration):
                     while l < j and l * gamma_interval < val2 + strip_height * gamma_interval:
                         e = min_energy_values[k, l] + integrate_efficient(tp, tq, py, qy, k, i, l, j,
                                                                 gamma_interval, rough_path)
-                        # if np.abs(e-minimum)< 0.0000001:
-                        #     print(i, j, e, minimum, e-minimum)
-
                         if e < minimum:
                             minimum = e
                             path_nodes[i][j][0] = k

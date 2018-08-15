@@ -1,5 +1,5 @@
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 def calculate_tangent(x, y):
     dx_dt = np.gradient(x)
@@ -10,7 +10,9 @@ def calculate_tangent(x, y):
     return tangent
 
 
-def calculate_normals(x, y):
+def calculate_normals(p):
+    x = p[:, 0]
+    y = p[:, 1]
     dx_dt = np.gradient(x)
     dy_dt = np.gradient(y)
     velocity = np.array([[dx_dt[i], dy_dt[i]] for i in range(dx_dt.size)])
@@ -27,16 +29,24 @@ def calculate_normals(x, y):
     length_dT_dt = np.sqrt(deriv_tangent_x * deriv_tangent_x + deriv_tangent_y * deriv_tangent_y)
 
     normal = np.array([1 / length_dT_dt] * 2).transpose() * dT_dt
+    for i in range(len(normal)):
+        if np.cross(tangent[i], normal[i]) > 0:
+            normal[i] = -1 * normal[i]
     return normal
 
 
-def calculate_curvature(x, y):
+def calculate_curvature(x, y, closed):
+    # plt.plot(x,y)
+    # plt.show()
     dx_dt = np.gradient(x)
     dy_dt = np.gradient(y)
     d2x_dt2 = np.gradient(dx_dt)
     d2y_dt2 = np.gradient(dy_dt)
 
-    curvature = np.abs(d2x_dt2 * dy_dt - dx_dt * d2y_dt2) / (dx_dt * dx_dt + dy_dt * dy_dt) ** 1.5
+    curvature = np.abs(d2x_dt2 * dy_dt - dx_dt * d2y_dt2) / (dx_dt * dx_dt + dy_dt * dy_dt)**1.5
+    # t = np.linspace(0., 1., curvature.size)
+    # plt.plot(t, curvature)
+    # plt.show()
     return curvature
 
 
