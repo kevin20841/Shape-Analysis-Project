@@ -28,3 +28,4 @@ def convert(filename):
 convert("i_result.txt")
 convert("b_result.txt")
 convert("s_result.txt")
+convert("fs_result.txt")

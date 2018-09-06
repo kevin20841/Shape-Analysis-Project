@@ -1,7 +1,7 @@
 import numpy as np
 from numba.targets.arraymath import np_all
 from joblib import Parallel, delayed
-from shapedist.elastic_linear import find_gamma, find_shape_distance
+from shapedist_old.elastic_linear import find_gamma, find_shape_distance
 from scipy.interpolate import InterpolatedUnivariateSpline
 np.seterr(divide='ignore', invalid='ignore')
 def task(p, q, t):

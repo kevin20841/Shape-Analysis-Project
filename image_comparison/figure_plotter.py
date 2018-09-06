@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 from scipy.interpolate import InterpolatedUnivariateSpline
-from shapedist.elastic_linear import find_gamma
+from shapedist_old.elastic_linear import find_gamma
 from testing import examples as ex
 import numpy as np
 

@@ -212,6 +212,9 @@ def gamma_example(name, param1=None, param2=None):
         gamma  = lambda s: s
         dgamma = lambda s: np.ones(len(s))
 
+    elif name == "flat+steep":
+        gamma = flat_steep
+        dgamma = lambda s: 1
     elif name == 'polynomial':
         a = param1 if param1 is not None else 0.1
         gamma  = lambda s: s + 16*a * s**2 * (s-1)**2
@@ -236,10 +239,14 @@ def gamma_example(name, param1=None, param2=None):
         [gamma,dgamma] = gamma_example('custom',f,df)
 
     elif name == 'bumpy':
-        f  = lambda s: -s + (1/2.4)*(0.7 + 0.5*(1 + (2*s-1)**5) + 0.25*arctan(40*pi*(s-0.75)) + 0.2*arctan(40*pi*(s-0.4)))
-        df = lambda s: -1 + (1/2.4)*((2*s-1)**5 + 0.25*40*pi / (1 + (40*pi*(s-0.75))**2) + 0.2*40*pi / (1 + (40*pi*(s-0.4))**2))
-        gamma, dgamma = gamma_example('custom',f,df)
-
+        # f = lambda s: -s + (1 / 2.4) * (1.2 + 0.5 * (2 * s - 1). ^ 5 + 0.25 * atan(40 * pi * (s - 0.75))
+        #                   + 0.2 * atan(40 * pi * (s - 0.4)))
+        f = lambda s: -s + (1 / 2.4) * (1.2 + 0.5 * (2 * s - 1) ** 5 + 0.25 * arctan(40 * pi * (s - 0.75))
+                          + 0.2 * arctan(40 * pi * (s - 0.4)))
+        df = lambda s: -1 + (1 / 2.4) * (5.0 * (2 * s - 1)**4 + 0.25 * 40 * pi / (1 +
+                                                                      (40 * pi * (s - 0.75))** 2) + 0.2 * 40 * pi / (
+                                      1 + (40 * pi * (s - 0.4))**2))
+        [gamma,dgamma] = gamma_example('custom',f,df)
     elif name == 'custom':
         if param1 is None or param2 is None:
             f = lambda s: 4*exp(s);  df = f
@@ -253,4 +260,20 @@ def gamma_example(name, param1=None, param2=None):
     else:
         raise ValueError('Unknown gamma name!')
 
-    return (gamma, dgamma)
+    return gamma, dgamma
+
+
+def flat_steep(s):
+    x = np.zeros(s.size)
+    for i in range(s.size):
+        if s[i] <= 3/10:
+            x[i] = s[i] / 3
+        elif s[i] <= 7/20:
+            x[i] = (s[i]-3/10) * 7 + 1/10
+        elif s[i] <= 13/20:
+            x[i] = (s[i] - 7/20) / 3 + 9 / 20
+        elif s[i] <= 7/10:
+            x[i] = (s[i] - 13/20) * 7 + 11/20
+        elif s[i] <= 1:
+            x[i] = (s[i]-7/10) / 3 + 9/10
+    return x

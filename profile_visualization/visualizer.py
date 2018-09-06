@@ -6,7 +6,7 @@ prof = Profile()
 prof.disable()  # i.e. don't time imports
 from scipy.interpolate import InterpolatedUnivariateSpline
 import numpy as np
-from shapedist import elastic_linear_old
+from shapedist_old import elastic_linear_old
 from testing import examples as ex
 
 def calc(filename):

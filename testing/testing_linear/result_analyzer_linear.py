@@ -31,3 +31,4 @@ def analyze(filename):
 analyze("i_raw.txt")
 analyze("b_raw.txt")
 analyze("s_raw.txt")
+analyze("fs_raw.txt")

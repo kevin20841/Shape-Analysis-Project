@@ -1,7 +1,7 @@
 import numpy as np
 from numba.targets.arraymath import np_all
 
-from shapedist.elastic_linear import find_gamma, find_shape_distance
+from shapedist_old.elastic_linear import find_gamma, find_shape_distance
 from scipy.interpolate import InterpolatedUnivariateSpline
 import matplotlib.pyplot as plt
 

@@ -5,50 +5,9 @@ import numpy as np
 from numba import jit, types, float64, int16, generated_jit
 
 
-# @jit([float64[:](float64, float64[:], float64[:], int16, int16)], cache=True, nopython=True)
-# def interp_array(t, x, y, lower, upper):
-#     count = 0
-#     while count < t.size:
-#         i = 0
-#         if t[count] == x[x.size-1]:
-#             return y[y.size-1]
-#         while lower < upper:
-#             i = lower + (upper - lower) // 2
-#             val = x[i]
-#             if t == val:
-#                 break
-#             elif t > val:
-#                 if lower == i:
-#                     break
-#                 lower = i
-#             elif t < val:
-#                 upper = i
-#         return (t - x[i]) * (y[i + 1] - y[i]) / (x[i + 1] - x[i]) + y[i]
-
-
 @jit([float64(float64, float64[:], float64[:], int16, int16)], cache=True, nopython=True)
 def interp(t, x, y, lower, upper):
-    """
-    Linear interpolation function. Uses binary search to find which values of x to interpolate over.
-    Does not work if interpolation is out of bounds
-
-    Parameters
-    ----------
-    t : float
-        The input of the function
-    x : numpy array of floats
-        The domain of the function to be interpolated
-    y : numpy array of floats
-        The range of the function to be interpolated
-
-    Returns
-    -------
-    float
-        The calculated value
-    """
     i = 0
-    if t == x[x.size-1]:
-        return y[y.size-1]
     while lower < upper:
         i = lower + (upper - lower) // 2
         val = x[i]
@@ -60,7 +19,12 @@ def interp(t, x, y, lower, upper):
             lower = i
         elif t < val:
             upper = i
-    return (t - x[i]) * (y[i + 1] - y[i]) / (x[i + 1] - x[i]) + y[i]
+
+    if i == x.size-1:
+        temp = y[i]
+    else:
+        temp = (t - x[i]) * (y[i + 1] - y[i]) / (x[i + 1] - x[i]) + y[i]
+    return temp
 
 
 def integrate_1D(tp, tq, py, qy, gamma, k, i, l, j):
@@ -105,8 +69,6 @@ def integrate(tp, tq, py, qy, gamma, k, i, l, j):
         return integrate_1D
     elif py.ndim == 2:
         return integrate_2D
-# @jit([types.Tuple((float64[:], float64[:], float64))(float64[:, :], float64[:, :], float64[:, :], int16, int16)],
-#     cache=True, nopython=True)
 
 
 @jit(cache=True, nopython=True)
@@ -119,7 +81,6 @@ def find_gamma(t, p, q, tg, gamma, width1, width2):
     n = tp.size
     min_energy_values = np.zeros((n, m), dtype=np.float64)
     path_nodes = np.zeros((n, m, 2), dtype=np.int16)
-
     min_energy_values[0][0] = integrate(tp, tq, py, qy, gamma, 0, 1, 0, 1)
     path_nodes[1][1][0] = 0
     path_nodes[1][1][1] = 0
@@ -130,12 +91,12 @@ def find_gamma(t, p, q, tg, gamma, width1, width2):
         while j < m-1:
             min_energy_values[i][j] = integrate(tp, tq, py, qy, gamma, 0, i, 0, j)
             k = i - width1
-            if k < 0:
+            if k <= 0:
                 k = 1
             minimum = min_energy_values[i][j]
             while k < i:
                 l = j - width2
-                if l < 0:
+                if l <= 0:
                     l = 1
                 while l < j:
                     e = min_energy_values[k, l] + integrate(tp, tq, py, qy, gamma, k, i, l, j)
@@ -152,6 +113,8 @@ def find_gamma(t, p, q, tg, gamma, width1, width2):
             j = j + 1
         i = i + 1
     # !!
+    i = n - 1
+    j = m - 1
     min_energy_values[i][j] = integrate(tp, tq, py, qy, gamma, 0, i, 0, j)
     k = i - width1
     if k <= 0:
@@ -170,7 +133,6 @@ def find_gamma(t, p, q, tg, gamma, width1, width2):
 
             l = l + 1
         k = k + 1
-
     min_energy_values[i][j] = minimum
     # !!
     path = np.zeros((n, 2), dtype=np.int16)
@@ -182,7 +144,6 @@ def find_gamma(t, p, q, tg, gamma, width1, width2):
         path[i+1][0] = result[0]
         path[i+1][1] = result[1]
         i = i + 1
-
     gamma_range = np.zeros(n)
     i = 1
     previous = 1
@@ -199,41 +160,10 @@ def find_gamma(t, p, q, tg, gamma, width1, width2):
                 gamma_range[previousIndex_domain - j] = previous - (tg[previousIndex_domain] -
                                                                    tg[previousIndex_domain-j]) \
                                                  * (gamma[previousIndex_gamma] - gamma[path[i][1]]) / \
-                                                       (tg[previousIndex_domain] - tg[path[i][0]])
+                                                   (tg[previousIndex_domain] - tg[path[i][0]])
                 j = j + 1
         previousIndex_domain = path[i][0]
         previousIndex_gamma = path[i][1]
         previous = gamma[path[i][1]]
         i = i + 1
     return tg, gamma_range, min_energy_values[n-1][m-1]
-
-
-@jit(float64(float64[:], float64[:], float64[:]), cache=True, nopython=True)
-def find_error(tg, gammar, gammat):
-    """
-    Function that finds the error between two gamma curves for checking.
-
-    Parameters
-    ----------
-    tg : array of floats
-        The domain of the two gamma curves.
-    gammar : array of floats
-        The y-values of the known gamma curve.
-    gammat : array of floats
-        The y-values of gamma curve to be tested.
-
-    Returns
-    -------
-    float
-        The weighted error.
-    """
-    n = tg.size
-    error = 1 / 2 * (tg[1] - tg[0]) * (gammar[1] - gammat[1]) ** 2 + 1 / 2 * (tg[n-1] - tg[n-2]) * (gammar[n-1] - gammat[n-1]) ** 2
-    k = 2
-    if n != gammar.size or n != gammat.size:
-        raise IndexError
-    while k < n-1:
-        error = error + 1/2 * (gammar[k] - gammat[k]) ** 2 * (tg[k] - tg[k-1]) ** 2
-        k = k + 1
-    error = error ** (1/2)
-    return error

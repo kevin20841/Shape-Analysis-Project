@@ -4,7 +4,7 @@ from io import StringIO
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
 
-from shapedist import elastic_n_2
+from shapedist_old import elastic_n_2
 from testing import examples as ex
 
 readFile = open("test_cases_linear", "r")

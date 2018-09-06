@@ -4,7 +4,7 @@ from io import StringIO
 from scipy.interpolate import CubicSpline
 from scipy.interpolate import InterpolatedUnivariateSpline
 import numpy as np
-from shapedist import elastic_linear_uniform
+from shapedist_old import elastic_linear_uniform
 from testing import examples as ex
 def calc(filename):
     readFile = open(filename, "r")

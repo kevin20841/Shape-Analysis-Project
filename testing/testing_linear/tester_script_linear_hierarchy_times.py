@@ -7,6 +7,8 @@ import numpy as np
 import shapedist
 from testing import examples as ex
 import matplotlib.pyplot as plt
+
+
 def calc(filename):
     readFile = open(filename, "r")
     text = readFile.read()
@@ -28,19 +30,22 @@ def calc(filename):
         test = ex.gamma_example(curve_type)[0](t)
         p = x_function(test)
         original, boolean_mask, curve_hierarchy = \
-            shapedist.build_hierarchy_1D.hierarchical_curve_discretization(np.array([[t, p], [t, q]]), 2e-5)
+            shapedist.build_hierarchy_1D.hierarchical_curve_discretization(np.array([np.array([t, p]), np.array([t, q])]),
+                                                                           init_coarsening_tol=2e-5)
 
         t_orig = original[0]
+
         b1_orig = original[1]
         b2_orig = original[2]
-
-        print(t_orig[boolean_mask[-1]].size)
-        domain_x, gammax, val = shapedist.elastic_linear_hierarchy.find_gamma(t_orig, b1_orig, b2_orig, boolean_mask, 8, 6)
+        print(curve_type, m, t_orig[boolean_mask[1]].size)
+        domain_x, gammax, energy= shapedist.elastic_linear_hierarchy.find_gamma(t_orig, b1_orig, b2_orig, boolean_mask,
+                                                                          False, 0)
         error = shapedist.find_error(domain_x, ex.gamma_example(curve_type)[0](domain_x), gammax)
-        #print(error)
-        f.write("Minimum Energy: " + str(val) + " Error: " + str(error) + "\n\n\n")
+        # print(error)
+        # print(t_orig[boolean_mask[-1]].size)
+        f.write("Minimum Energy: " + str(energy) + " Error: " + str(error) + "\n\n\n")
         for j in range(3):
-            cProfile.runctx('tg1, gammay, energy_1 = shapedist.elastic_linear_hierarchy.find_gamma(t_orig, b1_orig, b2_orig, boolean_mask, 8, 6)',
+            cProfile.runctx('domain_x, gammax, energy= shapedist.elastic_linear_hierarchy.find_gamma(t_orig, b1_orig, b2_orig, boolean_mask, False, 0)',
                             globals(),
                             locals(), filename="statsfile")
             stream = StringIO()
@@ -52,3 +57,4 @@ def calc(filename):
 calc("test_case_i")
 calc("test_case_s")
 calc("test_case_b")
+calc("test_case_fs")

@@ -3,7 +3,7 @@ from operator import index
 import image_comparison.curve_processing
 from scipy.io import loadmat
 from sqlalchemy.sql.functions import concat
-from shapedist import elastic_linear
+from shapedist_old import elastic_linear
 import numpy as np
 from scipy.interpolate import interp1d
 from joblib import Parallel, delayed
