@@ -1,7 +1,5 @@
 import numpy as np
 import shapedist.shape_distance_types
-import matplotlib.pyplot as plt
-
 
 def arclen_fct_values(b):
     N = b[:, 0].size
@@ -91,7 +89,7 @@ def coarsen_curve(t, b1, b2, tol=2e-3, maxiter=5):
 
 
 def hierarchical_curve_discretization(curves, t1=None, t2=None, init_coarsening_tol=2e-3, n_levels=5,
-                                      max_iter=5,
+                                      max_iter=3, adaptive = True,
                                       interpolation_method="linear", curve_type="coord"):
 
     single_curve = len(curves) == 1
@@ -135,13 +133,20 @@ def hierarchical_curve_discretization(curves, t1=None, t2=None, init_coarsening_
             t1 = arclen_fct_values(b1)
             t2 = arclen_fct_values(b2)
         b1_combined, b2_combined, t_new = parametrize_curve_pair(b1, b2, t1, t2,
-                                                       interpolation_method=interpolation_method)
+                                                                 interpolation_method=interpolation_method)
         original_length = t_new.size
         t_new = t_new.transpose()
         b1_combined = b1_combined.transpose()
         b2_combined = b2_combined.transpose()
         N = t_new.size
+        # print(np.equal(b1_combined[1:-1, 0], b1_combined[0:-2, 0]))
+        # print(np.equal(b1_combined[1:-1, 1], b1_combined[0:-2, 1]))
+
         remove = np.zeros(N, dtype=bool)
+        # remove[1:N - 1] = np.logical_or.reduce((np.equal(b1_combined[1:-1, 0], b1_combined[0:-2, 0]),
+        #                                        np.equal(b1_combined[1:-1, 1], b1_combined[0:-2, 1]),
+        #                                        np.equal(b2_combined[1:-1, 0], b2_combined[0:-2, 0]),
+        #                                        np.equal(b2_combined[1:-1, 1], b2_combined[0:-2, 1])))
         remove[1:N - 1] = (t_new[1:N - 1] - t_new[0:N - 2]) < t_spacing_tol
         t_new = t_new[np.logical_not(remove)]
         b1_combined = b1_combined[np.logical_not(remove), :]
@@ -150,9 +155,9 @@ def hierarchical_curve_discretization(curves, t1=None, t2=None, init_coarsening_
         hierarchy.append([t_new, b1_combined, b2_combined])
 
         t_prev = t_new.size
-        while t_prev - t_new.size < original_length // 4:
+        while t_new.size > 400:
             t_new, b1_combined, b2_combined = coarsen_curve(t_new, b1_combined, b2_combined, tol, max_iter)
-            tol = tol * 1.5
+            tol = tol * 1.2
         hierarchy.append([t_new, b1_combined, b2_combined])
         count = 0
 
@@ -163,7 +168,11 @@ def hierarchical_curve_discretization(curves, t1=None, t2=None, init_coarsening_
 
             N = t_new.size
             remove = np.zeros(N, dtype=bool)
-            remove[1:N-1] = (t_new[1:N-1] - t_new[0:N-2]) < t_spacing_tol
+            # remove[1:N - 1] = np.logical_or.reduce((np.equal(b1_coarse[1:-1, 0], b1_coarse[0:-2, 0]),
+            #                                         np.equal(b1_coarse[1:-1, 1], b1_coarse[0:-2, 1]),
+            #                                         np.equal(b2_coarse[1:-1, 0], b2_coarse[0:-2, 0]),
+            #                                         np.equal(b2_coarse[1:-1, 1], b2_coarse[0:-2, 1])))
+            remove[1:N - 1] = (t_new[1:N - 1] - t_new[0:N - 2]) < t_spacing_tol
             t_new = t_new[np.logical_not(remove)]
             b1_coarse = b1_coarse[np.logical_not(remove), :]
             b2_coarse = b2_coarse[np.logical_not(remove), :]
@@ -183,17 +192,21 @@ def hierarchical_curve_discretization(curves, t1=None, t2=None, init_coarsening_
         for i in range(n_levels):
             boolean_mask[i][-1] = True
             boolean_mask[i][0] = True
-
         if curve_type == "curvature":
             original[1] = curvature(original[1])
-            original[1] = (original[1] - np.min(original[1]))/np.max(original[1]-np.min(original[1]))
+            # original[1] = (original[1] - np.min(original[1]))/np.max(original[1]-np.min(original[1]))
             original[2] = curvature(original[2])
-            original[2] = (original[2] - np.min(original[2])) / np.max(original[2] - np.min(original[2]))
+            # original[2] = (original[2] - np.min(original[2])) / np.max(original[2] - np.min(original[2]))
         elif curve_type == "normals":
-            original[1] = shapedist.shape_distance_types.calculate_normals(original[1])
-            original[2] = shapedist.shape_distance_types.calculate_normals(original[2])
-
-        return original, boolean_mask[::-1][:-1], hierarchy[::-1][:-1]
+            original[1] = shapedist.shape_distance_types.calculate_normals(original[1], original[0])
+            original[2] = shapedist.shape_distance_types.calculate_normals(original[2], original[0])
+        elif curve_type == "SRVF":
+            original[1] = shapedist.shape_distance_types.calculate_srvf(original[1], original[0])
+            original[2] = shapedist.shape_distance_types.calculate_srvf(original[2], original[0])
+        if adaptive:
+            return original, boolean_mask[::-1][:-1], hierarchy[::-1][:-1]
+        else:
+            return original, boolean_mask[::-1], hierarchy[::-1][:-1]
 
 
 def parametrize_curve_pair(b1_in, b2_in, t1, t2, interpolation_method='linear' ):
