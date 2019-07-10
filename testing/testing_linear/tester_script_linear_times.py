@@ -66,6 +66,7 @@ def calc(filename):
 
     f.close()
 
-calc("test_case_i")
-calc("test_case_s")
-calc("test_case_b")
+calc("test_case_sine")
+calc("test_case_steep")
+calc("test_case_bumpy")
+calc("test_case_flatsteep")

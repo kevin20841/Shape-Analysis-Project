@@ -2,6 +2,7 @@ import shapedist
 import numpy as np
 from numba import jit, float64
 import warnings
+from math import pi
 import matplotlib.pyplot as plt
 
 
@@ -12,38 +13,41 @@ def elastic_matcher(p, q, dim, parametrization=None, curve_type="coord", gamma_t
     if not(parametrization is None):
         t1 = parametrization[0]
         t2 = parametrization[1]
-    if dim == 1 and adaptive:
+    if dim == 1:
         if hierarchy_tol == 1:
             hierarchy_tol = 2e-5
         original, boolean_mask, curve_hierarchy = \
             shapedist.build_hierarchy_1D.hierarchical_curve_discretization(np.array([p, q]), hierarchy_tol,
                                                                            n_levels=n_levels, max_iter=max_iter,
+                                                                           adaptive = adaptive,
                                                                            interpolation_method=interpolation_method)
 
         t_orig = original[0]
 
         b1_orig = original[1]
         b2_orig = original[2]
-        for i in boolean_mask:
-            print(t_orig[i].size)
         #     plt.figure()
         #     plt.plot(t_orig[i], b1_orig[i], ".-r")
         #     plt.plot(t_orig[i], b2_orig[i], ".-b")
         # plt.show()
-        if t_orig[boolean_mask[-1]].size > 500:
+        if t_orig[boolean_mask[1]].size > 500:
             warnings.warn("Algorithm will run slowly because curves are not coarsened enough. A larger hierarchy tolerance is recommended.", RuntimeWarning)
         tg, gamma, energy = shapedist.elastic_linear_hierarchy.find_gamma(t_orig, b1_orig, b2_orig, boolean_mask,
                                                                               energy_dot, gamma_tol)
-        return tg, gamma, energy
+        return tg, gamma, energy, original, boolean_mask
 
-    elif dim == 2 and adaptive:
+    elif dim == 2:
         if hierarchy_tol == 1:
             hierarchy_tol = 2e-3
+        if curve_type == "SRVF":
+            energy_dot = True
+
         original, boolean_mask, curve_hierarchy = \
             shapedist.build_hierarchy_2D.hierarchical_curve_discretization(np.array([p, q]),
                                                                            t1=t1, t2=t2,
                                                                            init_coarsening_tol=hierarchy_tol,
                                                                            n_levels=n_levels, max_iter=max_iter,
+                                                                           adaptive=adaptive,
                                                                            interpolation_method=interpolation_method,
                                                                            curve_type=curve_type)
 
@@ -51,13 +55,25 @@ def elastic_matcher(p, q, dim, parametrization=None, curve_type="coord", gamma_t
         b1_orig = original[1]
         b2_orig = original[2]
         for i in boolean_mask:
-            print(t_orig[i].size)
-        if t_orig[boolean_mask[-1]].size > 500:
+            print(b1_orig[i].size)
+        if t_orig[boolean_mask[1]].size > 500:
             warnings.warn("Algorithm will run slowly because curves are not coarsened enough. A larger hierarchy tolerance is recommended.", RuntimeWarning)
         tg, gammay, energy = shapedist.elastic_linear_hierarchy.find_gamma(t_orig, b1_orig, b2_orig, boolean_mask,
-                                                                           energy_dot, gamma_tol)
+                                                                                   energy_dot, gamma_tol)
+        if curve_type == "SRVF" and adaptive:
+            new_b2 = np.zeros((tg.size, 2))
+            new_b2[:, 0] = np.interp(gammay, tg, b2_orig[boolean_mask[1], 0])
+            new_b2[:, 1] = np.interp(gammay, tg, b2_orig[boolean_mask[1], 1])
+            new_b1 = b1_orig[boolean_mask[1]]
+            energy = shapedist.find_shape_distance_SRVF(tg, new_b1, new_b2)
+        elif curve_type == "SRVF" and not adaptive:
+            new_b2 = np.zeros((tg.size, 2))
+            new_b2[:, 0] = np.interp(gammay, tg, b2_orig[:, 0])
+            new_b2[:, 1] = np.interp(gammay, tg, b2_orig[:, 1])
+            new_b1 = b1_orig
+            energy = shapedist.find_shape_distance_SRVF(tg, new_b1, new_b2)
 
-        return tg, gammay, energy
+        return tg, gammay, energy, original, boolean_mask
 
 
 @jit(float64(float64[:], float64[:], float64[:]), cache=True, nopython=True)
@@ -72,3 +88,49 @@ def find_error(tg, gammar, gammat):
         k = k + 1
     error = error ** (1/2)
     return error
+
+
+@jit(float64(float64[:], float64[:], float64[:]), cache=True, nopython=True)
+def inner_product(t, p, q):
+    i = 0
+    result = 0
+    while i < p.size-1:
+        result = result + (p[i] * q[i] + p[i+1] * q[i+1]) / 2 * (t[i+1] - t[i])
+        i = i + 1
+    return result
+
+
+@jit(float64(float64[:], float64[:], float64[:]), cache=True, nopython=True)
+def find_shape_distance(t, p, q):
+    p_q = inner_product(t, p, q)
+    p_p = inner_product(t, p, p)
+    q_q = inner_product(t, q, q)
+    temp = p_q / (p_p**0.5 * q_q ** 0.5)
+    if temp > 1:
+        temp = 1
+    return np.arccos(temp) / pi
+
+
+@jit(float64(float64[:], float64[:, :], float64[:, :]), cache=True, nopython=True)
+def inner_product_2D(t, p, q):
+    i = 0
+    result = 0
+
+    while i < p.shape[0]-1:
+        val1 = p[i][0] * q[i][0] + p[i][1] * q[i][1]
+        val2 = p[i+1][0] * q[i+1][0] + p[i+1][1] *q[i+1][1]
+        result = result + (val1 + val2) / 2 * (t[i+1] - t[i])
+        i = i + 1
+    return result
+
+
+@jit(float64(float64[:], float64[:, :], float64[:, :]), cache=True, nopython=True)
+def find_shape_distance_SRVF(t, p, q):
+    p_q = inner_product_2D(t, p, q)
+    p_p = inner_product_2D(t, p, p)
+    q_q = inner_product_2D(t, q, q)
+    temp = p_q / (p_p**0.5 * q_q ** 0.5)
+    if temp > 1:
+        temp = 1
+    return np.arccos(temp) / pi
+

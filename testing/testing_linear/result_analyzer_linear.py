@@ -28,7 +28,8 @@ def analyze(filename):
         counter = counter + 1
     f.close()
 
-analyze("i_raw.txt")
-analyze("b_raw.txt")
-analyze("s_raw.txt")
-analyze("fs_raw.txt")
+
+analyze("sine_raw.txt")
+analyze("steep_raw.txt")
+analyze("bumpy_raw.txt")
+analyze("flatsteep_raw.txt")

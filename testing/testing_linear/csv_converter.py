@@ -25,7 +25,7 @@ def convert(filename):
     f.close()
 
 
-convert("i_result.txt")
-convert("b_result.txt")
-convert("s_result.txt")
-convert("fs_result.txt")
+convert("sine_result.txt")
+convert("steep_result.txt")
+convert("bumpy_result.txt")
+convert("flatsteep_result.txt")

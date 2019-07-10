@@ -48,8 +48,8 @@ def coarsen_curve(t, b1, b2, tol=2e-7, maxiter=5):
     return t, b1, b2
 
 
-def hierarchical_curve_discretization(curves, init_coarsening_tol=2e-5,
-                                      n_levels=3, max_iter=5, hierarchy_factor=2, adaptive=True,
+def hierarchical_curve_discretization(curves, init_coarsening_tol=2e-3,
+                                      n_levels=3, max_iter=5, adaptive=True, hierarchy_factor = 2,
                                       interpolation_method="linear"):
 
     single_curve = len(curves) == 1
@@ -71,47 +71,58 @@ def hierarchical_curve_discretization(curves, init_coarsening_tol=2e-5,
         b2 = b1[0] - b2[0] + b2
     hierarchy = []
     if single_curve:
-        # tol = init_coarsening_tol
-        # count = 0
-        #
-        # t_prev = t.size * 2
-        # hierarchy.append([t, b])
-        # original = [t, b]
-        # while count < n_levels:
-        #     t, b_coarse, b_coarse = coarsen_curve(t, b, b, tol, max_iter)
-        #     if t.size == t_prev:
-        #         break
-        #     elif t.size <= 90:
-        #         hierarchy.append([t, b_coarse])
-        #         break
-        #
-        #     b = b_coarse
-        #     tol = 2 * tol
-        # if len(hierarchy) == 2:
-        #     hierarchy.insert(0, original)
-        # n_levels = len(hierarchy)
-        #
-        # N = hierarchy[0][0].size
-        # boolean_mask = np.zeros([n_levels, N]) < 1
-        #
-        # t = hierarchy[0][0]
-        # for i in range(n_levels - 1):
-        #     t2 = hierarchy[i+1][0]
-        #     boolean_mask[i+1] = np.in1d(t, t2)
-        # for i in range(n_levels):
-        #     boolean_mask[i][-1] = True
-        #     boolean_mask[i][0] = True
-        #
-        # return original, boolean_mask[::-1][:-1], hierarchy[::-1][:-1]
-        pass
+        tol = init_coarsening_tol
+        count = 0
+
+        t_prev = t.size * 2
+        hierarchy.append([t, b])
+        original = [t, b]
+        while count < n_levels:
+            t, b_coarse, b_coarse = coarsen_curve(t, b, b, tol, max_iter)
+            if adaptive:
+                if t.size == t_prev:
+                    break
+                elif t.size <= 90:
+                    hierarchy.append([t, b_coarse])
+                    break
+                elif t.size * 2 < t_prev:
+                    hierarchy.append([t, b_coarse])
+                    t_prev = t.size
+
+            else:
+                if t.size == t_prev:
+                    raise RuntimeError("Curves cannot be coarsened more than " +
+                                       str(count) + " levels with given parameters (given " + str(n_levels)
+                                       + " levels).")
+                elif t.size * 2 < t_prev:
+                    hierarchy.append([t, b_coarse])
+                    count = count + 1
+
+            b = b_coarse
+            tol = 2 * tol
+        if len(hierarchy) == 2:
+            hierarchy.insert(0, original)
+        n_levels = len(hierarchy)
+
+        N = hierarchy[0][0].size
+        boolean_mask = np.zeros([n_levels, N]) < 1
+
+        t = hierarchy[0][0]
+        for i in range(n_levels - 1):
+            t2 = hierarchy[i+1][0]
+            boolean_mask[i+1] = np.in1d(t, t2)
+        for i in range(n_levels):
+            boolean_mask[i][-1] = True
+            boolean_mask[i][0] = True
+
+        return original, boolean_mask[::-1][:-1], hierarchy[::-1][:-1]
     else:
 
         tol = init_coarsening_tol
         t_spacing_tol = 0.0001
 
         b1_combined, b2_combined, t_new = parametrize_curve_pair(b1, b2, t1, t2)
-        print(b1_combined.size)
-        original_length = t_new.size
+
         N = t_new.size
         remove = np.zeros(N, dtype=bool)
         remove[1:N - 1] = (t_new[1:N - 1] - t_new[0:N - 2]) < t_spacing_tol
@@ -121,14 +132,8 @@ def hierarchical_curve_discretization(curves, init_coarsening_tol=2e-5,
 
         original = [t_new, b1_combined, b2_combined]
         hierarchy.append([t_new, b1_combined, b2_combined])
-        t_prev = t_new.size
-        if t_prev > 180:
-            while t_new.size > 300:
-                t_new, b1_combined, b2_combined = coarsen_curve(t_new, b1_combined, b2_combined, tol, max_iter)
-                tol = tol * 2
-
-        hierarchy.append([t_new, b1_combined, b2_combined])
         count = 0
+        t_prev = t_new.size * hierarchy_factor
         while count < n_levels:
             t_new, b1_coarse, b2_coarse = coarsen_curve(t_new, b1_combined, b2_combined, tol, max_iter)
             # b1 = b1_coarse
@@ -138,13 +143,30 @@ def hierarchical_curve_discretization(curves, init_coarsening_tol=2e-5,
             remove[1:N-1] = (t_new[1:N-1] - t_new[0:N-2]) < t_spacing_tol
             b1_coarse = b1_coarse[np.logical_not(remove)]
             b2_coarse = b2_coarse[np.logical_not(remove)]
-            if t_new.size <= 90:
-                hierarchy.append([t_new, b1_coarse, b2_coarse])
-                break
+            if adaptive:
+                if t_new.size == t_prev:
+                    break
+                elif t_new.size <= 90:
+                    hierarchy.append([t_new, b1_coarse, b2_coarse])
+                    break
+                elif t_new.size * hierarchy_factor < t_prev:
+                    hierarchy.append([t_new, b1_coarse, b2_coarse])
+                    t_prev = t_new.size
+
+            else:
+                if t_new.size == t_prev:
+                    raise RuntimeError("Curves cannot be coarsened up to " + str(n_levels) +
+                                       " levels with given parameters, but rather only up to " +
+                                       str(count) + " levels.")
+                elif t_new.size * hierarchy_factor < t_prev:
+                    hierarchy.append([t_new, b1_coarse, b2_coarse])
+                    count = count + 1
             b1_combined = b1_coarse
             b2_combined = b2_coarse
-            tol = 2 * tol
 
+            tol = 2 * tol
+        if len(hierarchy) == 2 and hierarchy[1][0].size != hierarchy[0][0].size:
+            hierarchy.insert(0, original)
         n_levels = len(hierarchy)
         N = hierarchy[0][0].size
         boolean_mask = np.zeros([n_levels, N]) < 1
@@ -156,10 +178,8 @@ def hierarchical_curve_discretization(curves, init_coarsening_tol=2e-5,
         for i in range(n_levels):
             boolean_mask[i][-1] = True
             boolean_mask[i][0] = True
-        if adaptive:
-            return original, boolean_mask[::-1][:-1], hierarchy[::-1][:-1]
-        else:
-            return original, boolean_mask[::-1], hierarchy[::-1][:-1]
+
+        return original, boolean_mask[::-1][:-1], hierarchy[::-1][:-1]
 
 
 def parametrize_curve_pair(b1_in, b2_in, t1, t2):

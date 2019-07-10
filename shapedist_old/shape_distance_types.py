@@ -10,11 +10,11 @@ def calculate_tangent(x, y):
     return tangent
 
 
-def calculate_normals(p, t):
+def calculate_normals(p):
     x = p[:, 0]
     y = p[:, 1]
-    dx_dt = np.gradient(x, t)
-    dy_dt = np.gradient(y, t)
+    dx_dt = np.gradient(x)
+    dy_dt = np.gradient(y)
     velocity = np.array([[dx_dt[i], dy_dt[i]] for i in range(dx_dt.size)])
     ds_dt = np.sqrt(dx_dt * dx_dt + dy_dt * dy_dt)
     tangent = np.array([1 / ds_dt] * 2).transpose() * velocity
@@ -27,25 +27,19 @@ def calculate_normals(p, t):
     dT_dt = np.array([[deriv_tangent_x[i], deriv_tangent_y[i]] for i in range(deriv_tangent_x.size)])
 
     length_dT_dt = np.sqrt(deriv_tangent_x * deriv_tangent_x + deriv_tangent_y * deriv_tangent_y)
-    for i in range(length_dT_dt.shape[0]):
-        if length_dT_dt[i] == 0:
-            length_dT_dt[i] = 1
 
     normal = np.array([1 / length_dT_dt] * 2).transpose() * dT_dt
-
     for i in range(len(normal)):
         if np.cross(tangent[i], normal[i]) > 0:
             normal[i] = -1 * normal[i]
     return normal
 
 
-def calculate_curvature(p, t):
-    x = p[:, 0]
-    y = p[:, 1]
-    dx_dt = np.gradient(x, t)
-    dy_dt = np.gradient(y, t)
-    d2x_dt2 = np.gradient(dx_dt, t)
-    d2y_dt2 = np.gradient(dy_dt, t)
+def calculate_curvature(x, y, closed):
+    dx_dt = np.gradient(x)
+    dy_dt = np.gradient(y)
+    d2x_dt2 = np.gradient(dx_dt)
+    d2y_dt2 = np.gradient(dy_dt)
 
     curvature = np.abs(d2x_dt2 * dy_dt - dx_dt * d2y_dt2) / (dx_dt * dx_dt + dy_dt * dy_dt)**1.5
 
@@ -99,31 +93,7 @@ def calculate_angle_function(x, y):
     return s, theta
 
 
-def calculate_srvf(p, t):
-    x = p[:, 0]
-    y = p[:, 1]
-    dx_dt = np.gradient(x, t)
-    dy_dt = np.gradient(y, t)
-    result = np.zeros((x.size, 2), dtype=np.float64)
-    mag = (dx_dt ** 2 + dy_dt ** 2) ** 0.25
-    result[:, 0] = dx_dt / mag
-    result[:, 1] = dy_dt / mag
-
-    return result
-
-
-def calculate_com(p):
-    x = p[:, 0]
-    y = p[:, 1]
-    i = 1
-    h_i = 0
-    h_i_1 = 0
-    com_x = 0
-    com_y = 0
-    while i < x.size - 1:
-        h_i = ((x[i] - x[i+1])**2 + (y[i] - y[i+1])**2)**0.5
-        h_i_1 = ((x[i+1] - x[i]) ** 2 + (y[i+1] - y[i]) ** 2) ** 0.5
-        com_x = com_x + (h_i + h_i_1) / 2 * x[i]
-        com_y = com_y + (h_i + h_i_1) / 2 * y[i]
-        i = i + 1
-    return np.array([com_x, com_y])
+def calculate_srvf(x, y):
+    dx_dt = np.gradient(x)
+    dy_dt = np.gradient(y)
+    return dx_dt / np.sqrt(np.linalg.norm(dx_dt)), dy_dt / np.sqrt(np.linalg.norm(dy_dt))
