@@ -6,9 +6,10 @@ from numba import jit, float64, int16, generated_jit
 import shapedist.elastic_n_2
 from math import floor, pi
 import matplotlib.pyplot as plt
+from line_profiler import LineProfiler
 
 
-@jit([float64(float64, float64[:], float64[:], int16, int16)], cache=True, nopython=True)
+@jit([float64(float64, float64[:], float64[:], int16, int16)], cache=True, nopython=True, fastmath=True)
 def interp(t, x, y, lower, upper):
     i = 0
     while lower < upper:
@@ -33,14 +34,21 @@ def interp(t, x, y, lower, upper):
 def integrate_1D(tp, tq, py, qy, k, i, l, j, gamma_interval, energy_dot):
     e = 0
     a = k
+    gammak_1 = gamma_interval * l + (tp[a] - tp[k]) * \
+               (gamma_interval * j - gamma_interval * l) / (tp[i] - tp[k])
+    gammak_2 = gamma_interval * l + (tp[a + 1] - tp[k]) * (gamma_interval * j - gamma_interval * l) \
+               / (tp[i] - tp[k])
+    e = e + (0.5 * (py[a] - interp(gammak_1, tq, qy, 0, tq.size)) ** 2
+             + 0.5 * (py[(a + 1)] - interp(gammak_2, tq, qy, 0, tq.size)) ** 2) * \
+        (tp[a + 1] - tp[a]) * 0.5
+    a = a + 1
     while a < i:
-        gammak_1 = gamma_interval * l + (tp[a] - tp[k]) * \
-                                        (gamma_interval * j - gamma_interval * l) / (tp[i] - tp[k])
         gammak_2 = gamma_interval * l + (tp[a+1] - tp[k]) * (gamma_interval * j - gamma_interval * l) \
                                         / (tp[i] - tp[k])
         e = e + (0.5 * (py[a] - interp(gammak_1, tq, qy, 0, tq.size)) ** 2
                          + 0.5 * (py[(a+1)] - interp(gammak_2, tq, qy, 0, tq.size)) ** 2) * \
                 (tp[a+1] - tp[a]) * 0.5
+        gammak_1 = gammak_2
         a = a + 1
     return e
 
@@ -77,7 +85,7 @@ def integrate_2D(tp, tq, py, qy, k, i, l, j, gamma_interval, energy_dot):
     return e
 
 
-@generated_jit(nopython=True)
+@generated_jit(nopython=True, cache=True, fastmath=True)
 def integrate(tp, tq, py, qy, k, i, l, j, gamma_interval, energy_dot):
     if py.ndim == 1:
         return integrate_1D
@@ -85,7 +93,18 @@ def integrate(tp, tq, py, qy, k, i, l, j, gamma_interval, energy_dot):
         return integrate_2D
 
 
-@jit(cache=True, nopython=True)
+@jit(nopython=True, cache=True, fastmath=True)
+def running_mean(x, N):
+    ret = np.zeros(x.size)
+    for i in range(ret.size):
+        back = i - N if (i - N) >=0 else 0
+        front = i + N if (i + N) < ret.size else ret.size-1
+        ret[i] = np.sum(x[back:front]) / (front - back)
+
+    return ret
+
+
+@jit(cache=True, nopython=True, fastmath=True)
 def find_gamma(t, p, q, parametrization_array, energy_dot, gamma_tol):
     # Initialize variables
     tp = t
@@ -108,7 +127,6 @@ def find_gamma(t, p, q, parametrization_array, energy_dot, gamma_tol):
         if parametrization_array[1][i]:
             parametrization_size = parametrization_size + 1
         i = i + 1
-    strip_height = 10
     n = tp.size
     path = np.zeros(parametrization_size, dtype=np.float64)
     tg = np.linspace(0., 1., n).astype(np.float64)
@@ -119,7 +137,8 @@ def find_gamma(t, p, q, parametrization_array, energy_dot, gamma_tol):
     py_temp = py[parametrization_array[1]]
     tq_temp = tq[parametrization_array[1]]
     qy_temp = qy[parametrization_array[1]]
-    # Initial N^2 path
+
+    # Find coarsest solution
     current_iteration = 0
     gamma_domain, gamma_range, energy = shapedist.elastic_n_2.find_gamma(
         tp[parametrization_array[0]], py[parametrization_array[0]],
@@ -128,191 +147,121 @@ def find_gamma(t, p, q, parametrization_array, energy_dot, gamma_tol):
 
     count = 0
     i = 0
-    boundary_check = False
+    cont = True
     previous_path = np.zeros(parametrization_size, dtype=np.float64)
     while i < parametrization_size:
         previous_path[i] = interp(temp_domain_gamma[i], gamma_domain, gamma_range, 0, previous_n)
         i = i + 1
-    # Create adaptive neighborhood and strip sizes
-    upper_bound_temp = np.zeros((parametrization_size, 2), dtype=np.float64)
-    lower_bound_temp = np.zeros((parametrization_size, 2), dtype=np.float64)
-    upper_bound = np.zeros(parametrization_size, dtype=np.float64)
-    lower_bound = np.zeros(parametrization_size, dtype=np.float64)
+
     neighborhood_array = np.zeros((parametrization_size, 2), dtype=np.int16)
-    derivative_array = np.zeros(parametrization_size, dtype=np.float64)
-    derivative_array[0] = 1
-    derivative_array[1:] = (previous_path[1:] - previous_path[:-1]) / (temp_domain_gamma[1:] - temp_domain_gamma[:-1])
-    i = 0
-    while i < parametrization_size:
-        if derivative_array[i] < 1:
-            neighborhood_array[i][0] = floor(1/derivative_array[i])
-        else:
-            neighborhood_array[i][1] = floor(derivative_array[i])
-        i = i + 1
-    neighborhood_array = neighborhood_array + 4
-    theta = np.pi/6
+    neighborhood_array = neighborhood_array + 8
+    gamma_interval = 1 /(parametrization_size-1)
+    strip_height = 16
+    upper_bound, lower_bound = calculate_search_area(temp_domain_gamma,
+                                                     temp_domain_gamma, previous_path, strip_height, parametrization_size)
 
-    rotation_matrix = np.array(((np.cos(theta), -np.sin(theta)), (np.sin(theta), np.cos(theta))))
-    unit_up = np.zeros(2, np.float64)
-    unit_up[1] = 1
-    upper_bound_temp[:, 0] = temp_domain_gamma
-    upper_bound_temp[:, 1] = previous_path
-    lower_bound_temp[:, 0] = temp_domain_gamma
-    lower_bound_temp[:, 1] = previous_path
-    gamma_interval = 1/ (parametrization_size-1)
-    upper_bound_temp = upper_bound_temp + (rotation_matrix @ unit_up) * strip_height / parametrization_size
-    lower_bound_temp = lower_bound_temp - (rotation_matrix @ unit_up) * strip_height / parametrization_size
-    i = 0
-    while i < parametrization_size:
-        if temp_domain_gamma[i] > upper_bound_temp[-1, 0]:
-            upper_bound[i] = 1.1
-        else:
-            upper_bound[i] = interp(temp_domain_gamma[i], upper_bound_temp[:, 0], upper_bound_temp[:, 1],
-                                    0, parametrization_size)
+    # Iteratively find the medium coarse solution
+    while cont:
 
-        i = i + 1
-
-    i = 0
-    while i < parametrization_size:
-        if temp_domain_gamma[i] < lower_bound_temp[0, 0]:
-            lower_bound[i] = -0.1
-        else:
-            lower_bound[i] = interp(temp_domain_gamma[i], lower_bound_temp[:, 0], lower_bound_temp[:, 1],
-                                    0, parametrization_size)
-        i = i + 1
-    while not boundary_check:
         path, shape_energy = iteration(tp_temp, tq_temp, py_temp, qy_temp, temp_domain_gamma, upper_bound, lower_bound,
               neighborhood_array, parametrization_size, energy_dot)
-        # Compare n_2 and linear gammas
-        i = 0
-        gamma_difference = 0
-        n = temp_domain_gamma.size
-        while i < n-1:
-            prev_gamma_value_1 = previous_path[i]
-            prev_gamma_value_2 = previous_path[i + 1]
 
-            gamma_difference = gamma_difference + ((prev_gamma_value_1 - path[i]) ** 2 +
-                                                   (prev_gamma_value_2 - path[i+1]) ** 2) / 2 \
-                * (temp_domain_gamma[i + 1] - temp_domain_gamma[i])
-
-            i = i + 1
-        # if gamma_difference < 0.00001:
-        #     break
-        boundary_check_outside = (path[:-1] < upper_bound[:-1]).all() and (path[1:] > lower_bound[1:]).all()
-        boundary_check_pushing = (np.abs((upper_bound[:-1] - path[:-1])) >= gamma_interval/2).all() and \
-                                 (np.abs((lower_bound[1:] - path[1:])) >= gamma_interval/2).all()
+        outside_boundary = (path[:-1] > upper_bound[:-1]).any() or (path[1:] < lower_bound[1:]).any()
+        pushing_boundary = (np.abs((upper_bound[:-1] - path[:-1])) < gamma_interval).any() or \
+                                 (np.abs((lower_bound[1:] - path[1:])) < gamma_interval).any()
+        # print(outside_boundary, pushing_boundary)
         if count >= 4:
             raise RuntimeWarning("Solution could not converge after 4 iterations.")
-        boundary_check = boundary_check_pushing and boundary_check_outside
-        if count >=4:
-            boundary_check = True
+        cont = pushing_boundary or outside_boundary
+        # print(pushing_boundary, outside_boundary)
+        # plt.plot(temp_domain_gamma, path, ".-r")
+        # plt.plot(temp_domain_gamma, upper_bound, "-y")
+        # plt.plot(temp_domain_gamma, lower_bound, "-y")
+        # plt.show()
         count = count + 1
 
         # print(count)
-        if not boundary_check_outside:
-            neighborhood_array = neighborhood_array + 4
-        elif not boundary_check_pushing:
-            theta = theta + np.pi/6
+        if pushing_boundary:
+            upper_bound, lower_bound = calculate_search_area(temp_domain_gamma,
+                                                             temp_domain_gamma, path, strip_height,
+                                                             parametrization_size)
             strip_height = strip_height + 4
-            previous_path = np.copy(path)
 
-            upper_bound_temp[:, 0] = temp_domain_gamma
-            upper_bound_temp[:, 1] = previous_path
-            lower_bound_temp[:, 0] = temp_domain_gamma
-            lower_bound_temp[:, 1] = previous_path
-
-            upper_bound_temp = upper_bound_temp + (rotation_matrix @ unit_up) * strip_height / parametrization_size
-            lower_bound_temp = lower_bound_temp - (rotation_matrix @ unit_up) * strip_height / parametrization_size
-            i = 0
-            while i < parametrization_size:
-                if temp_domain_gamma[i] > upper_bound_temp[-1, 0]:
-                    upper_bound[i] = 1.1
-                else:
-                    upper_bound[i] = interp(temp_domain_gamma[i], upper_bound_temp[:, 0], upper_bound_temp[:, 1],
-                                            0, parametrization_size)
-
-                i = i + 1
-
-            i = 0
-            while i < parametrization_size:
-                if temp_domain_gamma[i] < lower_bound_temp[0, 0]:
-                    lower_bound[i] = -0.1
-                else:
-                    lower_bound[i] = interp(temp_domain_gamma[i], lower_bound_temp[:, 0], lower_bound_temp[:, 1],
-                                            0, parametrization_size)
-                i = i + 1
+    # Calculate super fine solution, if needed
     previous_n = parametrization_size
     if parametrization_array.shape[0] == 2:
         current_iteration = 1
     elif parametrization_array.shape[0] == 3:
-        strip_height = 4
+
+        strip_height = 8
         current_iteration = 2
         domain_gamma = tg[parametrization_array[2]]
+
         tp_temp = tp[parametrization_array[2]]
         py_temp = py[parametrization_array[2]]
         tq_temp = tq[parametrization_array[2]]
         qy_temp = qy[parametrization_array[2]]
         parametrization_size = tp_temp.size
+        neighborhood_array_final = np.zeros((parametrization_size, 2), dtype=np.int64)
+        neighborhood_array_final = neighborhood_array_final + 8
         previous_path = np.zeros(parametrization_size, dtype=np.float64)
         i = 0
+
         while i < parametrization_size:
             previous_path[i] = interp(domain_gamma[i], temp_domain_gamma, path, 0, previous_n)
             i = i + 1
 
-        # Create adaptive neighborhood and strip sizes
-        upper_bound_temp = np.zeros((parametrization_size, 2), dtype=np.float64)
-        lower_bound_temp = np.zeros((parametrization_size, 2), dtype=np.float64)
-        upper_bound = np.zeros(parametrization_size, dtype=np.float64)
-        lower_bound = np.zeros(parametrization_size, dtype=np.float64)
-        neighborhood_array = np.zeros((parametrization_size, 2), dtype=np.int64)
-        derivative_array = np.zeros(parametrization_size, dtype=np.float64)
-        derivative_array[0] = 1
-        derivative_array[1:] = (previous_path[1:] - previous_path[:-1]) / (
-                domain_gamma[1:] - domain_gamma[:-1])
-        i = 0
-        while i < parametrization_size:
-            if derivative_array[i] < 1:
-                neighborhood_array[i][0] = floor(1 / derivative_array[i])
-            else:
-                neighborhood_array[i][1] = floor(derivative_array[i])
-            i = i + 1
-        neighborhood_array = neighborhood_array + 4
-        theta = np.pi / 6
+        upper_bound, lower_bound = calculate_search_area(domain_gamma, domain_gamma,
+                                                         previous_path, strip_height, parametrization_size)
 
-        rotation_matrix = np.array(((np.cos(theta), -np.sin(theta)), (np.sin(theta), np.cos(theta))))
-        unit_up = np.zeros(2, np.float64)
-        unit_up[1] = 1
-        upper_bound_temp[:, 0] = domain_gamma
-        upper_bound_temp[:, 1] = previous_path
-        lower_bound_temp[:, 0] = domain_gamma
-        lower_bound_temp[:, 1] = previous_path
-        gamma_interval = 1 / (parametrization_size - 1)
-        upper_bound_temp = upper_bound_temp + (rotation_matrix @ unit_up) * strip_height / parametrization_size
-        lower_bound_temp = lower_bound_temp - (rotation_matrix @ unit_up) * strip_height / parametrization_size
-        i = 0
-        while i < parametrization_size:
-            if domain_gamma[i] > upper_bound_temp[-1, 0]:
-                upper_bound[i] = 1.1
-            else:
-                upper_bound[i] = interp(domain_gamma[i], upper_bound_temp[:, 0], upper_bound_temp[:, 1],
-                                        0, parametrization_size)
-
-            i = i + 1
-
-        i = 0
-        while i < parametrization_size:
-            if domain_gamma[i] < lower_bound_temp[0, 0]:
-                lower_bound[i] = -0.1
-            else:
-                lower_bound[i] = interp(domain_gamma[i], lower_bound_temp[:, 0], lower_bound_temp[:, 1],
-                                        0, parametrization_size)
-            i = i + 1
         path, shape_energy = iteration(tp_temp, tq_temp, py_temp, qy_temp, domain_gamma, upper_bound, lower_bound,
-                                       neighborhood_array, parametrization_size, energy_dot)
+                                       neighborhood_array_final, parametrization_size, energy_dot)
+
     return tg[parametrization_array[current_iteration]], path, shape_energy
 
 
-@jit(cache=True, nopython=True)
+@jit(cache=True, nopython=True, fastmath=True)
+def calculate_search_area(new_domain, prev_domain, prev_path, strip_height, parametrization_size):
+
+    upper_bound_temp = np.zeros((prev_domain.size, 2), dtype=np.float64)
+    lower_bound_temp = np.zeros((prev_domain.size, 2), dtype=np.float64)
+    upper_bound_temp[:, 0] = prev_domain
+    upper_bound_temp[:, 1] = prev_path
+    lower_bound_temp[:, 0] = prev_domain
+    lower_bound_temp[:, 1] = prev_path
+    theta = pi/6
+    rotation_matrix = np.array(((np.cos(theta), -np.sin(theta)), (np.sin(theta), np.cos(theta))))
+    unit_up = np.zeros(2, np.float64)
+    unit_up[1] = 1
+
+    upper_bound_temp = upper_bound_temp + (rotation_matrix @ unit_up) * strip_height / parametrization_size
+    lower_bound_temp = lower_bound_temp - (rotation_matrix @ unit_up) * strip_height / parametrization_size
+
+    upper_bound = np.zeros(parametrization_size, dtype=np.float64)
+    lower_bound = np.zeros(parametrization_size, dtype=np.float64)
+
+    for i in range(parametrization_size):
+        if new_domain[i] > upper_bound_temp[-1, 0]:
+            upper_bound[i] = 1.1
+        else:
+            upper_bound[i] = interp(new_domain[i], upper_bound_temp[:, 0], upper_bound_temp[:, 1], 0, parametrization_size)
+    for i in range(parametrization_size):
+        if new_domain[i] < lower_bound_temp[0, 0]:
+            lower_bound[i] = -0.1
+        else:
+            lower_bound[i] = interp(new_domain[i], lower_bound_temp[:, 0], lower_bound_temp[:, 1], 0, parametrization_size)
+
+    upper_bound = running_mean(upper_bound, 6)
+    lower_bound = running_mean(lower_bound, 6)
+    #
+
+    # return prev_path_interp + (rotation_matrix @ unit_up) * strip_height / parametrization_size,\
+    #        prev_path_interp - (rotation_matrix @ unit_up) * strip_height / parametrization_size
+
+    return upper_bound, lower_bound
+
+
+@jit(cache=True, nopython=True, fastmath=True)
 def iteration(tp_temp, tq_temp, py_temp, qy_temp, temp_domain_gamma, upper_bound, lower_bound,
               neighborhood_array, parametrization_size, energy_dot):
     # Linear Iteration
@@ -364,12 +313,12 @@ def iteration(tp_temp, tq_temp, py_temp, qy_temp, temp_domain_gamma, upper_bound
                         minimum = e
                         path_nodes[i][j][0] = k
                         path_nodes[i][j][1] = l
+
                     l = l + 1
                 k = k + 1
             min_energy_values[i][j] = minimum
             j = j + 1
         i = i + 1
-
     # !!
     i = n - 1
     j = m - 1

@@ -5,7 +5,7 @@ import numpy as np
 from numba import jit, types, float64, int16, generated_jit
 
 
-@jit([float64(float64, float64[:], float64[:], int16, int16)], cache=True, nopython=True)
+@jit([float64(float64, float64[:], float64[:], int16, int16)], cache=False, nopython=True)
 def interp(t, x, y, lower, upper):
     i = 0
     while lower < upper:
@@ -72,7 +72,7 @@ def integrate_2D(tp, tq, py, qy, gamma, k, i, l, j, energy_dot):
     return e
 
 
-@generated_jit(cache=True, nopython=True)
+@generated_jit(cache=False, nopython=True)
 def integrate(tp, tq, py, qy, gamma, k, i, l, j, energy_dot):
     if py.ndim == 1:
         return integrate_1D
@@ -80,7 +80,7 @@ def integrate(tp, tq, py, qy, gamma, k, i, l, j, energy_dot):
         return integrate_2D
 
 
-@jit(cache=True, nopython=True)
+@jit(cache=False, nopython=True)
 def find_gamma(t, p, q, tg, gamma, width1, width2, energy_dot):
     tp = t
     tq = t

@@ -110,7 +110,7 @@ def hierarchical_curve_discretization(curves, init_coarsening_tol=2e-5,
         t_spacing_tol = 0.0001
 
         b1_combined, b2_combined, t_new = parametrize_curve_pair(b1, b2, t1, t2)
-        print(b1_combined.size)
+
         original_length = t_new.size
         N = t_new.size
         remove = np.zeros(N, dtype=bool)

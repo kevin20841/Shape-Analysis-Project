@@ -113,17 +113,25 @@ def calculate_srvf(p, t):
 
 
 def calculate_com(p):
-    x = p[:, 0]
-    y = p[:, 1]
+    com = np.zeros(p.shape[1])
     i = 1
-    h_i = 0
-    h_i_1 = 0
-    com_x = 0
-    com_y = 0
-    while i < x.size - 1:
-        h_i = ((x[i] - x[i+1])**2 + (y[i] - y[i+1])**2)**0.5
-        h_i_1 = ((x[i+1] - x[i]) ** 2 + (y[i+1] - y[i]) ** 2) ** 0.5
-        com_x = com_x + (h_i + h_i_1) / 2 * x[i]
-        com_y = com_y + (h_i + h_i_1) / 2 * y[i]
+    while i < p.shape[1] - 1:
+        h1 = np.sum(np.power(p[i] - p[i-1], 2))**0.5
+        h2 = np.sum(np.power(p[i+1] - p[i], 2))**0.5
+        com = com + (h1 + h2) / 5 *p[i]
         i = i + 1
-    return np.array([com_x, com_y])
+    return com
+    # x = p[:, 0]
+    # y = p[:, 1]
+    # i = 1
+    # h_i = 0
+    # h_i_1 = 0
+    # com_x = 0
+    # com_y = 0
+    # while i < x.size - 1:
+    #     h_i = ((x[i] - x[i+1])**2 + (y[i] - y[i+1])**2)**0.5
+    #     h_i_1 = ((x[i+1] - x[i]) ** 2 + (y[i+1] - y[i]) ** 2) ** 0.5
+    #     com_x = com_x + (h_i + h_i_1) / 2 * x[i]
+    #     com_y = com_y + (h_i + h_i_1) / 2 * y[i]
+    #     i = i + 1
+    # return np.array([com_x, com_y])

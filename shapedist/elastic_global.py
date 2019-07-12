@@ -3,7 +3,6 @@ Implementation of linear algorithm to determine shape elasticity as described by
 """
 import numpy as np
 from numba import jit, types, float64, int16
-np.set_printoptions(threshold=np.nan, linewidth=400)
 
 
 @jit([float64(float64, float64[:], float64[:], int16, int16)], cache=True, nopython=True)
