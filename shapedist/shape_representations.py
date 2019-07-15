@@ -1,7 +1,13 @@
 import numpy as np
 
 
-def calculate_tangent(x, y):
+def coords(p):
+    return p
+
+
+def tangent(p):
+    x = p[0, :]
+    y = p[1, :]
     dx_dt = np.gradient(x)
     dy_dt = np.gradient(y)
     velocity = np.array([[dx_dt[i], dy_dt[i]] for i in range(dx_dt.size)])
@@ -10,7 +16,7 @@ def calculate_tangent(x, y):
     return tangent
 
 
-def calculate_normals(p, t):
+def normals(p, t):
     x = p[:, 0]
     y = p[:, 1]
     dx_dt = np.gradient(x, t)
@@ -39,7 +45,7 @@ def calculate_normals(p, t):
     return normal
 
 
-def calculate_curvature(p, t):
+def curvature(p, t):
     x = p[:, 0]
     y = p[:, 1]
     dx_dt = np.gradient(x, t)
@@ -52,10 +58,10 @@ def calculate_curvature(p, t):
     return curvature
 
 
-def calculate_angle_function(x, y):
+def angle_function(p):
+    x = p[:, 0]
+    y = p[:, 1]
     i = 1
-    h_i = 0
-    h_i_1 = 0
     com_x = 0
     com_y = 0
     curve_length = 0
@@ -99,7 +105,7 @@ def calculate_angle_function(x, y):
     return s, theta
 
 
-def calculate_srvf(p, t):
+def srvf(p, t):
     x = p[:, 0]
     y = p[:, 1]
     dx_dt = np.gradient(x, t)
@@ -121,17 +127,3 @@ def calculate_com(p):
         com = com + (h1 + h2) / 5 *p[i]
         i = i + 1
     return com
-    # x = p[:, 0]
-    # y = p[:, 1]
-    # i = 1
-    # h_i = 0
-    # h_i_1 = 0
-    # com_x = 0
-    # com_y = 0
-    # while i < x.size - 1:
-    #     h_i = ((x[i] - x[i+1])**2 + (y[i] - y[i+1])**2)**0.5
-    #     h_i_1 = ((x[i+1] - x[i]) ** 2 + (y[i+1] - y[i]) ** 2) ** 0.5
-    #     com_x = com_x + (h_i + h_i_1) / 2 * x[i]
-    #     com_y = com_y + (h_i + h_i_1) / 2 * y[i]
-    #     i = i + 1
-    # return np.array([com_x, com_y])

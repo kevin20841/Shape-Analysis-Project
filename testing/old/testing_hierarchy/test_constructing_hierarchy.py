@@ -6,7 +6,7 @@ leaf2 = np.loadtxt("leaf2.txt", dtype=np.float64)
 
 # print(test_curvature(leaf1))
 # print(curvature(leaf1))
-tg, gammay, energy, original, boolean_mask = shapedist.elastic_matcher(leaf1, leaf2, 2, curve_type="SRVF", adaptive=False)
+tg, gammay, energy, original, boolean_mask = shapedist.find_shapedist(leaf1, leaf2, 2, curve_type="SRVF", adaptive=False)
 
 leaf1 = original[1][boolean_mask[1]]
 leaf2 = original[2]

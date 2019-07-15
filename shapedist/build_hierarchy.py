@@ -1,36 +1,34 @@
 import numpy as np
-import shapedist.shape_distance_types
+import shapedist.shape_representations
 
 
-def hierarchical_curve_discretization(p, q, t1=None, t2=None, init_coarsening_tol=2e-6, n_levels=5,
-                                      max_iter=3, adaptive=True,
-                                      interpolation_method="linear", curve_type="coord"):
+def hierarchical_curve_discretization(p, q, t1, t2, init_coarsening_tol, uniform):
 
     # Curves should be an array of coordinates
 
-    # Normalize curve to center of mass
-    N = p.shape[0]
-    # arclen_1 = np.sum((p[1:N, :] - p[0:N - 1, :]) ** 2, 1) ** 0.5
-    # arclen_1 = np.sum(arclen_1)
-    # p = (p - shapedist.shape_distance_types.calculate_com(p)) / arclen_1
-    #
-    # N = q.shape[0]
-    # arclen_2 = np.sum(np.sum((q[1:N, :] - q[0:N - 1, :]) ** 2, 1) ** 0.5)
-    # arclen_2 = np.sum(arclen_2)
-    # q = (q - shapedist.shape_distance_types.calculate_com(q)) / arclen_2
-    t, p, q = parametrize_curve_pair(p, q, t1, t2, init_coarsening_tol, interpolation_method=interpolation_method)
+    t, p, q = parametrize_curve_pair(p, q, t1, t2, init_coarsening_tol)
     # TODO Coarsen Curves (for now it just gets a boolean mask that doubles in size)
+    if uniform:
+        boolean_mask = get_uniform_mask(p.shape[0])
+    else:
+        boolean_mask = get_adaptive_mask()
+    return [t, p, q], boolean_mask
 
-    boolean_mask = np.zeros((3, p.shape[0]), dtype=np.bool)
-    N = p.shape[0]
-    level_numbers = [60, 200, N]
+
+def get_adaptive_mask():
+    return None
+
+
+def get_uniform_mask(n):
+    boolean_mask = np.zeros((3, n), dtype=np.bool)
+    level_numbers = [60, 200, n]
     for j in range(3):
         for i in range(level_numbers[j]):
-            step_size = np.int(np.ceil(p.shape[0] / level_numbers[j]))
-            if i * step_size < p.shape[0]:
+            step_size = np.int(np.ceil(n / level_numbers[j]))
+            if i * step_size < n:
                 boolean_mask[j][i * step_size] = True
         boolean_mask[j][-1] = True
-    return [t, p, q], boolean_mask
+    return boolean_mask
 
 
 def arclen_fct_values(b):
@@ -119,16 +117,16 @@ def coarsen_curve(t, b1, b2, tol=2e-3, maxiter=5):
     return t, b1, b2
 
 
-def parametrize_curve_pair(p, q, t1, t2, t_spacing_tol, interpolation_method='linear'):
+def parametrize_curve_pair(p, q, t1, t2, t_spacing_tol):
     if t1 is None and t2 is None:
         t1 = arclen_fct_values(p)
         t2 = arclen_fct_values(q)
     t = np.union1d(t1, t2)
     N = t.shape[0]
-    # remove = np.zeros(N, dtype=bool)
-    # remove[1:N - 1] = (t[1:N - 1] - t[0:N - 2]) < t_spacing_tol
-    # t = t[np.logical_not(remove)]
-    # print(remove)
+    remove = np.zeros(N, dtype=bool)
+    remove[1:N - 1] = (t[1:N - 1] - t[0:N - 2]) < t_spacing_tol
+    t = t[np.logical_not(remove)]
+
     dim = p.shape[1]
     ip = np.zeros((t.shape[0], dim))
     iq = np.zeros((t.shape[0], dim))

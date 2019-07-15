@@ -1,5 +1,5 @@
 import numpy as np
-import shapedist.shape_distance_types
+import shapedist.shape_representations
 
 
 def arclen_fct_values(b):
@@ -104,11 +104,11 @@ def hierarchical_curve_discretization(curves, t1=None, t2=None, init_coarsening_
         N = b1[:, 0].size
         arclen_1 = np.sum((b1[1:N, :] - b1[0:N-1, :])**2, 1)**0.5
         arclen_1 = np.sum(arclen_1)
-        b1 = (b1 - shapedist.shape_distance_types.calculate_com(b1)) / arclen_1
+        b1 = (b1 - shapedist.shape_representations.calculate_com(b1)) / arclen_1
         N = b2[:, 0].size
         arclen_2 = np.sum(np.sum((b2[1:N, :] - b2[0:N - 1, :]) ** 2, 1) ** 0.5)
         arclen_2 = np.sum(arclen_2)
-        b2 = (b2 - shapedist.shape_distance_types.calculate_com(b2)) / arclen_2
+        b2 = (b2 - shapedist.shape_representations.calculate_com(b2)) / arclen_2
 
         # b1[:, 0] = (b1[:, 0] - np.min(b1[:, 0])) / np.max(b1[:, 0] - np.min(b1[:, 0]))
         # b1[:, 1] = (b1[:, 1] - np.min(b1[:, 1])) / np.max(b1[:, 1] - np.min(b1[:, 1]))
@@ -199,11 +199,11 @@ def hierarchical_curve_discretization(curves, t1=None, t2=None, init_coarsening_
             original[2] = curvature(original[2])
             # original[2] = (original[2] - np.min(original[2])) / np.max(original[2] - np.min(original[2]))
         elif curve_type == "normals":
-            original[1] = shapedist.shape_distance_types.calculate_normals(original[1], original[0])
-            original[2] = shapedist.shape_distance_types.calculate_normals(original[2], original[0])
+            original[1] = shapedist.shape_representations.normals(original[1], original[0])
+            original[2] = shapedist.shape_representations.normals(original[2], original[0])
         elif curve_type == "SRVF":
-            original[1] = shapedist.shape_distance_types.calculate_srvf(original[1], original[0])
-            original[2] = shapedist.shape_distance_types.calculate_srvf(original[2], original[0])
+            original[1] = shapedist.shape_representations.srvf(original[1], original[0])
+            original[2] = shapedist.shape_representations.srvf(original[2], original[0])
         if adaptive:
             return original, boolean_mask[::-1][:-1], hierarchy[::-1][:-1]
         else:

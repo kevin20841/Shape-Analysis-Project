@@ -1,6 +1,6 @@
 print("Loading.....")
 import sys
-sys.path.append("../shapedist")
+sys.path.append("./shapedist")
 import matplotlib.pyplot as plt
 import scipy.interpolate
 import shapedist
@@ -10,36 +10,26 @@ import cProfile
 import pstats
 from io import StringIO
 
+
 # One example shapdist compuation for gamma
 n = 1000  # number of points in domain
 
 t = np.linspace(0., 1., n)
-gamma_sol = ex.gamma_example("sine")[0](t)
-q = ex.curve_example("bumps", t)[0][0]
+gamma_sol = ex.gamma_example("bumpy")[0](t)
+q = ex.curve_example("bumps", t)[0]
 p = np.zeros(q.shape)
 
-inter_func1 = scipy.interpolate.CubicSpline(t, q)
-
-p = inter_func1(gamma_sol)
-
-print(p.shape)
-print(q.shape)
-p_new, q_new, tg, gammay, energy= shapedist.elastic_matcher(p, q, t1=t, t2=t)
-
-cProfile.runctx('p, q, tg, gammay, energy= shapedist.elastic_matcher(p.T, q.T, t1=t, t2=t)',
-                globals(),
-                locals(), filename="statsfile")
-stream = StringIO()
-stats = pstats.Stats('statsfile', stream=stream).sort_stats("cumulative")
-stats.print_stats()
-print(stream.getvalue())
+inter_func1 = scipy.interpolate.CubicSpline(t, q[0])
+inter_func2 = scipy.interpolate.CubicSpline(t, q[1])
+p[0] = inter_func1(gamma_sol)
+p[1] = inter_func2(gamma_sol)
+print(shapedist.tangent(p))
+energy, p_new, q_new, tg, gammay = shapedist.find_shapedist(p.T, q.T, 'ud', shape_rep=shapedist.coords, t1=t, t2=t)
+plt.plot(tg, gammay)
+plt.show()
 #
 # # get a gamma_sol who's domain matches the returned hierarchical domain
 #
-plt.figure()
-plt.plot(t, gamma_sol, ".-b")
-plt.plot(tg, gammay, ".-r")
-plt.show()
 
 
 

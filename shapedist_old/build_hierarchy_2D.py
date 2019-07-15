@@ -1,5 +1,5 @@
 import numpy as np
-import shapedist.shape_distance_types
+import shapedist.shape_representations
 
 
 def arclen_fct_values(b):
@@ -188,8 +188,8 @@ def hierarchical_curve_discretization(curves, init_coarsening_tol=2e-3, n_levels
             original[2] = curvature(original[2])
             original[2] = (original[2] - np.min(original[2])) / np.max(original[2] - np.min(original[2]))
         elif curve_type == "normals":
-            original[1] = shapedist.shape_distance_types.calculate_normals(original[1])
-            original[2] = shapedist.shape_distance_types.calculate_normals(original[2])
+            original[1] = shapedist.shape_representations.normals(original[1])
+            original[2] = shapedist.shape_representations.normals(original[2])
 
         return original, boolean_mask[::-1][:-1], hierarchy[::-1][:-1]
 
