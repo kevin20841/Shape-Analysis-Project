@@ -29,6 +29,28 @@ def interp(t, x, y, lower, upper):
     return temp, i
 
 
+# def integrate_1D(tp, tq, py, qy, k, i, l, j, gamma_interval, energy_dot):
+#     a = k
+#     gamma = np.empty(i - k, dtype=np.float64)
+#     gamma[0] = gamma_interval * l + (tp[a] - tp[k]) * \
+#                (gamma_interval * j - gamma_interval * l) / (tp[i] - tp[k])
+#     gamma[-1] = gamma_interval * l + (tp[i] - tp[k]) * \
+#                 (gamma_interval * j - gamma_interval * l) / (tp[i] - tp[k])
+#     while a < i:
+#         gamma[a - k] = gamma_interval * l + (tp[a] - tp[k]) * \
+#                   (gamma_interval * j - gamma_interval * l) / (tp[i] - tp[k])
+#     interp_val = np.empty(i - k, dtype=np.float64)
+#     interp_val[0], start = interp(gamma[0], tq, qy, 0, tq.size)
+#     interp_val[-1], end = interp(gamma[-1], tq, qy, start, tq.size)
+#     a = a + 1
+#     while a <= i:
+#         interp_val[a-k], start = interp(gamma[a], tq, qy, start, end)
+#         a = a + 1
+#
+#     e = np.sum(np.linalg.norm(py[a:i-1] - interp_val[0: i-k-1]) + py[a+1, i] - interp_val[a+1: i - k]))
+#     return e
+
+#
 def integrate_1D(tp, tq, py, qy, k, i, l, j, gamma_interval, energy_dot):
     e = 0
     a = k
@@ -43,7 +65,7 @@ def integrate_1D(tp, tq, py, qy, k, i, l, j, gamma_interval, energy_dot):
         gammak_2 = gamma_interval * l + (tp[a + 1] - tp[k]) * (gamma_interval * j - gamma_interval * l) / (
                 tp[i] - tp[k])
 
-        val2, temp = interp(gammak_2, tq, qy, start, end)
+        val2, start = interp(gammak_2, tq, qy, start, end + 1)
         e = e + (0.5 * (py[a] - val1) ** 2 + 0.5 *
                  (py[a + 1] - val2) ** 2) * (tp[a + 1] - tp[a]) * 0.5
         val1 = val2

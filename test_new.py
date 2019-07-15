@@ -15,17 +15,16 @@ from io import StringIO
 n = 1000  # number of points in domain
 
 t = np.linspace(0., 1., n)
-gamma_sol = ex.gamma_example("bumpy")[0](t)
-q = ex.curve_example("bumps", t)[0]
+gamma_sol = ex.gamma_example("steep")[0](t)
+q = ex.curve_example("bumps", t)[0][0]
 p = np.zeros(q.shape)
 
-inter_func1 = scipy.interpolate.CubicSpline(t, q[0])
-inter_func2 = scipy.interpolate.CubicSpline(t, q[1])
-p[0] = inter_func1(gamma_sol)
-p[1] = inter_func2(gamma_sol)
-print(shapedist.tangent(p))
-energy, p_new, q_new, tg, gammay = shapedist.find_shapedist(p.T, q.T, 'ud', shape_rep=shapedist.coords, t1=t, t2=t)
-plt.plot(tg, gammay)
+inter_func1 = scipy.interpolate.CubicSpline(t, q)
+p = inter_func1(gamma_sol)
+
+energy, p_new, q_new, tg, gammay = shapedist.find_shapedist(p, q, 'ud', shape_rep=shapedist.normals, t1=t, t2=t)
+plt.plot(tg, gammay, ".-r")
+plt.plot(tg, ex.gamma_example("steep")[0](tg), ".-b")
 plt.show()
 #
 # # get a gamma_sol who's domain matches the returned hierarchical domain
