@@ -11,7 +11,7 @@ import pstats
 from io import StringIO
 
 # One example shapdist compuation for gamma
-n = 1400  # number of points in domain
+n = 1000  # number of points in domain
 
 t = np.linspace(0., 1., n)
 gamma_sol = ex.gamma_example("bumpy")[0](t)

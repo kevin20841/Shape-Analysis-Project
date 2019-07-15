@@ -2,14 +2,14 @@
 Implementation of linear algorithm to determine shape elasticity as described by Bernal et al.
 """
 import numpy as np
-from numba import jit, float64, int16, generated_jit
+from numba import jit, float64, int64, generated_jit
 import shapedist.elastic_n_2
 from math import floor, pi
 import matplotlib.pyplot as plt
 from line_profiler import LineProfiler
 
 
-@jit([float64(float64, float64[:], float64[:], int16, int16)], cache=True, nopython=True, fastmath=True)
+@jit('Tuple((float64, int64))(float64, float64[:], float64[:], int64, int64)', cache=True, nopython=True, fastmath=True)
 def interp(t, x, y, lower, upper):
     i = 0
     while lower < upper:
@@ -24,11 +24,11 @@ def interp(t, x, y, lower, upper):
         elif t < val:
             upper = i
 
-    if i == x.size-1:
+    if i == x.size - 1:
         temp = y[i]
     else:
         temp = (t - x[i]) * (y[i + 1] - y[i]) / (x[i + 1] - x[i]) + y[i]
-    return temp
+    return temp, i
 
 
 def integrate_1D(tp, tq, py, qy, k, i, l, j, gamma_interval, energy_dot):
@@ -36,22 +36,48 @@ def integrate_1D(tp, tq, py, qy, k, i, l, j, gamma_interval, energy_dot):
     a = k
     gammak_1 = gamma_interval * l + (tp[a] - tp[k]) * \
                (gamma_interval * j - gamma_interval * l) / (tp[i] - tp[k])
-    gammak_2 = gamma_interval * l + (tp[a + 1] - tp[k]) * (gamma_interval * j - gamma_interval * l) \
-               / (tp[i] - tp[k])
-    e = e + (0.5 * (py[a] - interp(gammak_1, tq, qy, 0, tq.size)) ** 2
-             + 0.5 * (py[(a + 1)] - interp(gammak_2, tq, qy, 0, tq.size)) ** 2) * \
-        (tp[a + 1] - tp[a]) * 0.5
-    a = a + 1
+    gammak_end = gamma_interval * l + (tp[i] - tp[k]) * \
+                 (gamma_interval * j - gamma_interval * l) / (tp[i] - tp[k])
+    val1, start = interp(gammak_1, tq, qy, 0, tq.size)
+    val2, end = interp(gammak_end, tq, qy, start, tq.size)
+
     while a < i:
-        gammak_2 = gamma_interval * l + (tp[a+1] - tp[k]) * (gamma_interval * j - gamma_interval * l) \
-                                        / (tp[i] - tp[k])
-        e = e + (0.5 * (py[a] - interp(gammak_1, tq, qy, 0, tq.size)) ** 2
-                         + 0.5 * (py[(a+1)] - interp(gammak_2, tq, qy, 0, tq.size)) ** 2) * \
-                (tp[a+1] - tp[a]) * 0.5
-        gammak_1 = gammak_2
+        gammak_2 = gamma_interval * l + (tp[a + 1] - tp[k]) * (gamma_interval * j - gamma_interval * l) / (
+                    tp[i] - tp[k])
+
+        val2, temp = interp(gammak_2, tq, qy, start, end)
+        e = e + (0.5 * (py[a] - val1) ** 2 + 0.5 *
+                 (py[a + 1] - val2) ** 2) * (tp[a + 1] - tp[a]) * 0.5
+        val1 = val2
         a = a + 1
     return e
 
+
+# def integrate(tp, tq, py, qy, k, i, l, j, gamma_interval, energy_dot):
+#     e = 0
+#     a = k
+#     gammak_1 = gamma_interval * l + (tp[a] - tp[k]) * \
+#                (gamma_interval * j - gamma_interval * l) / (tp[i] - tp[k])
+#     gammak_end = gamma_interval * l + (tp[i - 1] - tp[k]) * \
+#                  (gamma_interval * j - gamma_interval * l) / (tp[i] - tp[k])
+#     val1, start = interp(gammak_1, tq, qy, 0, tq.size)
+#     val2, end = interp(gammak_1, tq, qy, start, tq.size)
+#
+#     gammak_2 = gamma_interval * l + (tp[a + 1] - tp[k]) * (gamma_interval * j - gamma_interval * l) \
+#                / (tp[i] - tp[k])
+#
+#     e = e + (0.5 * (py[a] - interp(gammak_1, tq, qy, 0, tq.size)) ** 2
+#              + 0.5 * (py[(a + 1)] - interp(gammak_2, tq, qy, 0, tq.size)) ** 2) * \
+#         (tp[a + 1] - tp[a]) * 0.5
+#     a = a + 1
+#     while a < i:
+#         gammak_2 = gamma_interval * l + (tp[a + 1] - tp[k]) * (gamma_interval * j - gamma_interval * l) / (
+#                     tp[i] - tp[k])
+#         e = e + (0.5 * (py[a] - interp(gammak_1, tq, qy, 0, tq.size)) ** 2 + 0.5 * (
+#                     py[(a + 1)] - interp(gammak_2, tq, qy, 0, tq.size)) ** 2) * (tp[a + 1] - tp[a]) * 0.5
+#         gammak_1 = gammak_2
+#         a = a + 1
+#     return e
 
 def integrate_2D(tp, tq, py, qy, k, i, l, j, gamma_interval, energy_dot):
     e = 0
@@ -59,7 +85,7 @@ def integrate_2D(tp, tq, py, qy, k, i, l, j, gamma_interval, energy_dot):
     while a < i:
         gamma_derivative = (gamma_interval * j - gamma_interval * l) / (tp[i] - tp[k])
         gammak_1 = gamma_interval * l + (tp[a] - tp[k]) * gamma_derivative
-        gammak_2 = gamma_interval * l + (tp[a+1] - tp[k]) * gamma_derivative
+        gammak_2 = gamma_interval * l + (tp[a + 1] - tp[k]) * gamma_derivative
 
         qx_value_1 = interp(gammak_1, tq, qy[:, 0], 0, tq.size)
         qy_value_1 = interp(gammak_1, tq, qy[:, 1], 0, tq.size)
@@ -68,10 +94,10 @@ def integrate_2D(tp, tq, py, qy, k, i, l, j, gamma_interval, energy_dot):
         qy_value_2 = interp(gammak_2, tq, qy[:, 1], 0, tq.size)
         if not energy_dot:
             val1 = 0.5 * (py[a][0] ** 2 + py[a][1] ** 2
-                          - 2*(py[a][0] * qx_value_1 + py[a][1] * qy_value_1)
-                          + qx_value_1**2 + qy_value_1**2)
-            val2 = 0.5 * (py[a+1][0] ** 2 + py[a+1][1] ** 2
-                          - 2 * (py[a+1][0] * qx_value_2 + py[a+1][1] * qy_value_2)
+                          - 2 * (py[a][0] * qx_value_1 + py[a][1] * qy_value_1)
+                          + qx_value_1 ** 2 + qy_value_1 ** 2)
+            val2 = 0.5 * (py[a + 1][0] ** 2 + py[a + 1][1] ** 2
+                          - 2 * (py[a + 1][0] * qx_value_2 + py[a + 1][1] * qy_value_2)
                           + qx_value_2 ** 2 + qy_value_2 ** 2)
         else:
             val1 = 0.5 * (py[a][0] ** 2 + py[a][1] ** 2
@@ -80,7 +106,7 @@ def integrate_2D(tp, tq, py, qy, k, i, l, j, gamma_interval, energy_dot):
             val2 = 0.5 * (py[a + 1][0] ** 2 + py[a + 1][1] ** 2
                           - 2 * gamma_derivative ** 0.5 * (py[a + 1][0] * qx_value_2 + py[a + 1][1] * qy_value_2)
                           + gamma_derivative * (qx_value_2 ** 2 + qy_value_2 ** 2))
-        e = e + (val1 + val2) * (tp[a+1] - tp[a]) * 0.5
+        e = e + (val1 + val2) * (tp[a + 1] - tp[a]) * 0.5
         a = a + 1
     return e
 
@@ -97,8 +123,8 @@ def integrate(tp, tq, py, qy, k, i, l, j, gamma_interval, energy_dot):
 def running_mean(x, N):
     ret = np.zeros(x.size)
     for i in range(ret.size):
-        back = i - N if (i - N) >=0 else 0
-        front = i + N if (i + N) < ret.size else ret.size-1
+        back = i - N if (i - N) >= 0 else 0
+        front = i + N if (i + N) < ret.size else ret.size - 1
         ret[i] = np.sum(x[back:front]) / (front - back)
 
     return ret
@@ -150,25 +176,26 @@ def find_gamma(t, p, q, parametrization_array, energy_dot, gamma_tol):
     cont = True
     previous_path = np.zeros(parametrization_size, dtype=np.float64)
     while i < parametrization_size:
-        previous_path[i] = interp(temp_domain_gamma[i], gamma_domain, gamma_range, 0, previous_n)
+        previous_path[i], temp = interp(temp_domain_gamma[i], gamma_domain, gamma_range, 0, previous_n)
         i = i + 1
 
-    neighborhood_array = np.zeros((parametrization_size, 2), dtype=np.int16)
+    neighborhood_array = np.zeros((parametrization_size, 2), dtype=np.int64)
     neighborhood_array = neighborhood_array + 8
-    gamma_interval = 1 /(parametrization_size-1)
+    gamma_interval = 1 / (parametrization_size - 1)
     strip_height = 16
     upper_bound, lower_bound = calculate_search_area(temp_domain_gamma,
-                                                     temp_domain_gamma, previous_path, strip_height, parametrization_size)
+                                                     temp_domain_gamma, previous_path, strip_height,
+                                                     parametrization_size)
 
     # Iteratively find the medium coarse solution
     while cont:
 
         path, shape_energy = iteration(tp_temp, tq_temp, py_temp, qy_temp, temp_domain_gamma, upper_bound, lower_bound,
-              neighborhood_array, parametrization_size, energy_dot)
+                                       neighborhood_array, parametrization_size, energy_dot)
 
         outside_boundary = (path[:-1] > upper_bound[:-1]).any() or (path[1:] < lower_bound[1:]).any()
         pushing_boundary = (np.abs((upper_bound[:-1] - path[:-1])) < gamma_interval).any() or \
-                                 (np.abs((lower_bound[1:] - path[1:])) < gamma_interval).any()
+                           (np.abs((lower_bound[1:] - path[1:])) < gamma_interval).any()
         # print(outside_boundary, pushing_boundary)
         if count >= 4:
             raise RuntimeWarning("Solution could not converge after 4 iterations.")
@@ -208,7 +235,7 @@ def find_gamma(t, p, q, parametrization_array, energy_dot, gamma_tol):
         i = 0
 
         while i < parametrization_size:
-            previous_path[i] = interp(domain_gamma[i], temp_domain_gamma, path, 0, previous_n)
+            previous_path[i], temp = interp(domain_gamma[i], temp_domain_gamma, path, 0, previous_n)
             i = i + 1
 
         upper_bound, lower_bound = calculate_search_area(domain_gamma, domain_gamma,
@@ -222,14 +249,13 @@ def find_gamma(t, p, q, parametrization_array, energy_dot, gamma_tol):
 
 @jit(cache=True, nopython=True, fastmath=True)
 def calculate_search_area(new_domain, prev_domain, prev_path, strip_height, parametrization_size):
-
     upper_bound_temp = np.zeros((prev_domain.size, 2), dtype=np.float64)
     lower_bound_temp = np.zeros((prev_domain.size, 2), dtype=np.float64)
     upper_bound_temp[:, 0] = prev_domain
     upper_bound_temp[:, 1] = prev_path
     lower_bound_temp[:, 0] = prev_domain
     lower_bound_temp[:, 1] = prev_path
-    theta = pi/6
+    theta = pi / 6
     rotation_matrix = np.array(((np.cos(theta), -np.sin(theta)), (np.sin(theta), np.cos(theta))))
     unit_up = np.zeros(2, np.float64)
     unit_up[1] = 1
@@ -244,12 +270,14 @@ def calculate_search_area(new_domain, prev_domain, prev_path, strip_height, para
         if new_domain[i] > upper_bound_temp[-1, 0]:
             upper_bound[i] = 1.1
         else:
-            upper_bound[i] = interp(new_domain[i], upper_bound_temp[:, 0], upper_bound_temp[:, 1], 0, parametrization_size)
+            upper_bound[i], temp = interp(new_domain[i], upper_bound_temp[:, 0], upper_bound_temp[:, 1], 0,
+                                          parametrization_size)
     for i in range(parametrization_size):
         if new_domain[i] < lower_bound_temp[0, 0]:
             lower_bound[i] = -0.1
         else:
-            lower_bound[i] = interp(new_domain[i], lower_bound_temp[:, 0], lower_bound_temp[:, 1], 0, parametrization_size)
+            lower_bound[i], temp = interp(new_domain[i], lower_bound_temp[:, 0], lower_bound_temp[:, 1], 0,
+                                          parametrization_size)
 
     upper_bound = running_mean(upper_bound, 6)
     lower_bound = running_mean(lower_bound, 6)
@@ -271,7 +299,7 @@ def iteration(tp_temp, tq_temp, py_temp, qy_temp, temp_domain_gamma, upper_bound
     n = parametrization_size
 
     min_energy_values = np.zeros((n, n), dtype=np.float64)
-    path_nodes = np.zeros((n, n, 2), dtype=np.int16)
+    path_nodes = np.zeros((n, n, 2), dtype=np.int64)
     gamma_interval = 1 / (m - 1)
     min_energy_values[0][0] = integrate(tp_temp, tq_temp, py_temp, qy_temp, 0, 1, 0, 1, gamma_interval, energy_dot)
 
@@ -352,7 +380,7 @@ def iteration(tp_temp, tq_temp, py_temp, qy_temp, temp_domain_gamma, upper_bound
     min_energy_values[i][j] = minimum
 
     # !! Interpolate
-    path_indices = np.zeros((n, 2), dtype=np.int16)
+    path_indices = np.zeros((n, 2), dtype=np.int64)
     path_indices[0][0] = n - 1
     path_indices[0][1] = m - 1
 
@@ -383,4 +411,4 @@ def iteration(tp_temp, tq_temp, py_temp, qy_temp, temp_domain_gamma, upper_bound
         previousIndex_gamma = path_indices[i][1]
         previous = gamma_interval * path_indices[i][1]
         i = i + 1
-    return path, min_energy_values[n-1][m-1]
+    return path, min_energy_values[n - 1][m - 1]
