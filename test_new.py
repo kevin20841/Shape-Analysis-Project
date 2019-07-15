@@ -14,7 +14,7 @@ from io import StringIO
 n = 1000  # number of points in domain
 
 t = np.linspace(0., 1., n)
-gamma_sol = ex.gamma_example("bumpy")[0](t)
+gamma_sol = ex.gamma_example("sine")[0](t)
 q = ex.curve_example("bumps", t)[0][0]
 p = np.zeros(q.shape)
 
