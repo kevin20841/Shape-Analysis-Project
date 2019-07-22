@@ -12,20 +12,55 @@ from io import StringIO
 
 
 # One example shapdist compuation for gamma
-n = 1000  # number of points in domain
+n = 1024  # number of points in domain
 
 t = np.linspace(0., 1., n)
-gamma_sol = ex.gamma_example("steep")[0](t)
-q = ex.curve_example("bumps", t)[0][0]
+q = ex.curve_example('limacon', t)[0]
 p = np.zeros(q.shape)
+x_function = scipy.interpolate.CubicSpline(t, q[0])
+y_function = scipy.interpolate.CubicSpline(t, q[1])
 
-inter_func1 = scipy.interpolate.CubicSpline(t, q)
-p = inter_func1(gamma_sol)
 
-energy, p_new, q_new, tg, gammay = shapedist.find_shapedist(p, q, 'ud', shape_rep=shapedist.normals, t1=t, t2=t)
-plt.plot(tg, gammay, ".-r")
-plt.plot(tg, ex.gamma_example("steep")[0](tg), ".-b")
+test = ex.gamma_example("bumpy")[0]
+# test1 = ex.gamma_example("sine")[0](t)
+
+p[0] = x_function(test(t))
+p[1] = y_function(test(t))
+
+p = p.T
+q = q.T
+# q = ex.curve_example("circle", t)[0].T
+# p = ex.curve_example("ellipse", t)[0].T
+
+# energy, p_new, q_new, tg, gammay = shapedist.find_shapedist(p, q, 'd', t1=t, t2=t, shape_rep=shapedist.normals)
+# plt.plot(tg, gammay, "-r")
+
+energy1, p_new, q_new, tg, gammay = shapedist.find_shapedist(p, q, 'd', shape_rep=shapedist.coords)
+plt.plot(tg, gammay, ".b")
+plt.plot(tg, test(tg), "-r")
+# for i in range(q_new.shape[1]):
+#     interp_func = scipy.interpolate.CubicSpline(tg, q_new[:, i])
+#     q_new[:, i] = interp_func(gammay)
+plt.figure()
+plt.ylim(-0.2, 0.2)
+plt.xlim(-0.2, 0.2)
+
+# plt.plot([p_new[:, 0], q_new[:, 0]], [p_new[:, 1], q_new[:, 1]], "-")
+
+plt.plot(p_new[:, 0], p_new[:, 1], ".-b")
+plt.figure()
+plt.ylim(-0.2, 0.2)
+plt.xlim(-0.2, 0.2)
+plt.plot(q_new[:, 0], q_new[:, 1], ".-r")
 plt.show()
+
+# print(energy, energy1)
+# for i in range(q_new.shape[1]):
+#     interp_func = scipy.interpolate.CubicSpline(tg, q_new[:, i])
+#     q_new[:, i] = interp_func(gammay)
+# plt.figure()
+#
+
 #
 # # get a gamma_sol who's domain matches the returned hierarchical domain
 #

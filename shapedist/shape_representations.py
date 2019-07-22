@@ -2,18 +2,18 @@ import numpy as np
 
 
 def coords(p):
-    return p
+    return p, None
 
 
 def tangent(p):
-    x = p[0, :]
-    y = p[1, :]
+    x = p[:, 0]
+    y = p[:, 1]
     dx_dt = np.gradient(x)
     dy_dt = np.gradient(y)
     velocity = np.array([[dx_dt[i], dy_dt[i]] for i in range(dx_dt.size)])
     ds_dt = np.sqrt(dx_dt * dx_dt + dy_dt * dy_dt)
     tangent = np.array([1 / ds_dt] * 2).transpose() * velocity
-    return tangent
+    return tangent, None
 
 
 def normals(p, t):
@@ -42,7 +42,7 @@ def normals(p, t):
     for i in range(len(normal)):
         if np.cross(tangent[i], normal[i]) > 0:
             normal[i] = -1 * normal[i]
-    return normal
+    return normal, None
 
 
 def curvature(p, t):
@@ -53,9 +53,9 @@ def curvature(p, t):
     d2x_dt2 = np.gradient(dx_dt, t)
     d2y_dt2 = np.gradient(dy_dt, t)
 
-    curvature = np.abs(d2x_dt2 * dy_dt - dx_dt * d2y_dt2) / (dx_dt * dx_dt + dy_dt * dy_dt)**1.5
+    c = np.abs(d2x_dt2 * dy_dt - dx_dt * d2y_dt2) / (dx_dt * dx_dt + dy_dt * dy_dt)**1.5
 
-    return curvature
+    return c, None
 
 
 def angle_function(p):
@@ -115,7 +115,7 @@ def srvf(p, t):
     result[:, 0] = dx_dt / mag
     result[:, 1] = dy_dt / mag
 
-    return result
+    return result, None
 
 
 def calculate_com(p):

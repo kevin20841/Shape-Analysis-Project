@@ -10,3 +10,4 @@ from shapedist import elastic_linear_hierarchy
 # from shapedist import build_hierarchy_1D
 # from shapedist import build_hierarchy_2D
 from shapedist import build_hierarchy
+from shapedist import kd_tree

@@ -1,6 +1,5 @@
 import numpy as np
-import shapedist.shape_representations
-
+import matplotlib.pyplot as plt
 
 def hierarchical_curve_discretization(p, q, t1, t2, init_coarsening_tol, uniform):
 
@@ -11,12 +10,37 @@ def hierarchical_curve_discretization(p, q, t1, t2, init_coarsening_tol, uniform
     if uniform:
         boolean_mask = get_uniform_mask(p.shape[0])
     else:
-        boolean_mask = get_adaptive_mask()
+        boolean_mask = get_adaptive_mask(p, q, t, init_coarsening_tol)
     return [t, p, q], boolean_mask
 
 
-def get_adaptive_mask():
-    return None
+def get_adaptive_mask(p, q, t, init_coarsening_tol):
+    t_new = t
+    boolean_mask = np.zeros((2, t.shape[0]), dtype=np.bool)
+    tol = init_coarsening_tol
+    # get first adaptive mask
+    # while t_new.size > 400:
+    #     t_new, p, q = coarsen_curve(t_new, p, q, tol)
+    #     tol = tol * 1.2
+    t_new, temp1, temp2 = coarsen_curve(t_new, p, q, 0.001)
+    plt.figure()
+    plt.plot(temp1[:, 0], temp1[:, 1], ".-")
+    plt.figure()
+    plt.plot(temp2[:, 0], temp2[:, 1], ".-")
+    plt.show()
+    print(t_new.shape)
+    boolean_mask[1] = np.in1d(t, t_new)
+    t_new = t
+
+    t_new, temp1, temp2 = coarsen_curve(t_new, p, q, 0.002)
+    print(t_new.shape)
+    # while t_new.size > 90:
+    #     t_new, p, q = coarsen_curve(t_new, p, q, tol)
+    #     tol = tol * 1.5
+    # get second adaptive mask
+
+    boolean_mask[0] = np.in1d(t, t_new)
+    return boolean_mask
 
 
 def get_uniform_mask(n):
@@ -29,15 +53,6 @@ def get_uniform_mask(n):
                 boolean_mask[j][i * step_size] = True
         boolean_mask[j][-1] = True
     return boolean_mask
-
-
-def arclen_fct_values(b):
-    N = b[:, 0].size
-    d = np.zeros(N)
-    d[1:N] = np.sum((b[1:N, :] - b[0:N-1, :])**2, 1)**0.5
-
-    cumsum_d = np.cumsum(d)
-    return cumsum_d / cumsum_d[N-1]
 
 
 def mark_nodes_for_coarsening(element_errors_1, element_errors_2, tol):
@@ -92,7 +107,6 @@ def curvature(p):
     K = np.zeros(n-1)
     K[1:n-1] = x[0:n-2] * y1[1:n-1] - x[1: n-1] * y2[1:n-1] + x[2:n] * y1[0:n-2]
     K[0] = x[n-2] * y1[0] - x[0] * y2[0] + x[1] * y1[n-3]
-
     K = -2 * K / np.sqrt(bottom_sqr)
 
     K = np.append(K, K[0])
@@ -118,9 +132,6 @@ def coarsen_curve(t, b1, b2, tol=2e-3, maxiter=5):
 
 
 def parametrize_curve_pair(p, q, t1, t2, t_spacing_tol):
-    if t1 is None and t2 is None:
-        t1 = arclen_fct_values(p)
-        t2 = arclen_fct_values(q)
     t = np.union1d(t1, t2)
     N = t.shape[0]
     remove = np.zeros(N, dtype=bool)

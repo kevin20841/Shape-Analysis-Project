@@ -2,20 +2,29 @@ import shapedist
 import numpy as np
 from numba import jit, float64
 from math import pi
+from inspect import signature
+
+
+@jit(nopython=True)
+def arclen_fct_values(b):
+    N = b.shape[0]
+    d = np.zeros(N)
+    d[1:N] = np.sum((b[1:N, :] - b[0:N-1, :])**2, 1)**0.5
+
+    cumsum_d = np.cumsum(d)
+    return cumsum_d / cumsum_d[N-1]
 
 
 def find_shapedist(p, q, dr='', shape_rep=shapedist.coords, distfunc=None, t1=None, t2=None,
-                   init_coarsening_tol=2e-6, energy_dot=False):
+                   init_coarsening_tol=2e-4, energy_dot=False):
 
-    if len(p.shape) == 1 and len(q.shape) == 1:
-        p = np.reshape(p, (-1, 1))
-        q = np.reshape(q, (-1, 1))
     # Generate Hierarchy (coarsen curve in n dimensions) TODO
     uniform = False
     if 'u' in dr.lower():
         uniform = True
     # Normalize curve to center of mass if two dimensions
-    if p.shape[1] == 2:
+
+    if len(p.shape) == 2 and p.shape[1] == 2:
         N = p.shape[0]
         arclen_1 = np.sum((p[1:N, :] - p[0:N - 1, :]) ** 2, 1) ** 0.5
         arclen_1 = np.sum(arclen_1)
@@ -25,35 +34,46 @@ def find_shapedist(p, q, dr='', shape_rep=shapedist.coords, distfunc=None, t1=No
         arclen_2 = np.sum(np.sum((q[1:N, :] - q[0:N - 1, :]) ** 2, 1) ** 0.5)
         arclen_2 = np.sum(arclen_2)
         q = (q - shapedist.shape_representations.calculate_com(q)) / arclen_2
-        p = shape_rep(p)
-        q = shape_rep(q)
 
+        if t1 is None and t2 is None:
+            t1 = arclen_fct_values(p)
+            t2 = arclen_fct_values(q)
+
+        numparams = len(signature(shape_rep).parameters)
+        if numparams == 2:
+            p, s1 = shape_rep(p, t1)
+            q, s2 = shape_rep(q, t2)
+        else:
+            p, s1 = shape_rep(p)
+            q, s2 = shape_rep(q)
+
+        if not (s1 is None or s2 is None):
+            t1 = s1
+            t2 = s2
+    if len(p.shape) == 1 and len(q.shape) == 1:
+        p = np.reshape(p, (-1, 1))
+        q = np.reshape(q, (-1, 1))
     [t, p, q], mask = shapedist.build_hierarchy.hierarchical_curve_discretization(p, q,
                                                                                   t1, t2,
                                                                                   init_coarsening_tol,
                                                                                   uniform)
+    if shape_rep is shapedist.srvf:
+        energy_dot = True
     # Find gamma in N dimensions
     dim = p.shape[1]
-    tg = t[mask[2]]
-    gammay = np.zeros((t.shape[0], dim))
-
-    energy = np.zeros(dim)
-    for i in range(dim):
-        temp, gammay[:, i], energy[i] = shapedist.elastic_linear_hierarchy.find_gamma(t, p[:, i], q[:, i], mask,
-                                                                                      energy_dot)
-    if dim ==1:
-        energy = energy[0]
-    if gammay.shape[1] == 1:
-        gammay = np.reshape(gammay, (-1))
+    if p.shape[1] == 1:
+        tg, gammay, sdist = shapedist.elastic_linear_hierarchy.find_gamma(t, p[:, 0], q[:, 0], mask, energy_dot, dim)
         p = np.reshape(p, (-1))
-        p = np.reshape(p, (-1))
-    if distfunc is not None:
-        energy = distfunc(energy)
-
-    if 'd' in dr.lower():
-        return energy, p, q, tg, gammay
+        q = np.reshape(q, (-1))
     else:
-        return energy
+        tg, gammay, sdist = shapedist.elastic_linear_hierarchy.find_gamma(t, p, q, mask, energy_dot, dim)
+
+    if distfunc is not None:
+        sdist = distfunc(p, q, tg, gammay)
+    if 'd' in dr.lower():
+        return sdist, p[mask[-1]], q[mask[-1]], tg, gammay
+    else:
+        return sdist
 
 
 @jit(float64(float64[:], float64[:], float64[:]), cache=True, nopython=True)
