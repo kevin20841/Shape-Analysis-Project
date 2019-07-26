@@ -17,7 +17,7 @@ def run_tests(ndim, test_cases, curve_name, test_sizes, n_iter, shape_reps):
     for shape_rep in shape_reps:
         for case in test_cases:
             eprint(curve_name.upper() + " curve, " + case.upper() + " gamma, in {} dimensions with ".format(str(ndim)) + shape_rep.__name__ + " representation")
-            eprint("{: <15}| {: <15}| {: <15}| {: <15}".format("Size", "Energy", "Error", "Time(seconds)"))
+            eprint("{: <15}| {: <15}| {: <15} {: <15}| {: <15}".format("Size", "Coarsened Size", "Energy", "Error", "Time(seconds)"))
             for size in test_sizes:
                 n = size  # number of points in domain
 
@@ -42,13 +42,15 @@ def run_tests(ndim, test_cases, curve_name, test_sizes, n_iter, shape_reps):
                     start = time.time()
                     energy, p_new, q_new, tg, gammay = shapedist.find_shapedist(p, q, 'd', t1=t, t2=t, shape_rep=shape_rep)
                     end = time.time()
-                    if start - end < np.inf:
+                    if start - end < elapsed:
                         elapsed = end - start
 
                 error = shapedist.find_error(tg, gammay, ex.gamma_example(case)[0](tg))
-                eprint("{: <15}| {: <15}| {: <15}| {: <15}".format(str(size), "%0.10f" % energy, "%0.10f" % error,
+                eprint("{: <15}| {: <15}| {: <15}| {: <15}| {: <15}".format(str(size),str(tg.shape[0]), "%0.10f" % energy, "%0.10f" % error,
+
                                                                   "%0.10f" % elapsed))
         eprint()
+
 
 def main():
     test_cases = ["identity", "sine", "flat", "steep", "bumpy"]

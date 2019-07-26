@@ -1,11 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
-mu= np.loadtxt("matrix_elastic.out")
-mh = np.loadtxt("matrix_elastic_nonuniform.out")
+me = np.loadtxt("matrix_elastic.out")
+mk = np.loadtxt("matrix_kd_raw.out")
 
 
-mu = np.reshape(mu, (100, 100))
-mh = np.reshape(mh, (100, 100))
+me = np.reshape(me, (100, 100))
+
 
 
 #
@@ -44,10 +44,10 @@ mh = np.reshape(mh, (100, 100))
 # print("Average Difference for larger values:", s / count)
 
 
-print(np.max(mu - mh))
-plt.imshow(mu, cmap='hot', interpolation='nearest')
+print(np.max(me - mk))
+plt.imshow(me, cmap='hot', interpolation='nearest')
 plt.figure()
-plt.imshow(mh, cmap='hot', interpolation='nearest')
+plt.imshow(mk, cmap='hot', interpolation='nearest')
 plt.figure()
-plt.imshow(mh - mu, cmap="hot", interpolation="nearest")
+plt.imshow(me - mk, cmap="hot", interpolation="nearest")
 plt.show()

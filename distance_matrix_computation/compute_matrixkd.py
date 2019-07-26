@@ -22,6 +22,5 @@ for i in trange(100):
 end = time.time()
 
 print("Total Time:", end - start)
-np.savetxt("matrix_kd.out", matrix)
+np.savetxt("matrix_kd_raw.out", matrix)
 
-# TODO interpolate into arclen

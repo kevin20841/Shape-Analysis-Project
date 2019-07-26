@@ -7,69 +7,69 @@ import matplotlib.pyplot as plt
 
 #@njit
 def ad_hoc(ind, p, q, dist):
-    # find parametrization, query p onto qtree
-    max_diff = 0
-    for i in range(ind.shape[0] - 1):
-        if ind[i+1] < ind[i] and ind[i] - ind[i+1] > max_diff:
-            max_diff = ind[i] - ind[i+1]
-    # print(ind.shape[0])
-    # find jumps and discontinuities
-
-    plt.plot(np.arange(0, ind.shape[0]), ind, ".r")
-    plt.figure()
-    i = 0
-    while i < ind.shape[0]-1:
-        if np.abs(ind[i+1] - ind[i]) > 30 and ind[i] - ind[i+1] != max_diff:
-            start = i + 1
-            j = start
-            while j < ind.shape[0]-1:
-                if np.abs(ind[j+1] - ind[j]) >= 30:
-                    break
-                j = j + 1
-            end = j
-            if end == ind.shape[0]:
-                end = end - 1
-                break
-            print(start, end, end + 1 - start)
-            # find current distance
-            # currd = np.sum(dist[start:end + 1])
-            # currd = 0
-            # for l in range(start, end + 1):
-            #     currd = currd + norm(p[l], q[ind[l]])
-
-            # find first distance
-            firstd = 0
-            for l in range(start, end+1):
-                firstd = firstd + norm(p[l], q[ind[start]])
-            # find last distance
-            lastd = 0
-            for l in range(start, end):
-                lastd = lastd + norm(p[l], q[ind[end]])
-
-            sm = min(firstd, lastd)
-            if end == ind.shape[0] - 1:
-                lastc = 0
-            else:
-                lastc = end + 1
-            if firstd == sm:
-                ind[start:end + 1] = ind[start-1]
-                # print("first")
-            elif lastd == sm:
-                ind[start:end + 1] = ind[lastc]
-                # print("last")
-            i = end
-
-        i = i + 1
-    plt.plot(np.arange(0, ind.shape[0]), ind, ".r")
-    plt.show()
-    max_diff = 0
-    for i in range(ind.shape[0] - 1):
-        if ind[i+1] < ind[i] and ind[i] - ind[i+1] > max_diff:
-            max_diff = ind[i] - ind[i+1]
-
-    for i in range(ind.shape[0]-1):
-        if ind[i+1] < ind[i] and ind[i] - ind[i+1] != max_diff:
-            ind[i+1] = ind[i]
+    # # find parametrization, query p onto qtree
+    # max_diff = 0
+    # for i in range(ind.shape[0] - 1):
+    #     if ind[i+1] < ind[i] and ind[i] - ind[i+1] > max_diff:
+    #         max_diff = ind[i] - ind[i+1]
+    # # print(ind.shape[0])
+    # # find jumps and discontinuities
+    #
+    # plt.plot(np.arange(0, ind.shape[0]), ind, ".r")
+    # plt.figure()
+    # i = 0
+    # while i < ind.shape[0]-1:
+    #     if np.abs(ind[i+1] - ind[i]) > 30 and ind[i] - ind[i+1] != max_diff:
+    #         start = i + 1
+    #         j = start
+    #         while j < ind.shape[0]-1:
+    #             if np.abs(ind[j+1] - ind[j]) >= 30:
+    #                 break
+    #             j = j + 1
+    #         end = j
+    #         if end == ind.shape[0]:
+    #             end = end - 1
+    #             break
+    #         print(start, end, end + 1 - start)
+    #         # find current distance
+    #         # currd = np.sum(dist[start:end + 1])
+    #         # currd = 0
+    #         # for l in range(start, end + 1):
+    #         #     currd = currd + norm(p[l], q[ind[l]])
+    #
+    #         # find first distance
+    #         firstd = 0
+    #         for l in range(start, end+1):
+    #             firstd = firstd + norm(p[l], q[ind[start]])
+    #         # find last distance
+    #         lastd = 0
+    #         for l in range(start, end):
+    #             lastd = lastd + norm(p[l], q[ind[end]])
+    #
+    #         sm = min(firstd, lastd)
+    #         if end == ind.shape[0] - 1:
+    #             lastc = 0
+    #         else:
+    #             lastc = end + 1
+    #         if firstd == sm:
+    #             ind[start:end + 1] = ind[start-1]
+    #             # print("first")
+    #         elif lastd == sm:
+    #             ind[start:end + 1] = ind[lastc]
+    #             # print("last")
+    #         i = end
+    #
+    #     i = i + 1
+    # plt.plot(np.arange(0, ind.shape[0]), ind, ".r")
+    # plt.show()
+    # max_diff = 0
+    # for i in range(ind.shape[0] - 1):
+    #     if ind[i+1] < ind[i] and ind[i] - ind[i+1] > max_diff:
+    #         max_diff = ind[i] - ind[i+1]
+    #
+    # for i in range(ind.shape[0]-1):
+    #     if ind[i+1] < ind[i] and ind[i] - ind[i+1] != max_diff:
+    #         ind[i+1] = ind[i]
     #
     # plt.plot(np.arange(0, ind.shape[0]), ind, ".r")
     # plt.show()

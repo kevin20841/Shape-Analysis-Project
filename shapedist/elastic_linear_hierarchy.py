@@ -171,6 +171,11 @@ def find_gamma(t, p, q, parametrization_array, energy_dot, dim):
     # Find coarsest solution
     current_iteration = 0
 
+    gamma_domain, path, energy = shapedist.elastic_n_2.find_gamma(
+        tp[parametrization_array[0]], py[parametrization_array[0]],
+        qy[parametrization_array[0]], tg[parametrization_array[0]],
+        g, n_2_precision, n_2_precision, energy_dot)
+
     gamma_domain, gamma_range, energy = shapedist.elastic_n_2.find_gamma(
         tp[parametrization_array[0]], py[parametrization_array[0]],
         qy[parametrization_array[0]], tg[parametrization_array[0]],
@@ -185,15 +190,39 @@ def find_gamma(t, p, q, parametrization_array, energy_dot, dim):
 
     neighborhood_array = get_neighborhood(temp_domain_gamma, previous_path)
     gamma_interval = 1 / (parametrization_size - 1)
-    strip_height = 12
     upper_bound, lower_bound = calculate_search_area(temp_domain_gamma,
-                                                     temp_domain_gamma, previous_path, strip_height,
+                                                     temp_domain_gamma, previous_path,
                                                      parametrization_size)
+    # current_iteration = 1
+    # while current_iteration < parametrization_array.shape[0]:
+    #     strip_height = 10
+    #     domain_gamma = tg[parametrization_array[current_iteration]]
+    #
+    #     tp_temp = tp[parametrization_array[current_iteration]]
+    #     py_temp = py[parametrization_array[current_iteration]]
+    #     tq_temp = tq[parametrization_array[current_iteration]]
+    #     qy_temp = qy[parametrization_array[current_iteration]]
+    #     parametrization_size = tp_temp.size
+    #     previous_path = np.zeros(parametrization_size, dtype=np.float64)
+    #     i = 0
+    #
+    #     while i < parametrization_size:
+    #         previous_path[i], temp = interp(domain_gamma[i], tp[parametrization_array[current_iteration-1]], path, 0, path.shape[0])
+    #         i = i + 1
+    #     neighborhood_array_final = get_neighborhood(domain_gamma, previous_path)
+    #     upper_bound, lower_bound = calculate_search_area(domain_gamma, domain_gamma,
+    #                                                      previous_path, strip_height, parametrization_size)
+    #
+    #     path, shape_energy = iteration(tp_temp, tq_temp, py_temp, qy_temp, domain_gamma, upper_bound, lower_bound,
+    #                                    neighborhood_array_final, parametrization_size, energy_dot, dim)
+    #     current_iteration = current_iteration + 1
+
 
     # Iteratively find the medium coarse solution
     while cont:
         if it >= 5:
-            raise RuntimeWarning("Solution could not converge after 5 iterations.")
+            break
+            # raise RuntimeWarning("Solution could not converge after 5 iterations.")
         path, shape_energy = iteration(tp_temp, tq_temp, py_temp, qy_temp, temp_domain_gamma, upper_bound, lower_bound,
                                        neighborhood_array, parametrization_size, energy_dot, dim)
 
@@ -206,17 +235,14 @@ def find_gamma(t, p, q, parametrization_array, energy_dot, dim):
 
         if pushing_boundary:
             upper_bound, lower_bound = calculate_search_area(temp_domain_gamma,
-                                                             temp_domain_gamma, path, strip_height,
+                                                             temp_domain_gamma, path,
                                                              parametrization_size)
-            strip_height = strip_height + 4
 
     # Calculate super fine solution, if needed
     previous_n = parametrization_size
     if parametrization_array.shape[0] == 2:
         current_iteration = 1
     elif parametrization_array.shape[0] == 3:
-
-        strip_height = 6
         current_iteration = 2
         domain_gamma = tg[parametrization_array[2]]
 
@@ -233,7 +259,7 @@ def find_gamma(t, p, q, parametrization_array, energy_dot, dim):
             i = i + 1
         neighborhood_array_final = get_neighborhood(domain_gamma, previous_path)
         upper_bound, lower_bound = calculate_search_area(domain_gamma, domain_gamma,
-                                                         previous_path, strip_height, parametrization_size)
+                                                         previous_path, parametrization_size)
 
         path, shape_energy = iteration(tp_temp, tq_temp, py_temp, qy_temp, domain_gamma, upper_bound, lower_bound,
                                        neighborhood_array_final, parametrization_size, energy_dot, dim)
@@ -242,7 +268,8 @@ def find_gamma(t, p, q, parametrization_array, energy_dot, dim):
 
 
 @jit(cache=False, nopython=True)
-def calculate_search_area(new_domain, prev_domain, prev_path, strip_height, parametrization_size):
+def calculate_search_area(new_domain, prev_domain, prev_path, parametrization_size):
+    strip_height = new_domain.shape[0] / prev_domain.shape[0] + 2
     upper_bound_temp = np.zeros((prev_domain.size, 2), dtype=np.float64)
     lower_bound_temp = np.zeros((prev_domain.size, 2), dtype=np.float64)
     upper_bound_temp[:, 0] = prev_domain
@@ -292,7 +319,7 @@ def iteration(tp_temp, tq_temp, py_temp, qy_temp, temp_domain_gamma, upper_bound
     m = parametrization_size
     n = parametrization_size
 
-    min_energy_values = np.zeros((n, n), dtype=np.float64)
+    min_energy_values = np.full((n, n), np.inf, dtype=np.float64)
     path_nodes = np.zeros((n, n, 2), dtype=np.int64)
     gamma_interval = 1 / (m - 1)
 
