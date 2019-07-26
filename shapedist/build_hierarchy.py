@@ -17,24 +17,43 @@ def hierarchical_curve_discretization(p, q, t1, t2, init_coarsening_tol, uniform
     return [t, p, q], boolean_mask
 
 
-def get_adaptive_mask(p, q, t, init_coarsening_tol=None):
-    t_new = t
-    boolean_mask = np.zeros((2, t.shape[0]), dtype=np.bool)
-    tol = init_coarsening_tol
-    # get first adaptive mask
-    # while t_new.size > 400:
-    #     t_new, p, q = coarsen_curve(t_new, p, q, tol)
-    #     tol = tol * 1.2
-    t_new, temp1, temp2 = coarsen_curve_pair(t_new, p, q, 0.001)
-    boolean_mask[1] = np.in1d(t, t_new)
-    t_new = t
-    t_new, temp1, temp2 = coarsen_curve_pair(t_new, p, q, 1)
+# def get_adaptive_mask(p, q, t, init_coarsening_tol=None):
+#     t_new = t
+#     boolean_mask = np.zeros((2, t.shape[0]), dtype=np.bool)
+#     tol = init_coarsening_tol
+#     # get first adaptive mask
+#     # while t_new.size > 400:
+#     #     t_new, p, q = coarsen_curve(t_new, p, q, tol)
+#     #     tol = tol * 1.2
+#     t_new, temp1, temp2 = coarsen_curve_pair(t_new, p, q, 0.001)
+#     boolean_mask[1] = np.in1d(t, t_new)
+#     t_new = t
+#     t_new, temp1, temp2 = coarsen_curve_pair(t_new, p, q, 1)
+#     # print(t_new.shape, file=sys.stderr)
+#     # while t_new.size > 90:
+#     #     t_new, p, q = coarsen_curve(t_new, p, q, tol)
+#     #     tol = tol * 1.5
+#     # get second adaptive mask
+#
+#     boolean_mask[0] = np.in1d(t, t_new)
+#     return boolean_mask
+
+def get_adaptive_mask(p, q, t1, t2, init_coarsening_tol=None):
+    tol = [0.01, 2e-3]
+    t_p = []
+    t_q = []
+    for i in range(len(tol)):
+        temp, p_temp = coarsen_curve(t1, p, tol[i])
+        t_p.append(temp)
+        temp, q_temp = coarsen_curve(t2, q, tol[i])
+        t_q.append(temp)
+
     # print(t_new.shape, file=sys.stderr)
     # while t_new.size > 90:
     #     t_new, p, q = coarsen_curve(t_new, p, q, tol)
     #     tol = tol * 1.5
     # get second adaptive mask
-
+    boolean_mask = np.zeros((2, t.shape[0]), dtype=np.bool)
     boolean_mask[0] = np.in1d(t, t_new)
     return boolean_mask
 
@@ -141,7 +160,7 @@ def curvature(p):
     return K
 
 
-def coarsen_curve(b, tol=2e-3, maxiter=5):
+def coarsen_curve(t, b, tol=2e-3, maxiter=5):
     i = 0
 
     while i < maxiter:
@@ -151,10 +170,10 @@ def coarsen_curve(b, tol=2e-3, maxiter=5):
             break
 
         b = b[np.logical_not(markers), :]
-        # t = t[np.logical_not(markers)]
+        t = t[np.logical_not(markers)]
         i = i + 1
-    # return t, b
-    return b
+    return t, b
+
 
 
 def coarsen_curve_pair(t, b1, b2, tol=2e-3, maxiter=5):
