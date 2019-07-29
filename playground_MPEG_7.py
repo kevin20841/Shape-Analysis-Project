@@ -21,27 +21,27 @@ for i in range(100):
 
 b1 = curves[10]
 b2 = curves[12]
-t1 = shapedist.arclen_fct_values(b1)
-t2 = shapedist.arclen_fct_values(b2)
-
-b1f1 = scipy.interpolate.CubicSpline(t1, b1[:, 0])
-b1f2 = scipy.interpolate.CubicSpline(t1, b1[:, 1])
-
-b2f1 = scipy.interpolate.CubicSpline(t2, b2[:, 0])
-b2f2 = scipy.interpolate.CubicSpline(t2, b2[:, 1])
-t = np.linspace(0., 1., 1039)
-b1 = np.zeros((1039, 2))
-b2 = np.zeros((1039, 2))
-b1[:, 0] = b1f1(t)
-b1[:, 1] = b1f2(t)
-b2[:, 0] = b2f1(t)
-b2[:, 1] = b2f2(t)
+# t1 = shapedist.arclen_fct_values(b1)
+# t2 = shapedist.arclen_fct_values(b2)
+#
+# b1f1 = scipy.interpolate.CubicSpline(t1, b1[:, 0])
+# b1f2 = scipy.interpolate.CubicSpline(t1, b1[:, 1])
+#
+# b2f1 = scipy.interpolate.CubicSpline(t2, b2[:, 0])
+# b2f2 = scipy.interpolate.CubicSpline(t2, b2[:, 1])
+# t = np.linspace(0., 1., 1039)
+# b1 = np.zeros((1039, 2))
+# b2 = np.zeros((1039, 2))
+# b1[:, 0] = b1f1(t)
+# b1[:, 1] = b1f2(t)
+# b2[:, 0] = b2f1(t)
+# b2[:, 1] = b2f2(t)
 
 # energy1, pu, qu, tg, gammay = shapedist.find_shapedist(b1, b2, 'd')
 # print("Nonuniform:", energy1)
 # plt.plot(tg, gammay, "-r")
-energy2, p, q, tg, gammay = shapedist.find_shapedist(b1, b2, 'ud')
-print("Uniform:", energy2)
+energy2, p, q, tg, gammay = shapedist.find_shapedist(b1, b2, 'd')
+print("Nonuniform:", energy2)
 plt.plot(tg, gammay, ".-g")
 # plt.figure()
 # plt.ylim(-0.2, 0.2)

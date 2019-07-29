@@ -8,54 +8,39 @@ np.set_printoptions(threshold=sys.maxsize)
 def hierarchical_curve_discretization(p, q, t1, t2, init_coarsening_tol, uniform):
 
     # Curves should be an array of coordinates
-
-    t, p, q = parametrize_curve_pair(p, q, t1, t2, 0.001)
     if uniform:
         boolean_mask = get_uniform_mask(p.shape[0])
+        t = combine_t(t1, t2)
+        t, p, q = parametrize_curve_pair(p, q, t)
+        return [t, p, q], boolean_mask
     else:
-        boolean_mask = get_adaptive_mask(p, q, t)
+        return get_adaptive_mask(p, q, t1, t2)
+
+
+def get_adaptive_mask(p, q, t1, t2, init_coarsening_tol=None):
+    tol = [0.01, 2e-4]
+    t = combine_t(t1, t2)
+    boolean_mask = np.zeros((2, t.shape[0]), dtype=np.bool)
+    for i in range(len(tol)):
+        t_p, temp = coarsen_curve(t1, p, tol[i])
+        boolean_mask[i] = np.in1d(t, t_p)
+        t_q, temp = coarsen_curve(t2, q, tol[i])
+        boolean_mask[i] = np.logical_or(boolean_mask[i], np.in1d(t, t_q))
+        boolean_mask[i][0] = True
+        boolean_mask[i][-1] = True
+    p, q = parametrize_curve_pair(p, q, t, t1, t2)
+    for i in boolean_mask:
+        print(p[i].shape)
     return [t, p, q], boolean_mask
 
 
-# def get_adaptive_mask(p, q, t, init_coarsening_tol=None):
-#     t_new = t
-#     boolean_mask = np.zeros((2, t.shape[0]), dtype=np.bool)
-#     tol = init_coarsening_tol
-#     # get first adaptive mask
-#     # while t_new.size > 400:
-#     #     t_new, p, q = coarsen_curve(t_new, p, q, tol)
-#     #     tol = tol * 1.2
-#     t_new, temp1, temp2 = coarsen_curve_pair(t_new, p, q, 0.001)
-#     boolean_mask[1] = np.in1d(t, t_new)
-#     t_new = t
-#     t_new, temp1, temp2 = coarsen_curve_pair(t_new, p, q, 1)
-#     # print(t_new.shape, file=sys.stderr)
-#     # while t_new.size > 90:
-#     #     t_new, p, q = coarsen_curve(t_new, p, q, tol)
-#     #     tol = tol * 1.5
-#     # get second adaptive mask
-#
-#     boolean_mask[0] = np.in1d(t, t_new)
-#     return boolean_mask
-
-def get_adaptive_mask(p, q, t1, t2, init_coarsening_tol=None):
-    tol = [0.01, 2e-3]
-    t_p = []
-    t_q = []
-    for i in range(len(tol)):
-        temp, p_temp = coarsen_curve(t1, p, tol[i])
-        t_p.append(temp)
-        temp, q_temp = coarsen_curve(t2, q, tol[i])
-        t_q.append(temp)
-
-    # print(t_new.shape, file=sys.stderr)
-    # while t_new.size > 90:
-    #     t_new, p, q = coarsen_curve(t_new, p, q, tol)
-    #     tol = tol * 1.5
-    # get second adaptive mask
-    boolean_mask = np.zeros((2, t.shape[0]), dtype=np.bool)
-    boolean_mask[0] = np.in1d(t, t_new)
-    return boolean_mask
+def combine_t(t1, t2, t_spacing_tol=1e-4):
+    t = np.union1d(t1, t2)
+    N = t.shape[0]
+    remove = np.zeros(N, dtype=bool)
+    remove[1:N - 1] = (t[1:N - 1] - t[0:N - 2]) < t_spacing_tol
+    t = t[np.logical_not(remove)]
+    return t
 
 
 def get_uniform_mask(n):
@@ -193,18 +178,12 @@ def coarsen_curve_pair(t, b1, b2, tol=2e-3, maxiter=5):
     return t, b1, b2
 
 
-def parametrize_curve_pair(p, q, t1, t2, t_spacing_tol):
-    t = np.union1d(t1, t2)
-    # N = t.shape[0]
-    # remove = np.zeros(N, dtype=bool)
-    # remove[1:N - 1] = (t[1:N - 1] - t[0:N - 2]) < t_spacing_tol
-    # t = t[np.logical_not(remove)]
-
+def parametrize_curve_pair(p, q, t, t1, t2):
     dim = p.shape[1]
     ip = np.zeros((t.shape[0], dim))
     iq = np.zeros((t.shape[0], dim))
     for i in range(p.shape[1]):
         ip[:, i] = np.interp(t, t1, p[:, i])
         iq[:, i] = np.interp(t, t2, q[:, i])
-    return t, ip, iq
+    return ip, iq
 

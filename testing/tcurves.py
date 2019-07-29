@@ -17,7 +17,7 @@ def run_tests(ndim, test_cases, curve_name, test_sizes, n_iter, shape_reps):
     for shape_rep in shape_reps:
         for case in test_cases:
             eprint(curve_name.upper() + " curve, " + case.upper() + " gamma, in {} dimensions with ".format(str(ndim)) + shape_rep.__name__ + " representation")
-            eprint("{: <15}| {: <15}| {: <15} {: <15}| {: <15}".format("Size", "Coarsened Size", "Energy", "Error", "Time(seconds)"))
+            eprint("{: <15}| {: <15}| {: <15}| {: <15}| {: <15}".format("Size", "Coarsened Size", "Energy", "Error", "Time(seconds)"))
             for size in test_sizes:
                 n = size  # number of points in domain
 
@@ -55,8 +55,7 @@ def run_tests(ndim, test_cases, curve_name, test_sizes, n_iter, shape_reps):
 def main():
     test_cases = ["identity", "sine", "flat", "steep", "bumpy"]
     test_sizes = [256, 512, 1024, 2048]
-    test_sizes = [1024]
-    curve_name = "circle"
+    curve_name = "limacon"
     n_iter = 5
     # 1d test
     # shape_reps = [shapedist.coords]
