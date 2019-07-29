@@ -1,5 +1,5 @@
 from numba import jit, generated_jit
-from math import floor, pi
+from math import floor, pi, sqrt
 
 
 @jit(nopython=True)
@@ -56,7 +56,7 @@ def norm(x, y):
 def srvfnorm(x, y, gammad):
     s = 0
     for i in range(x.shape[0]):
-        s = s + (x[i] - gammad * y[i]) ** 2
+        s = s + (x[i] - sqrt(gammad) * y[i]) ** 2
     return s
 
 

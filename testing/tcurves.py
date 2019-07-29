@@ -55,6 +55,7 @@ def run_tests(ndim, test_cases, curve_name, test_sizes, n_iter, shape_reps):
 def main():
     test_cases = ["identity", "sine", "flat", "steep", "bumpy"]
     test_sizes = [256, 512, 1024, 2048]
+    # test_sizes= [i for i in range(60, 200, 10)]
     curve_name = "limacon"
     n_iter = 5
     # 1d test

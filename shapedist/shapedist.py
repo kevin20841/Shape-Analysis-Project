@@ -48,27 +48,30 @@ def find_shapedist(p, q, dr='', shape_rep=shapedist.coords, distfunc=None, t1=No
                                                                                   t1, t2,
                                                                                   init_coarsening_tol,
                                                                                   uniform)
-    if numparams == 2:
-        p, s1 = shape_rep(p, t1)
-        q, s2 = shape_rep(q, t2)
-    else:
-        p, s1 = shape_rep(p)
-        q, s2 = shape_rep(q)
-
-    if not (s1 is None or s2 is None):
-        t1 = s1
-        t2 = s2
-
+    # if numparams == 2:
+    #     p, s1 = shape_rep(p, t1)
+    #     q, s2 = shape_rep(q, t2)
+    # else:
+    #     p, s1 = shape_rep(p)
+    #     q, s2 = shape_rep(q)
+    p = shape_rep(p)
+    q = shape_rep(q)
+    # if not (s1 is None or s2 is None):
+    #     t1 = s1
+    #     t2 = s2
+    print(p.shape)
     if shape_rep is shapedist.srvf:
         energy_dot = True
     # Find gamma in N dimensions
-    if p.shape[1] == 1:
-        tg, gammay, sdist = shapedist.elastic_linear_hierarchy.find_gamma(t, p[:, 0], q[:, 0], mask, energy_dot, uniform)
+    if len(p.shape) == 1 or p.shape[1] == 1:
+        p = np.reshape(p, (-1, 1))
+        q = np.reshape(q, (-1, 1))
+        tg, gammay, sdist = shapedist.elastic_linear_hierarchy.find_gamma(t, p, q, mask, energy_dot, uniform)
         p = np.reshape(p, (-1))
         q = np.reshape(q, (-1))
     else:
         tg, gammay, sdist = shapedist.elastic_linear_hierarchy.find_gamma(t, p, q, mask, energy_dot, uniform)
-
+        # tg, gammay, sdist = shapedist.elastic_n_2.find_gamma(t, p, q, 5, 5, energy_dot, uniform)
     if distfunc is not None:
         sdist = distfunc(p, q, tg, gammay)
     if 'd' in dr.lower():

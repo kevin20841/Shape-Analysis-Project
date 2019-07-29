@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import shapedist
 import numpy as np
 from scipy.io import loadmat
+from tqdm import tqdm
 import scipy.interpolate
 
 all_curves = loadmat('./data/Curve_data.mat')
@@ -15,12 +16,20 @@ curves = np.empty((100, 1024, 2))
 for i in range(100):
     curves[i] = curves_1024[i][0].T
 
+for i in tqdm(range(100)):
+    p = curves[i]
+    for j in range(100):
+        q = curves[j]
+        [t, pn, qn], mask = shapedist.build_hierarchy.get_adaptive_mask(p, q, shapedist.arclen_fct_values(p), shapedist.arclen_fct_values(q))
+        s = pn[mask[0]].shape[0]
+        if s > 90 or s < 30:
+            print(i, j, s)
 # for i in range(10, 20):
 #     plt.figure()
 #     plt.plot(curves[i][:, 0], curves[i][:, 1])
 
-b1 = curves[10]
-b2 = curves[12]
+# b1 = curves[10]
+# b2 = curves[12]
 # t1 = shapedist.arclen_fct_values(b1)
 # t2 = shapedist.arclen_fct_values(b2)
 #
@@ -40,17 +49,17 @@ b2 = curves[12]
 # energy1, pu, qu, tg, gammay = shapedist.find_shapedist(b1, b2, 'd')
 # print("Nonuniform:", energy1)
 # plt.plot(tg, gammay, "-r")
-energy2, p, q, tg, gammay = shapedist.find_shapedist(b1, b2, 'd')
-print("Nonuniform:", energy2)
-plt.plot(tg, gammay, ".-g")
+# energy2, p, q, tg, gammay = shapedist.find_shapedist(b1, b2, 'd')
+# print("Nonuniform:", energy2)
+# plt.plot(tg, gammay, ".-g")
+# # plt.figure()
+# # plt.ylim(-0.2, 0.2)
+# # plt.xlim(-0.2, 0.2)
+# # plt.plot(pu[:, 0], pu[:, 1], ".-")
+# # plt.plot(qu[:, 0], qu[:, 1], ".-")
 # plt.figure()
 # plt.ylim(-0.2, 0.2)
 # plt.xlim(-0.2, 0.2)
-# plt.plot(pu[:, 0], pu[:, 1], ".-")
-# plt.plot(qu[:, 0], qu[:, 1], ".-")
-plt.figure()
-plt.ylim(-0.2, 0.2)
-plt.xlim(-0.2, 0.2)
-plt.plot(p[:, 0], p[:, 1], ".-")
-plt.plot(q[:, 0], q[:, 1], ".-")
-plt.show()
+# plt.plot(p[:, 0], p[:, 1], ".-")
+# plt.plot(q[:, 0], q[:, 1], ".-")
+# plt.show()

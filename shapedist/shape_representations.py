@@ -100,7 +100,7 @@ def angle_function(p):
             pass
         i = i + 1
     theta = np.abs(theta)
-    theta = theta / (2 * np.pi) + 0.5
+    # theta = theta / (2 * np.pi) + 0.5
 
     return s, theta
 

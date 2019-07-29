@@ -8,7 +8,7 @@ from shapedist.comp import *
 
 
 @jit(cache=False, nopython=True)
-def find_gamma(t, p, q, width1, width2, energy_dot, u):
+def find_gamma(t, p, q, height, width, energy_dot, u):
 
     if len(p.shape) == 2:
         dim = p.shape[1]
@@ -38,17 +38,17 @@ def find_gamma(t, p, q, width1, width2, energy_dot, u):
 
     while i < n - 1:
 
-        j = 1
-        while j < m - 1:
+        j = max(floor(i / width), 1)
+        while j < min(i * height, m - 1):
             min_energy_values[i][j] = integrate(t, t, p, q, 0, i, 0, j,
                                                 gamma_interval, energy_dot,
                                                 dim, start, end, val1, val2, u)
-            k = i - width1
+            k = i - height
             if k <= 0:
                 k = 1
             minimum = min_energy_values[i][j]
             while k < i:
-                l = j - width2
+                l = j - width
                 if l <= 0:
                     l = 1
                 while l < j:
@@ -73,12 +73,12 @@ def find_gamma(t, p, q, width1, width2, energy_dot, u):
                                         gamma_interval, energy_dot,
                                         dim, start, end, val1, val2, u)
 
-    k = i - width1
+    k = i - height
     if k <= 0:
         k = 1
     minimum = min_energy_values[i][j]
     while k < i:
-        l = j - width2
+        l = j - width
         if l <= 0:
             l = 1
         while l < j:
