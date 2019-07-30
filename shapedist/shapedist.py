@@ -3,7 +3,7 @@ import numpy as np
 from numba import jit, float64
 from math import pi
 from inspect import signature
-
+import matplotlib.pyplot as plt
 
 @jit(nopython=True)
 def arclen_fct_values(b):
@@ -48,30 +48,30 @@ def find_shapedist(p, q, dr='', shape_rep=shapedist.coords, distfunc=None, t1=No
                                                                                   t1, t2,
                                                                                   init_coarsening_tol,
                                                                                   uniform)
-    # if numparams == 2:
-    #     p, s1 = shape_rep(p, t1)
-    #     q, s2 = shape_rep(q, t2)
-    # else:
-    #     p, s1 = shape_rep(p)
-    #     q, s2 = shape_rep(q)
-    p = shape_rep(p)
-    q = shape_rep(q)
-    # if not (s1 is None or s2 is None):
-    #     t1 = s1
-    #     t2 = s2
-    print(p.shape)
+
+    if numparams == 2:
+        p, s1 = shape_rep(p, t1)
+        q, s2 = shape_rep(q, t2)
+    else:
+        p, s1 = shape_rep(p)
+        q, s2 = shape_rep(q)
+
+    if not (s1 is None or s2 is None):
+        t1 = s1
+        t2 = s2
     if shape_rep is shapedist.srvf:
         energy_dot = True
     # Find gamma in N dimensions
     if len(p.shape) == 1 or p.shape[1] == 1:
-        p = np.reshape(p, (-1, 1))
-        q = np.reshape(q, (-1, 1))
-        tg, gammay, sdist = shapedist.elastic_linear_hierarchy.find_gamma(t, p, q, mask, energy_dot, uniform)
         p = np.reshape(p, (-1))
         q = np.reshape(q, (-1))
+
+    if len(p.shape) == 2:
+        dim = p.shape[1]
     else:
-        tg, gammay, sdist = shapedist.elastic_linear_hierarchy.find_gamma(t, p, q, mask, energy_dot, uniform)
-        # tg, gammay, sdist = shapedist.elastic_n_2.find_gamma(t, p, q, 5, 5, energy_dot, uniform)
+        dim = p.shape[0]
+    # tg, gammay, sdist = shapedist.elastic_linear_reduced.find_gamma(t, p, q, mask, energy_dot, uniform, dim)
+    tg, gammay, sdist = shapedist.elastic_n_2.find_gamma(t, p, q, 5, 5, energy_dot, uniform, dim)
     if distfunc is not None:
         sdist = distfunc(p, q, tg, gammay)
     if 'd' in dr.lower():
@@ -128,9 +128,7 @@ def inner_product_2D(t, p, q):
         i = i + 1
     return result
 
-
-@jit(float64(float64[:], float64[:, :], float64[:, :]), cache=True, nopython=True)
-def find_shape_distance_SRVF(t, p, q):
+def find_shape_distance_SRVF(p, q, t, gammay):
     p_q = inner_product_2D(t, p, q)
     p_p = inner_product_2D(t, p, p)
     q_q = inner_product_2D(t, q, q)

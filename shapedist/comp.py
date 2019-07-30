@@ -4,15 +4,12 @@ from math import floor, pi, sqrt
 
 @jit(nopython=True)
 def interpu(t, x, y, lower, upper, u):
-    sp = x[1] - y[0]
-    i = floor(t / sp)
-    if i >= x.size - 1:
-        ret = y[i]
-    elif i < 0:
-        ret = y[0]
+    interval = x[1] - x[0]
+    i = floor(t / interval)
+    if i == floor(1/interval):
+        return y[i], i
     else:
-        ret = (t - x[i]) * (y[i + 1] - y[i]) / (x[i + 1] - x[i]) + y[i]
-    return ret, i
+        return (t - x[i]) * (y[i + 1] - y[i]) / interval + y[i], i
 
 @jit(nopython=True)
 def interpn(t, x, y, lower, upper, u):

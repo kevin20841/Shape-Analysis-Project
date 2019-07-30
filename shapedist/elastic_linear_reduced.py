@@ -26,23 +26,20 @@ def get_neighborhood(tg, gamma):
         currd = (gamma[i + 1] - gamma[i]) / (tg[i + 1] - tg[i])
         if currd < 1:
             val = floor(1 / currd) + 3
-            neighborhood[i][0] = min(val, 8)
+            neighborhood[i][0] = val
             neighborhood[i][1] = 5
         else:
             val = floor(currd) + 3
             neighborhood[i][0] = 5
-            neighborhood[i][1] = min(val, 8)
+            neighborhood[i][1] = val
     neighborhood[-1][0] = 5
     neighborhood[-1][1] = 5
     return neighborhood
 
 
 @jit(nopython=True, cache=False)
-def find_gamma(t, p, q, parametrization_array, energy_dot, u):
-    if len(p.shape) == 2:
-        dim = p.shape[1]
-    else:
-        dim = p.shape[0]
+def find_gamma(t, p, q, parametrization_array, energy_dot, u, dim):
+
     # Initialize variables
     tp = t
     tq = t
@@ -71,8 +68,7 @@ def find_gamma(t, p, q, parametrization_array, energy_dot, u):
     gamma_domain, gamma_range, energy = shapedist.elastic_n_2.find_gamma(
         coarsest_domain, py[parametrization_array[0]],
         qy[parametrization_array[0]],
-        n_2_precision, n_2_precision, energy_dot, u)
-
+        n_2_precision, n_2_precision, energy_dot, u, dim)
     it = 0
     i = 0
     cont = True
@@ -87,6 +83,7 @@ def find_gamma(t, p, q, parametrization_array, energy_dot, u):
     upper_bound, lower_bound = calculate_search_area(temp_domain_gamma,
                                                      temp_domain_gamma, previous_path,
                                                      parametrization_size, u, 0)
+
 
     # current_iteration = 1
     # while current_iteration < parametrization_array.shape[0]:
@@ -170,7 +167,7 @@ def find_gamma(t, p, q, parametrization_array, energy_dot, u):
 
 @jit(cache=False, nopython=True)
 def calculate_search_area(new_domain, prev_domain, prev_path, parametrization_size, u, it):
-    strip_height = max(new_domain.shape[0] / (prev_domain.shape[0] * np.sqrt(2) / 2) + 3 + it * 2, 4)
+    strip_height = max(new_domain.shape[0] / (prev_domain.shape[0] * np.sqrt(2) / 2) + 3 + it * 2, 6)
     # strip_height = 2 * it + 4
     upper_bound_temp = np.zeros((prev_domain.size, 2), dtype=np.float64)
     lower_bound_temp = np.zeros((prev_domain.size, 2), dtype=np.float64)

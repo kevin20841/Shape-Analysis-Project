@@ -4,26 +4,82 @@ from joblib import Parallel, delayed, dump, load
 import os
 import shapedist
 import numpy as np
-folder = "./jm"
-try:
-    os.mkdir(folder)
-except FileExistsError:
-    pass
-dfm = os.path.join(folder, 'data_memmap')
-from scipy.io import loadmat
+import time
+import subprocess
+# host names
+names = ["magenta", "benson", "jeeves", "renfield", "bunter"]
+num_curves = 100
+dirname = os.path.dirname(__file__)
+def cache():
+    # put data onto disk for easy access
+    folder = "./jm"
+    try:
+        os.mkdir(folder)
+    except FileExistsError:
+        pass
+    dfm = os.path.join(folder, 'data_memmap')
+    from scipy.io import loadmat
 
-all_curves = loadmat('../data/Curve_data.mat')
+    all_curves = loadmat('../data/Curve_data.mat')
+    curves_raw = all_curves['MPEG7_curves_256'][:num_curves]
 
-curves_1024 = all_curves['MPEG7_curves_1024']
-print(all_curves['MPEG7_classes'])
-curves = np.empty((100, 1024, 2))
+    curves = np.empty((num_curves, 256, 2))
 
-for i in range(100):
-    curves[i] = curves_1024[i][0].T
-dump(curves, dfm)
-curves = load(dfm, mmap_mode='r')
-shapedist.find_shapedist(curves[0], curves[3], '')
+    for i in range(100):
+        curves[i] = curves_raw[i][0].T
+    dump(curves, dfm)
 
-matrix = Parallel(n_jobs=-1, verbose=5, max_nbytes=1e5)(delayed(shapedist.find_shapedist)(curves[i//100], curves[i-100 * (i//100)], 'u')for i in range(10000))
-matrix = np.array(matrix)
-np.savetxt("matrix_elastic_uniform_2.out", matrix)
+def broadcast():
+    N = len(names)
+    for i in range(N):
+        name = names[i]
+        step = int(np.ceil(100/N))
+        start = step * i
+        end = min(100, step *(i + 1))
+        command = ["ssh","-f", name, "nohup","/users/kls6/anaconda3/envs/Shape-Analysis-Project/bin/python",
+                   "/users/kls6/Shape-Analysis-Project/distance_matrix_computation/worker.py", str(start), str(end), "&>", "/dev/null"]
+        subprocess.Popen(command)
+
+
+def wait():
+    num = 0
+    count = 0
+    while num != len(names):
+        # check every 20 seconds if all jobs have completed
+        time.sleep(20)
+        onlyfiles = os.listdir("./output") # dir is your directory path as string
+        num = len(onlyfiles)
+        count = count + 1
+    print("Took " + str(count * 20) + " seconds!")
+def assemble():
+    output = np.zeros((num_curves, num_curves))
+    # assemble all files
+    data_matrices = os.listdir("./output")
+    for name in data_matrices:
+        raw_data = np.loadtxt(os.path.join(dirname, "./output/" + name))
+        [start, end] = name.split("_")
+        start = int(start)
+        end = int(end)
+        output[start:end] = raw_data
+    np.savetxt("distance_matrix.txt", output)
+
+def main():
+    args = sys.argv
+    if len(args) == 1:
+        cache()
+        broadcast()
+        wait()
+        assemble()
+    else:
+
+        if "-c" in args:
+            cache()
+        if "-w" in args:
+            wait()
+        if "-b" in args:
+            broadcast()
+        if "-a" in args:
+            assemble()
+
+if __name__ == "__main__":
+    sys.exit(main())

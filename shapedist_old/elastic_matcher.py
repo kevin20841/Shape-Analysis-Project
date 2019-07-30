@@ -16,8 +16,8 @@ def elastic_matcher(p, q, dim, curve_type="coord", adaptive=True, hierarchy_tol=
         t_orig = original[0]
         b1_orig = original[1]
         b2_orig = original[2]
-        tg, gamma, energy = shapedist.elastic_linear_hierarchy.find_gamma(t_orig, b1_orig, b2_orig, boolean_mask,
-                                                                          energy_dot)
+        tg, gamma, energy = shapedist.elastic_linear_reduced.find_gamma(t_orig, b1_orig, b2_orig, boolean_mask,
+                                                                        energy_dot)
         return tg, gamma, energy
 
     elif dim == 2 and adaptive:
@@ -34,8 +34,8 @@ def elastic_matcher(p, q, dim, curve_type="coord", adaptive=True, hierarchy_tol=
         b2_orig = original[2]
         for i in boolean_mask:
             print(t_orig[i].size)
-        tg, gammay, energy = shapedist.elastic_linear_hierarchy.find_gamma(t_orig, b1_orig, b2_orig, boolean_mask,
-                                                                           energy_dot)
+        tg, gammay, energy = shapedist.elastic_linear_reduced.find_gamma(t_orig, b1_orig, b2_orig, boolean_mask,
+                                                                         energy_dot)
 
         return tg, gammay, energy
 

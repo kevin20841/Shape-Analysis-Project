@@ -48,8 +48,8 @@ def calc(filename):
         b1_orig = original[1]
         b2_orig = original[2]
 
-        domain_x, gammax, energy= shapedist.elastic_linear_hierarchy.find_gamma(t_orig, b1_orig, b2_orig, boolean_mask,
-                                                                          True, 0)
+        domain_x, gammax, energy= shapedist.elastic_linear_reduced.find_gamma(t_orig, b1_orig, b2_orig, boolean_mask,
+                                                                              True, 0)
         error = shapedist.find_error(domain_x, ex.gamma_example(curve_type)[0](domain_x), gammax)
         print(curve_type, m, t_orig[boolean_mask[1]].size, error)
         # print(error)

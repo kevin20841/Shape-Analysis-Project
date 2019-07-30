@@ -13,7 +13,8 @@ def eprint(*args, **kwargs):
     print(*args)
 
 
-def run_tests(ndim, test_cases, curve_name, test_sizes, n_iter, shape_reps):
+def run_tests(ndim, test_cases, curve_name, test_sizes, n_iter, shape_reps, mode):
+    mode = mode + "d"
     for shape_rep in shape_reps:
         for case in test_cases:
             eprint(curve_name.upper() + " curve, " + case.upper() + " gamma, in {} dimensions with ".format(str(ndim)) + shape_rep.__name__ + " representation")
@@ -40,7 +41,7 @@ def run_tests(ndim, test_cases, curve_name, test_sizes, n_iter, shape_reps):
                 gammay = 0
                 for i in range(n_iter):
                     start = time.time()
-                    energy, p_new, q_new, tg, gammay = shapedist.find_shapedist(p, q, 'd', t1=t, t2=t, shape_rep=shape_rep)
+                    energy, p_new, q_new, tg, gammay = shapedist.find_shapedist(p, q, mode, t1=t, t2=t, shape_rep=shape_rep)
                     end = time.time()
                     if start - end < elapsed:
                         elapsed = end - start
@@ -53,19 +54,21 @@ def run_tests(ndim, test_cases, curve_name, test_sizes, n_iter, shape_reps):
 
 
 def main():
-    test_cases = ["identity", "sine", "flat", "steep", "bumpy"]
-    test_sizes = [256, 512, 1024, 2048]
+    # test_cases = ["identity", "sine", "flat", "steep", "bumpy"]
+    test_cases = ["identity", "sine", "bumpy"]
+    test_sizes = [256, 512, 1024]
     # test_sizes= [i for i in range(60, 200, 10)]
     curve_name = "limacon"
-    n_iter = 5
+    n_iter = 1
     # 1d test
     # shape_reps = [shapedist.coords]
     # run_tests(1, test_cases, curve_name, test_sizes, n_iter, shape_reps)
     
     # 2d test
-    shape_reps = [shapedist.coords, shapedist.srvf, shapedist.normals, shapedist.tangent]
+    shape_reps = [shapedist.coords, shapedist.tangent, shapedist.srvf]
+
     # shape_reps = [shapedist.curvature]
-    run_tests(2, test_cases, curve_name, test_sizes, n_iter, shape_reps)
+    run_tests(2, test_cases, curve_name, test_sizes, n_iter, shape_reps, "u")
     
     # 3d test
     # shape_reps = [shapedist.coords]

@@ -6,18 +6,17 @@ np.set_printoptions(threshold=sys.maxsize)
 
 
 def hierarchical_curve_discretization(p, q, t1, t2, init_coarsening_tol, uniform):
-
     # Curves should be an array of coordinates
     if uniform:
         t = combine_t(t1, t2)
         p, q = parametrize_curve_pair(p, q, t, t1, t2)
-        return [t, p, q], get_uniform_mask(p.shape[0])
+        return [t, p, q], get_uniform_mask(t.shape[0])
     else:
         return get_adaptive_mask(p, q, t1, t2)
 
 
 def get_adaptive_mask(p, q, t1, t2, init_coarsening_tol=None):
-    tol = [0.019, 2e-3]
+    tol = [0.03, 1e-4]
     t = combine_t(t1, t2)
     boolean_mask = np.zeros((3, t.shape[0])) < 1
     for i in range(len(tol)):
@@ -27,6 +26,7 @@ def get_adaptive_mask(p, q, t1, t2, init_coarsening_tol=None):
         boolean_mask[i] = np.logical_or(boolean_mask[i], np.in1d(t, t_q))
         boolean_mask[i][0] = True
         boolean_mask[i][-1] = True
+
     p, q = parametrize_curve_pair(p, q, t, t1, t2)
     for i in boolean_mask:
         print(p[i].shape)
@@ -55,6 +55,7 @@ def get_uniform_mask(n):
     #     boolean_mask.append(mask)
     #     ct = ct * 2
     #     c = (c-1)//2
+    #     print(c)
     #
     # boolean_mask[::-1] = boolean_mask
     # boolean_mask = [boolean_mask[0], boolean_mask[2], boolean_mask[-1]]
@@ -62,12 +63,13 @@ def get_uniform_mask(n):
     #
     # return boolean_mask
     boolean_mask = np.zeros((3, n), dtype=np.bool)
-    level_numbers = [60, 200, n]
+    level_numbers = [70, 400, n]
     for j in range(3):
         for i in range(level_numbers[j]):
-            step_size = np.int(np.ceil(n / level_numbers[j]))
+            step_size = np.int(np.floor(n / level_numbers[j]))
             if i * step_size < n:
                 boolean_mask[j][i * step_size] = True
+        boolean_mask[j][0] = True
         boolean_mask[j][-1] = True
     return boolean_mask
 
@@ -156,7 +158,7 @@ def curvature(p):
     K = -2 * K / np.sqrt(bottom_sqr)
 
     K = np.append(K, K[0])
-    print("yay")
+
     return K
 
 
@@ -176,7 +178,7 @@ def coarsen_curve(t, b, tol=2e-3, maxiter=5):
 
 
 
-def coarsen_curve_pair(t, b1, b2, tol=2e-3, maxiter=10):
+def coarsen_curve_pair(t, b1, b2, tol=2e-3, maxiter=7):
     i = 0
 
     while i < maxiter:

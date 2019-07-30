@@ -1,5 +1,5 @@
 import numpy as np
-
+import shapedist
 
 def coords(p):
     return p, None
@@ -13,7 +13,7 @@ def tangent(p):
     velocity = np.array([[dx_dt[i], dy_dt[i]] for i in range(dx_dt.size)])
     ds_dt = np.sqrt(dx_dt * dx_dt + dy_dt * dy_dt)
     tangent = np.array([1 / ds_dt] * 2).transpose() * velocity
-    return tangent, None
+    return np.arctan2(tangent[:, 0], tangent[:, 1]), None
 
 
 def normals(p, t):
@@ -45,17 +45,8 @@ def normals(p, t):
     return normal, None
 
 
-def curvature(p, t):
-    x = p[:, 0]
-    y = p[:, 1]
-    dx_dt = np.gradient(x, t)
-    dy_dt = np.gradient(y, t)
-    d2x_dt2 = np.gradient(dx_dt, t)
-    d2y_dt2 = np.gradient(dy_dt, t)
-
-    c = np.abs(d2x_dt2 * dy_dt - dx_dt * d2y_dt2) / (dx_dt * dx_dt + dy_dt * dy_dt)**1.5
-
-    return c, None
+def curvature(p):
+    return shapedist.build_hierarchy.curvature(p), None
 
 
 def angle_function(p):
