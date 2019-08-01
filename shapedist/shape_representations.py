@@ -6,14 +6,18 @@ def coords(p):
 
 
 def tangent(p):
-    x = p[:, 0]
-    y = p[:, 1]
-    dx_dt = np.gradient(x)
-    dy_dt = np.gradient(y)
-    velocity = np.array([[dx_dt[i], dy_dt[i]] for i in range(dx_dt.size)])
-    ds_dt = np.sqrt(dx_dt * dx_dt + dy_dt * dy_dt)
-    tangent = np.array([1 / ds_dt] * 2).transpose() * velocity
-    return np.arctan2(tangent[:, 0], tangent[:, 1]), None
+    tans = p[1:] - p[:-1]
+    bot = np.sqrt(tans[:, 0] **2 + tans[:, 1] **2)
+    tans = np.divide(tans, bot)
+    return tans
+    # x = p[:, 0]
+    # y = p[:, 1]
+    # dx_dt = np.gradient(x)
+    # dy_dt = np.gradient(y)
+    # velocity = np.array([[dx_dt[i], dy_dt[i]] for i in range(dx_dt.size)])
+    # ds_dt = np.sqrt(dx_dt * dx_dt + dy_dt * dy_dt)
+    # tangent = np.array([1 / ds_dt] * 2).transpose() * velocity
+    # return np.arctan2(tangent[:, 0], tangent[:, 1]), None
 
 
 def normals(p, t):
@@ -103,6 +107,7 @@ def srvf(p, t):
     dy_dt = np.gradient(y, t)
     result = np.zeros((x.size, 2), dtype=np.float64)
     mag = (dx_dt ** 2 + dy_dt ** 2) ** 0.25
+
     result[:, 0] = dx_dt / mag
     result[:, 1] = dy_dt / mag
 

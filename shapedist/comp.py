@@ -9,7 +9,7 @@ def interpu(t, x, y, lower, upper, u):
     if i == floor(1/interval):
         return y[i], i
     else:
-        return (t - x[i]) * (y[i + 1] - y[i]) / interval + y[i], i
+        return (t - x[i]) * (y[i + 1] - y[i]) / (x[i+1] - x[i]) + y[i], i
 
 @jit(nopython=True)
 def interpn(t, x, y, lower, upper, u):
@@ -58,19 +58,19 @@ def srvfnorm(x, y, gammad):
 
 
 @jit(nopython=True, cache=False)
-def integrate_nd(tp, tq, py, qy, k, i, l, j, gamma_interval, energy_dot, dim, start, end, val1, val2, u):
+def integrate_nd(tp, tq, py, qy, k, i, l, j, gamma, energy_dot, dim, start, end, val1, val2, u):
     e = 0
     a = k
-    gammad = (gamma_interval * (j - l)) / (tp[i] - tp[k])
-    gammak_1 = gamma_interval * l + (tp[a] - tp[k]) * gammad
-    gammak_end = gamma_interval * l + (tp[i] - tp[k]) * gammad
+    gammad = (gamma[j] - gamma[l]) / (tp[i] - tp[k])
+    gammak_1 = gamma[l] + (tp[a] - tp[k]) * gammad
+    gammak_end = gamma[l]+ (tp[i] - tp[k]) * gammad
 
     for d in range(dim):
         val1[d], start[d] = interp(gammak_1, tq, qy[:, d], 0, tq.size, u)
         temp, end[d] = interp(gammak_end, tq, qy[:, d], start[d], tq.size, u)
 
     while a < i:
-        gammak_2 = gamma_interval * l + (tp[a + 1] - tp[k]) * gammad
+        gammak_2 = gamma[l] + (tp[a + 1] - tp[k]) * gammad
         for d in range(dim):
             val2[d], start[d] = interp(gammak_2, tq, qy[:, d], start[d], end[d] + 1, u)
         if not energy_dot:
@@ -87,19 +87,19 @@ def integrate_nd(tp, tq, py, qy, k, i, l, j, gamma_interval, energy_dot, dim, st
     return e
 
 
-def integrate_1d(tp, tq, py, qy, k, i, l, j, gamma_interval, energy_dot, dim, start, end, val1, val2, u):
+def integrate_1d(tp, tq, py, qy, k, i, l, j, gamma, energy_dot, dim, start, end, val1, val2, u):
     e = 0
     a = k
-    gammak_1 = gamma_interval * l + (tp[a] - tp[k]) * \
-               (gamma_interval * j - gamma_interval * l) / (tp[i] - tp[k])
-    gammak_end = gamma_interval * l + (tp[i] - tp[k]) * \
-                 (gamma_interval * j - gamma_interval * l) / (tp[i] - tp[k])
+    gammak_1 = gamma[l] + (tp[a] - tp[k]) * \
+               (gamma[j]- gamma[l]) / (tp[i] - tp[k])
+    gammak_end = gamma[l]  + (tp[i] - tp[k]) * \
+                 (gamma[j]  - gamma[l] ) / (tp[i] - tp[k])
 
     val1, start = interp(gammak_1, tq, qy, 0, tq.size, u)
     val2, end = interp(gammak_end, tq, qy, start, tq.size, u)
 
     while a < i:
-        gammak_2 = gamma_interval * l + (tp[a + 1] - tp[k]) * (gamma_interval * j - gamma_interval * l) / (
+        gammak_2 = gamma[l]  + (tp[a + 1] - tp[k]) * (gamma[j]  - gamma[l] ) / (
                 tp[i] - tp[k])
 
         val2, start = interp(gammak_2, tq, qy, start, end + 1, u)
@@ -111,7 +111,7 @@ def integrate_1d(tp, tq, py, qy, k, i, l, j, gamma_interval, energy_dot, dim, st
 
 
 @generated_jit(nopython=True, cache=False)
-def integrate(tp, tq, py, qy, k, i, l, j, gamma_interval, energy_dot, dim, start, end, val1, val2, u):
+def integrate(tp, tq, py, qy, k, i, l, j, gamma, energy_dot, dim, start, end, val1, val2, u):
     if py.ndim == 1:
         return integrate_1d
     elif py.ndim == 2:

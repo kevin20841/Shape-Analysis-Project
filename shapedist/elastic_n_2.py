@@ -11,6 +11,7 @@ from shapedist.comp import *
 def find_gamma(t, p, q, height, width, energy_dot, u, dim):
 
     # Linear Iteration
+    gamma = t
     parametrization_size = p.shape[0]
     start = np.empty(dim, dtype=np.int64)
     val1 = np.empty(dim, dtype=np.float64)
@@ -23,11 +24,11 @@ def find_gamma(t, p, q, height, width, energy_dot, u, dim):
 
     min_energy_values = np.full((n, n), np.inf, dtype=np.float64)
     path_nodes = np.zeros((n, n, 2), dtype=np.int64)
-    gamma_interval = 1 / (m - 1)
 
-    min_energy_values[0][0] = integrate(t, t, p, q, 0, 1, 0, 1, gamma_interval, energy_dot,
-                                        dim, start, end, val1, val2, u)
-
+    for i in range(1, width):
+        for j in range(1, height):
+            min_energy_values[i][j] = integrate(t, t, p, q, 0, i, 0, j, gamma, energy_dot,
+                                                dim, start, end, val1, val2, u)
     path_nodes[1][1][0] = 0
     path_nodes[1][1][1] = 0
     i, j, k, l = 1, 1, 1, 1
@@ -36,9 +37,10 @@ def find_gamma(t, p, q, height, width, energy_dot, u, dim):
 
         j = 1
         while j < m-1:
-            min_energy_values[i][j] = integrate(t, t, p, q, 0, i, 0, j,
-                                                gamma_interval, energy_dot,
-                                                dim, start, end, val1, val2, u)
+            # min_energy_values[i][j] = np.inf
+            # integrate(t, t, p, q, 0, i, 0, j,
+            #                                     gamma_interval, energy_dot,
+            #                                     dim, start, end, val1, val2, u)
             k = i - height
             if k <= 0:
                 k = 1
@@ -50,7 +52,7 @@ def find_gamma(t, p, q, height, width, energy_dot, u, dim):
                 while l < j:
                     e = min_energy_values[k, l] + integrate(t, t, p, q,
                                                             k, i, l, j,
-                                                            gamma_interval, energy_dot,
+                                                            gamma, energy_dot,
                                                             dim, start, end, val1, val2, u)
                     if e < minimum:
                         minimum = e
@@ -62,12 +64,13 @@ def find_gamma(t, p, q, height, width, energy_dot, u, dim):
             min_energy_values[i][j] = minimum
             j = j + 1
         i = i + 1
+
     # !!
     i = n - 1
     j = m - 1
-    min_energy_values[i][j] = integrate(t, t, p, q, 0, i, 0, j,
-                                        gamma_interval, energy_dot,
-                                        dim, start, end, val1, val2, u)
+    # min_energy_values[i][j] = integrate(t, t, p, q, 0, i, 0, j,
+    #                                     gamma_interval, energy_dot,
+    #                                     dim, start, end, val1, val2, u)
 
     k = i - height
     if k <= 0:
@@ -81,7 +84,7 @@ def find_gamma(t, p, q, height, width, energy_dot, u, dim):
         while l < j:
             e = min_energy_values[k, l] + integrate(t, t, p, q,
                                                     k, i, l, j,
-                                                    gamma_interval, energy_dot,
+                                                    gamma, energy_dot,
                                                     dim, start, end, val1, val2, u)
             if e < minimum:
                 minimum = e
@@ -108,12 +111,12 @@ def find_gamma(t, p, q, height, width, energy_dot, u, dim):
     previousIndex_domain = n - 1
     previousIndex_gamma = n - 1
 
-    path[path_indices[0][0]] = gamma_interval * path_indices[0][1]
+    path[path_indices[0][0]] = gamma[path_indices[0][1]]
     while i < path_indices.size // 2 and previousIndex_domain != 0:
-        path[path_indices[i][0]] = gamma_interval * path_indices[i][1]
+        path[path_indices[i][0]] = gamma[path_indices[i][1]]
         if previousIndex_domain - path_indices[i][0] > 1:
             j = 0
-            val = (gamma_interval * (previousIndex_gamma - path_indices[i][1])) / \
+            val = (gamma[previousIndex_gamma] - gamma[path_indices[i][1]])/ \
                   (t[previousIndex_domain] - t[path_indices[i][0]])
             while j < previousIndex_domain - path_indices[i][0]:
                 path[previousIndex_domain - j] = previous - (t[previousIndex_domain] -
@@ -122,6 +125,6 @@ def find_gamma(t, p, q, height, width, energy_dot, u, dim):
                 j = j + 1
         previousIndex_domain = path_indices[i][0]
         previousIndex_gamma = path_indices[i][1]
-        previous = gamma_interval * path_indices[i][1]
+        previous = gamma[path_indices[i][1]]
         i = i + 1
     return t, path, min_energy_values[n - 1][m - 1]

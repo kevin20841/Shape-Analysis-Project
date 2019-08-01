@@ -9,21 +9,29 @@ import scipy.interpolate
 
 all_curves = loadmat('./data/Curve_data.mat')
 
-curves_1024 = all_curves['MPEG7_curves_1024']
-print(all_curves['MPEG7_classes'])
-curves = np.empty((100, 1024, 2))
+curves_1024 = all_curves['MPEG7_curves_256']
+print(all_curves.keys())
+curves = np.empty((100, 256, 2))
 
 for i in range(100):
     curves[i] = curves_1024[i][0].T
-
-for i in tqdm(range(100)):
-    p = curves[i]
-    for j in range(100):
-        q = curves[j]
-        [t, pn, qn], mask = shapedist.build_hierarchy.get_adaptive_mask(p, q, shapedist.arclen_fct_values(p), shapedist.arclen_fct_values(q))
-        s = pn[mask[0]].shape[0]
-        if s > 90 or s < 30:
-            print(i, j, s)
+p = curves[61]
+q = curves[20]
+R = np.array([[0.877, -0.479],[0.479, 0.877]])
+# q = np.zeros(p.shape)
+# for i in range(256):
+#     q[i] = R @ p[i]
+t = np.linspace(0., 1., p.shape[0])
+dist = shapedist.closed_curve_shapedist(p, q, dr="u2", t1 = t, t2=t, shape_rep=shapedist.coords)
+print(dist)
+# for i in tqdm(range(100)):
+#     p = curves[i]
+#     for j in range(100):
+#         q = curves[j]
+#         [t, pn, qn], mask = shapedist.build_hierarchy.get_adaptive_mask(p, q, shapedist.arclen_fct_values(p), shapedist.arclen_fct_values(q))
+#         s = pn[mask[0]].shape[0]
+#         s2 = pn[mask[1]].shape[0]
+#     print(i, j, s)
 # for i in range(10, 20):
 #     plt.figure()
 #     plt.plot(curves[i][:, 0], curves[i][:, 1])

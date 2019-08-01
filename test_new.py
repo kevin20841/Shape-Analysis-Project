@@ -11,7 +11,7 @@ from io import StringIO
 
 
 # One example shapdist compuation for gamma
-n = 256  # number of points in domain
+n = 2048  # number of points in domain
 
 t = np.linspace(0., 1., n)
 q = ex.curve_example('limacon', t)[0]
@@ -20,7 +20,7 @@ x_function = scipy.interpolate.CubicSpline(t, q[0])
 y_function = scipy.interpolate.CubicSpline  (t, q[1])
 
 
-test = ex.gamma_example("sine")[0]
+test = ex.gamma_example("bumpy")[0]
 # test1 = ex.gamma_example("sine")[0](t)
 
 p[0] = x_function(test(t))
@@ -34,7 +34,7 @@ q = q.T
 # energy, p_new, q_new, tg, gammay = shapedist.find_shapedist(p, q, 'd', t1=t, t2=t, shape_rep=shapedist.normals)
 # plt.plot(tg, gammay, "-r")
 
-energy1, p_new, q_new, tg, gammay = shapedist.find_shapedist(p, q,'ud',  t1=t, t2=t, shape_rep=shapedist.curvature)
+energy1, p_new, q_new, tg, gammay = shapedist.find_shapedist(p, q,'d',  t1=t, t2=t, shape_rep=shapedist.coords)
 plt.plot(tg, gammay, ".b")
 plt.plot(tg, test(tg), "-r")
 # for i in range(q_new.shape[1]):

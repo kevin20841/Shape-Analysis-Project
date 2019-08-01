@@ -15,17 +15,14 @@ def job(start, end):
     curves = load(dfm, mmap_mode='r')
 
 
-    # matrix = Parallel(n_jobs=-1, verbose=5, max_nbytes=1e5)(
-    #     delayed(task)(curves[i], curves[j]) for i in range(start, end) for j in range(curves.shape[0]))
-
-    matrix = Parallel(n_jobs=-1, verbose=5)(delayed(task)(curves[i//curves.shape[0]], curves[i%curves.shape[0]]) for i in range(start *curves.shape[0], end * curves.shape[0]))
+    matrix = Parallel(n_jobs=-1, verbose=5, max_nbytes='50M')(delayed(task)(curves[i//curves.shape[0]], curves[i%curves.shape[0]]) for i in range(start *curves.shape[0], end * curves.shape[0]))
     matrix = np.reshape(np.array(matrix), (end-start, curves.shape[0]))
 
     np.savetxt(os.path.join(dirname, "./output/" + str(start) +"_"+str(end)), matrix)
 
 def task(p, q):
     t = np.linspace(0., 1., p.shape[0])
-    dist = shapedist.find_shapedist(p, q, 'u', t1 = t, t2 = t)
+    dist = shapedist.closed_curve_shapedist(p, q, dr='u2', t1 = t, t2 = t, shape_rep=shapedist.coords)
     return dist
 
 def main():

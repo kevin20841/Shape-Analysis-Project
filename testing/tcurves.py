@@ -55,20 +55,20 @@ def run_tests(ndim, test_cases, curve_name, test_sizes, n_iter, shape_reps, mode
 
 def main():
     # test_cases = ["identity", "sine", "flat", "steep", "bumpy"]
-    test_cases = ["identity", "sine", "bumpy"]
-    test_sizes = [256, 512, 1024]
+    test_cases = ["sine", "bumpy"]
+    test_sizes = [256, 512, 1024, 2048, 4096]
     # test_sizes= [i for i in range(60, 200, 10)]
     curve_name = "limacon"
-    n_iter = 1
+    n_iter = 5
     # 1d test
     # shape_reps = [shapedist.coords]
     # run_tests(1, test_cases, curve_name, test_sizes, n_iter, shape_reps)
     
     # 2d test
-    shape_reps = [shapedist.coords, shapedist.tangent, shapedist.srvf]
+    shape_reps = [shapedist.coords, shapedist.tangent, shapedist.curvature, shapedist.srvf]
 
     # shape_reps = [shapedist.curvature]
-    run_tests(2, test_cases, curve_name, test_sizes, n_iter, shape_reps, "u")
+    run_tests(2, test_cases, curve_name, test_sizes, n_iter, shape_reps, "um")
     
     # 3d test
     # shape_reps = [shapedist.coords]

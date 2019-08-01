@@ -8,7 +8,7 @@ import time
 import subprocess
 # host names
 names = ["magenta", "benson", "jeeves", "renfield", "bunter"]
-num_curves = 100
+num_curves = 20
 dirname = os.path.dirname(__file__)
 def cache():
     # put data onto disk for easy access
@@ -21,23 +21,24 @@ def cache():
     from scipy.io import loadmat
 
     all_curves = loadmat('../data/Curve_data.mat')
-    curves_raw = all_curves['MPEG7_curves_256'][:num_curves]
+    curves_raw = all_curves['MPEG7_curves_256']
 
     curves = np.empty((num_curves, 256, 2))
-
-    for i in range(100):
-        curves[i] = curves_raw[i][0].T
+    for i in range(10):
+        for j in range(2):
+            curves[i * 2 + j] = curves_raw[i * 10 + j][0].T
     dump(curves, dfm)
 
 def broadcast():
     N = len(names)
     for i in range(N):
         name = names[i]
-        step = int(np.ceil(100/N))
+        step = int(np.ceil(num_curves/N))
         start = step * i
-        end = min(100, step *(i + 1))
+        end = min(num_curves, step *(i + 1))
         command = ["ssh","-f", name, "nohup","/users/kls6/anaconda3/envs/Shape-Analysis-Project/bin/python",
                    "/users/kls6/Shape-Analysis-Project/distance_matrix_computation/worker.py", str(start), str(end), "&>", "/dev/null"]
+        time.sleep(2)
         subprocess.Popen(command)
 
 
@@ -46,11 +47,14 @@ def wait():
     count = 0
     while num != len(names):
         # check every 20 seconds if all jobs have completed
-        time.sleep(20)
+        st = 5
+        time.sleep(st)
         onlyfiles = os.listdir("./output") # dir is your directory path as string
         num = len(onlyfiles)
         count = count + 1
-    print("Took " + str(count * 20) + " seconds!")
+    f = open("time.txt", "a")
+    f.write("Took " + str(count * st) + " seconds!\n")
+    f.close()
 def assemble():
     output = np.zeros((num_curves, num_curves))
     # assemble all files
@@ -61,14 +65,17 @@ def assemble():
         start = int(start)
         end = int(end)
         output[start:end] = raw_data
-    np.savetxt("distance_matrix.txt", output)
+    np.savetxt("n2_5_small_256_coords", output)
 
 def main():
     args = sys.argv
     if len(args) == 1:
+        print("Caching")
         cache()
         broadcast()
+        print("Waiting")
         wait()
+        print("Finished!")
         assemble()
     else:
 

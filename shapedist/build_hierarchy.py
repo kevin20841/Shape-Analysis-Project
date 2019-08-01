@@ -5,18 +5,18 @@ import sys
 np.set_printoptions(threshold=sys.maxsize)
 
 
-def hierarchical_curve_discretization(p, q, t1, t2, init_coarsening_tol, uniform):
+def hierarchical_curve_discretization(p, q, t1, t2, init_coarsening_tol, uniform, multi):
     # Curves should be an array of coordinates
     if uniform:
         t = combine_t(t1, t2)
         p, q = parametrize_curve_pair(p, q, t, t1, t2)
-        return [t, p, q], get_uniform_mask(t.shape[0])
+        return [t, p, q], get_uniform_mask(t.shape[0], multi)
     else:
         return get_adaptive_mask(p, q, t1, t2)
 
 
 def get_adaptive_mask(p, q, t1, t2, init_coarsening_tol=None):
-    tol = [0.03, 1e-4]
+    tol = [0.03, 2e-3]
     t = combine_t(t1, t2)
     boolean_mask = np.zeros((3, t.shape[0])) < 1
     for i in range(len(tol)):
@@ -26,15 +26,19 @@ def get_adaptive_mask(p, q, t1, t2, init_coarsening_tol=None):
         boolean_mask[i] = np.logical_or(boolean_mask[i], np.in1d(t, t_q))
         boolean_mask[i][0] = True
         boolean_mask[i][-1] = True
-
+    if t.shape[0] < 300:
+        ret = np.array([boolean_mask[0], boolean_mask[-1]])
+    else:
+        ret = boolean_mask
     p, q = parametrize_curve_pair(p, q, t, t1, t2)
-    for i in boolean_mask:
-        print(p[i].shape)
-    return [t, p, q], boolean_mask
+    # for i in boolean_mask:
+    #     print(p[i].shape)
+    t = np.linspace(0., 1, t.shape[0])
+    return [t, p, q], ret
 
 
 def combine_t(t1, t2, t_spacing_tol=1e-4):
-    t_spacing_tol = min(np.min(t1), np.min(t2))
+    t_spacing_tol = min(np.min(t1[1:]-t1[0:-1]), np.min(t2[1:]-t2[0:-1]))
     t = np.union1d(t1, t2)
     N = t.shape[0]
     remove = np.zeros(N, dtype=bool)
@@ -43,35 +47,35 @@ def combine_t(t1, t2, t_spacing_tol=1e-4):
     return t
 
 
-def get_uniform_mask(n):
-    # boolean_mask = []
-    # c = n
-    # ct = 1
-    # while c >= 64:
-    #     mask = np.zeros(n, dtype=np.bool)
-    #     for i in range(c):
-    #         mask[i * ct] = True
-    #     mask[-1] = True
-    #     boolean_mask.append(mask)
-    #     ct = ct * 2
-    #     c = (c-1)//2
-    #     print(c)
-    #
-    # boolean_mask[::-1] = boolean_mask
-    # boolean_mask = [boolean_mask[0], boolean_mask[2], boolean_mask[-1]]
-    # boolean_mask = np.array(boolean_mask, dtype=np.bool)
-    #
-    # return boolean_mask
-    boolean_mask = np.zeros((3, n), dtype=np.bool)
-    level_numbers = [70, 400, n]
-    for j in range(3):
-        for i in range(level_numbers[j]):
-            step_size = np.int(np.floor(n / level_numbers[j]))
-            if i * step_size < n:
-                boolean_mask[j][i * step_size] = True
-        boolean_mask[j][0] = True
-        boolean_mask[j][-1] = True
+def get_uniform_mask(n, multi = False):
+    boolean_mask = []
+    c = n
+    ct = 1
+    while c >= 64:
+        mask = np.zeros(n, dtype=np.bool)
+        for i in range(c):
+            mask[i * ct] = True
+        mask[-1] = True
+        boolean_mask.append(mask)
+        ct = ct * 2
+        c = (c)//2
+
+    boolean_mask[::-1] = boolean_mask
+    if not multi:
+        boolean_mask = [boolean_mask[0], boolean_mask[2], boolean_mask[-1]]
+    boolean_mask = np.array(boolean_mask, dtype=np.bool)
+
     return boolean_mask
+    # boolean_mask = np.zeros((3, n), dtype=np.bool)
+    # level_numbers = [70, 400, n]
+    # for j in range(3):
+    #     for i in range(level_numbers[j]):
+    #         step_size = np.int(np.floor(n / level_numbers[j]))
+    #         if i * step_size < n:
+    #             boolean_mask[j][i * step_size] = True
+    #     boolean_mask[j][0] = True
+    #     boolean_mask[j][-1] = True
+    # return boolean_mask
 
 
 def mark_nodes_for_coarsening_pair(element_errors_1, element_errors_2, t, tol, t_spacing_tol=0.0001):
