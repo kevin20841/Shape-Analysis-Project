@@ -6,18 +6,18 @@ def coords(p):
 
 
 def tangent(p):
-    tans = p[1:] - p[:-1]
-    bot = np.sqrt(tans[:, 0] **2 + tans[:, 1] **2)
-    tans = np.divide(tans, bot)
-    return tans
-    # x = p[:, 0]
-    # y = p[:, 1]
-    # dx_dt = np.gradient(x)
-    # dy_dt = np.gradient(y)
-    # velocity = np.array([[dx_dt[i], dy_dt[i]] for i in range(dx_dt.size)])
-    # ds_dt = np.sqrt(dx_dt * dx_dt + dy_dt * dy_dt)
-    # tangent = np.array([1 / ds_dt] * 2).transpose() * velocity
-    # return np.arctan2(tangent[:, 0], tangent[:, 1]), None
+    # tans = p[1:] - p[:-1]
+    # bot = np.sqrt(tans[:, 0] **2 + tans[:, 1] **2)
+    # tans = np.divide(tans, bot)
+    # return tans
+    x = p[:, 0]
+    y = p[:, 1]
+    dx_dt = np.gradient(x)
+    dy_dt = np.gradient(y)
+    velocity = np.array([[dx_dt[i], dy_dt[i]] for i in range(dx_dt.size)])
+    ds_dt = np.sqrt(dx_dt * dx_dt + dy_dt * dy_dt)
+    tangent = np.array([1 / ds_dt] * 2).transpose() * velocity
+    return tangent, None
 
 
 def normals(p, t):
@@ -115,11 +115,16 @@ def srvf(p, t):
 
 
 def calculate_com(p):
-    com = np.zeros(p.shape[1])
-    i = 1
-    while i < p.shape[1] - 1:
-        h1 = np.sum(np.power(p[i] - p[i-1], 2))**0.5
-        h2 = np.sum(np.power(p[i+1] - p[i], 2))**0.5
-        com = com + (h1 + h2) / 5 *p[i]
-        i = i + 1
+
+    # com = np.zeros(p.shape[1])
+    com = np.average(p, axis=0, weights=p)
+    # i = 1
+    # while i < p.shape[0] - 1:
+    #     h1 = np.linalg.norm(p[i] - p[i-1])
+    #     h2 = np.linalg.norm(p[i+1] - p[i])
+    #     # h1 = np.sum(np.power(p[i] - p[i-1], 2))**0.5
+    #     # h2 = np.sum(np.power(p[i+1] - p[i], 2))**0.5
+    #     com = com + (h1 + h2) / 2 *p[i]
+    #     i = i + 1
     return com
+    # return com

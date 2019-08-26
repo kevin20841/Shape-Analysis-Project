@@ -1,7 +1,7 @@
 import sys
 sys.path.append("../")
 from joblib import Parallel, delayed, dump, load
-import os
+import os, shutil
 import shapedist
 import numpy as np
 import time
@@ -10,6 +10,15 @@ import subprocess
 names = ["magenta", "benson", "jeeves", "renfield", "bunter"]
 num_curves = 20
 dirname = os.path.dirname(__file__)
+
+filename = "kd_tree_comp_1024_coords"
+
+def printtime(t):
+    if t < 60:
+        print(str(t) + " seconds passed.", end='\r')
+    if t >= 60:
+        print(str(t//60) + " minutes, " + str(t % 60) + " seconds passed.", end='\r')
+
 def cache():
     # put data onto disk for easy access
     folder = "./jm"
@@ -23,7 +32,9 @@ def cache():
     all_curves = loadmat('../data/Curve_data.mat')
     curves_raw = all_curves['MPEG7_curves_256']
 
-    curves = np.empty((num_curves, 256, 2))
+    curves = np.empty((20, 256, 2))
+    # for i in range(100):
+    #     curves[i] = curves_raw[i][0].T
     for i in range(10):
         for j in range(2):
             curves[i * 2 + j] = curves_raw[i * 10 + j][0].T
@@ -38,6 +49,7 @@ def broadcast():
         end = min(num_curves, step *(i + 1))
         command = ["ssh","-f", name, "nohup","/users/kls6/anaconda3/envs/Shape-Analysis-Project/bin/python",
                    "/users/kls6/Shape-Analysis-Project/distance_matrix_computation/worker.py", str(start), str(end), "&>", "/dev/null"]
+        print("Connected to", name)
         time.sleep(2)
         subprocess.Popen(command)
 
@@ -52,8 +64,10 @@ def wait():
         onlyfiles = os.listdir("./output") # dir is your directory path as string
         num = len(onlyfiles)
         count = count + 1
+        printtime(st * count)
+    print()
     f = open("time.txt", "a")
-    f.write("Took " + str(count * st) + " seconds!\n")
+    f.write("Took " + str(count * st) + " seconds! "+ filename+"\n")
     f.close()
 def assemble():
     output = np.zeros((num_curves, num_curves))
@@ -65,7 +79,10 @@ def assemble():
         start = int(start)
         end = int(end)
         output[start:end] = raw_data
-    np.savetxt("n2_5_small_256_coords", output)
+    if os.path.isdir("./output"):
+        shutil.rmtree("./output")
+    os.mkdir("./output")
+    np.savetxt(filename, output)
 
 def main():
     args = sys.argv

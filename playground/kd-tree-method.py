@@ -16,8 +16,8 @@ curves = np.empty((100, 1024, 2))
 
 for i in range(100):
     curves[i] = curves_1024[i][0].T
-p = curves[93]
-q = curves[95]
+p = curves[90]
+q = curves[21]
 # p = curves[90]
 # q = curves[95]
 # p = curves[21]
@@ -25,13 +25,11 @@ q = curves[95]
 # p = curves[45]
 # q = curves[55]
 
-energy, p_new, q_new, tg, gammay = shapedist.find_shapedist(p, q, 'ud')
-plt.plot(tg, gammay, ".b")
-plt.figure()
+energy, p_new, q_new, tg, gammay = shapedist.find_shapedist(p, q, 'd')
+plt.plot(tg, gammay, "g")
 dist1, ind = shapedist.kd_tree.shape_dist(p, q)
-
-print(dist1, energy)
-
+print(energy, dist1)
+plt.plot(tg, tg[ind], "r")
 
 #
 # plt.figure()

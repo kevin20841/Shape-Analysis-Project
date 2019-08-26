@@ -2,43 +2,55 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import UnivariateSpline
 import sys
+from scipy.interpolate import CubicSpline
 np.set_printoptions(threshold=sys.maxsize)
 
 
-def hierarchical_curve_discretization(p, q, t1, t2, init_coarsening_tol, uniform, multi):
+def hierarchical_curve_discretization(p, q, t1, t2, coarsen,  tol = 2e-3, curvature = False):
     # Curves should be an array of coordinates
-    if uniform:
+    if coarsen:
         t = combine_t(t1, t2)
-        p, q = parametrize_curve_pair(p, q, t, t1, t2)
-        return [t, p, q], get_uniform_mask(t.shape[0], multi)
+        t_p, p = coarsen_curve(t1, p, tol)
+        mask = np.in1d(t, t_p)
+        t_q, q = coarsen_curve(t2, q, tol)
+        mask = np.logical_or(mask, np.in1d(t, t_q))
+        mask[0] = True
+        mask[-1] = True
+        t = t[mask]
+        p, q = parametrize_curve_pair(p, q, t, t_p, t_q, curvature)
+
+        return [t, p, q], get_uniform_mask(t.shape[0])
     else:
-        return get_adaptive_mask(p, q, t1, t2)
+        t = combine_t(t1, t2)
+        p, q = parametrize_curve_pair(p, q, t, t1, t2, curvature)
+        return [t, p, q], get_uniform_mask(t.shape[0])
 
 
-def get_adaptive_mask(p, q, t1, t2, init_coarsening_tol=None):
-    tol = [0.03, 2e-3]
-    t = combine_t(t1, t2)
-    boolean_mask = np.zeros((3, t.shape[0])) < 1
-    for i in range(len(tol)):
-        t_p, temp = coarsen_curve(t1, p, tol[i])
-        boolean_mask[i] = np.in1d(t, t_p)
-        t_q, temp = coarsen_curve(t2, q, tol[i])
-        boolean_mask[i] = np.logical_or(boolean_mask[i], np.in1d(t, t_q))
-        boolean_mask[i][0] = True
-        boolean_mask[i][-1] = True
-    if t.shape[0] < 300:
-        ret = np.array([boolean_mask[0], boolean_mask[-1]])
-    else:
-        ret = boolean_mask
-    p, q = parametrize_curve_pair(p, q, t, t1, t2)
-    # for i in boolean_mask:
-    #     print(p[i].shape)
-    t = np.linspace(0., 1, t.shape[0])
-    return [t, p, q], ret
+# def get_adaptive_mask(p, q, t1, t2, curvature, init_coarsening_tol=None):
+#     tol = [0.03, 2e-2]
+#     t = combine_t(t1, t2)
+#     boolean_mask = np.zeros((3, t.shape[0])) < 1
+#     for i in range(len(tol)):
+#         t_p, temp = coarsen_curve(t1, p, tol[i])
+#         boolean_mask[i] = np.in1d(t, t_p)
+#         t_q, temp = coarsen_curve(t2, q, tol[i])
+#         boolean_mask[i] = np.logical_or(boolean_mask[i], np.in1d(t, t_q))
+#         boolean_mask[i] = np.logical_or(boolean_mask[i], np.in1d(t, t_q))
+#         boolean_mask[i][0] = True
+#         boolean_mask[i][-1] = True
+#     # if t.shape[0] < 300:
+#     #     ret = np.array([boolean_mask[0], boolean_mask[-1]])
+#     # else:
+#     #     ret = boolean_mask
+#     ret = boolean_mask
+#     p, q = parametrize_curve_pair(p, q, t, t1, t2, curvature)
+#     # for i in boolean_mask:
+#     #     print(p[i].shape)
+#     return [t, p, q], ret
 
 
 def combine_t(t1, t2, t_spacing_tol=1e-4):
-    t_spacing_tol = min(np.min(t1[1:]-t1[0:-1]), np.min(t2[1:]-t2[0:-1]))
+    t_spacing_tol = min(np.min(t1[1:]-t1[0:-1]), np.min(t2[1:]-t2[0:-1]))/2
     t = np.union1d(t1, t2)
     N = t.shape[0]
     remove = np.zeros(N, dtype=bool)
@@ -47,11 +59,11 @@ def combine_t(t1, t2, t_spacing_tol=1e-4):
     return t
 
 
-def get_uniform_mask(n, multi = False):
+def get_uniform_mask(n):
     boolean_mask = []
     c = n
     ct = 1
-    while c >= 64:
+    while c > 45:
         mask = np.zeros(n, dtype=np.bool)
         for i in range(c):
             mask[i * ct] = True
@@ -60,9 +72,9 @@ def get_uniform_mask(n, multi = False):
         ct = ct * 2
         c = (c)//2
 
-    boolean_mask[::-1] = boolean_mask
-    if not multi:
-        boolean_mask = [boolean_mask[0], boolean_mask[2], boolean_mask[-1]]
+    boolean_mask= boolean_mask[::-1]
+    # if not multi:
+    #     boolean_mask = [boolean_mask[0], boolean_mask[2], boolean_mask[-1]]
     boolean_mask = np.array(boolean_mask, dtype=np.bool)
 
     return boolean_mask
@@ -105,8 +117,8 @@ def mark_nodes_for_coarsening(element_errors_1, tol):
     N = element_errors_1.size + 1
     element_markers_1 = element_errors_1 < tol
     node_markers_1 = np.ones(N) < 0
-    node_markers_1[1:N-1] = np.logical_and(element_markers_1[0:N-2], element_markers_1[1:N-1])
-    k = 0
+    node_markers_1[1:N-2] = np.logical_and(element_markers_1[0:N-3], element_markers_1[1:N-2])
+    k = 1
     while k < N-1:
         if node_markers_1[k] and node_markers_1[k+1]:
             node_markers_1[k+1] = False
@@ -119,7 +131,7 @@ def geometric_discretization_error(b):
     element_sizes = np.sqrt(np.sum(T**2, 1))
     K = np.abs(curvature(b))
     max_k = np.maximum(K[0:K.size-1], K[1:K.size])
-    e = max_k * element_sizes**2
+    e = np.multiply(max_k, element_sizes**2)
 
     return e
 #
@@ -159,6 +171,7 @@ def curvature(p):
     K = np.zeros(n-1)
     K[1:n-1] = x[0:n-2] * y1[1:n-1] - x[1: n-1] * y2[1:n-1] + x[2:n] * y1[0:n-2]
     K[0] = x[n-2] * y1[0] - x[0] * y2[0] + x[1] * y1[n-3]
+    bottom_sqr[bottom_sqr< 1e-14] = 1e-14
     K = -2 * K / np.sqrt(bottom_sqr)
 
     K = np.append(K, K[0])
@@ -166,7 +179,7 @@ def curvature(p):
     return K
 
 
-def coarsen_curve(t, b, tol=2e-3, maxiter=5):
+def coarsen_curve(t, b, tol=2e-3, maxiter=15):
     i = 0
 
     while i < maxiter:
@@ -199,12 +212,23 @@ def coarsen_curve_pair(t, b1, b2, tol=2e-3, maxiter=7):
     return t, b1, b2
 
 
-def parametrize_curve_pair(p, q, t, t1, t2):
+def parametrize_curve_pair(p, q, t, t1, t2,curvature):
     dim = p.shape[1]
     ip = np.zeros((t.shape[0], dim))
     iq = np.zeros((t.shape[0], dim))
-    for i in range(p.shape[1]):
-        ip[:, i] = np.interp(t, t1, p[:, i])
-        iq[:, i] = np.interp(t, t2, q[:, i])
-    return ip, iq
-
+    curvature = True
+    if not curvature:
+        for i in range(p.shape[1]):
+            ip[:, i] = np.interp(t, t1, p[:, i])
+            iq[:, i] = np.interp(t, t2, q[:, i])
+        return ip, iq
+    else:
+        for d in range(p.shape[1]):
+            inter_p = CubicSpline(t1, p[:, d])
+            ip[:, d] = inter_p(t)
+            N = t2.shape[0]
+            # print(t2[1:N] == t2[0:N-1])
+            # print(t2)
+            inter_q = CubicSpline(t2, q[:, d])
+            iq[:, d] = inter_q(t)
+        return ip, iq

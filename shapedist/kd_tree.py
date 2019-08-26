@@ -3,133 +3,118 @@ import shapedist
 from numba import njit, jitclass
 from sklearn.neighbors import KDTree
 import matplotlib.pyplot as plt
-
+from math import floor
 
 #@njit
-def ad_hoc(ind, p, q, dist):
-    # # find parametrization, query p onto qtree
-    # max_diff = 0
-    # for i in range(ind.shape[0] - 1):
-    #     if ind[i+1] < ind[i] and ind[i] - ind[i+1] > max_diff:
-    #         max_diff = ind[i] - ind[i+1]
-    # # print(ind.shape[0])
-    # # find jumps and discontinuities
+def ad_hoc(ind, p, q, t, tol=0.05):
+    # N = ind.shape[0]
+    # # make all segments monotonic increasing
     #
-    # plt.plot(np.arange(0, ind.shape[0]), ind, ".r")
-    # plt.figure()
-    # i = 0
-    # while i < ind.shape[0]-1:
-    #     if np.abs(ind[i+1] - ind[i]) > 30 and ind[i] - ind[i+1] != max_diff:
-    #         start = i + 1
-    #         j = start
-    #         while j < ind.shape[0]-1:
-    #             if np.abs(ind[j+1] - ind[j]) >= 30:
-    #                 break
-    #             j = j + 1
-    #         end = j
-    #         if end == ind.shape[0]:
-    #             end = end - 1
-    #             break
-    #         print(start, end, end + 1 - start)
-    #         # find current distance
-    #         # currd = np.sum(dist[start:end + 1])
-    #         # currd = 0
-    #         # for l in range(start, end + 1):
-    #         #     currd = currd + norm(p[l], q[ind[l]])
-    #
-    #         # find first distance
-    #         firstd = 0
-    #         for l in range(start, end+1):
-    #             firstd = firstd + norm(p[l], q[ind[start]])
-    #         # find last distance
-    #         lastd = 0
-    #         for l in range(start, end):
-    #             lastd = lastd + norm(p[l], q[ind[end]])
-    #
-    #         sm = min(firstd, lastd)
-    #         if end == ind.shape[0] - 1:
-    #             lastc = 0
-    #         else:
-    #             lastc = end + 1
-    #         if firstd == sm:
-    #             ind[start:end + 1] = ind[start-1]
-    #             # print("first")
-    #         elif lastd == sm:
-    #             ind[start:end + 1] = ind[lastc]
-    #             # print("last")
-    #         i = end
-    #
-    #     i = i + 1
-    # plt.plot(np.arange(0, ind.shape[0]), ind, ".r")
-    # plt.show()
-    # max_diff = 0
-    # for i in range(ind.shape[0] - 1):
-    #     if ind[i+1] < ind[i] and ind[i] - ind[i+1] > max_diff:
-    #         max_diff = ind[i] - ind[i+1]
-    #
-    # for i in range(ind.shape[0]-1):
-    #     if ind[i+1] < ind[i] and ind[i] - ind[i+1] != max_diff:
+    # for i in range(0, N-1):
+    #     if ind[i] > ind[i+1] and np.abs(ind[i+1] - ind[i])/N < tol:
     #         ind[i+1] = ind[i]
     #
-    # plt.plot(np.arange(0, ind.shape[0]), ind, ".r")
-    # plt.show()
+    # for i in range(N):
+    #     if np.abs(ind[i] - ind[i+1])/N > tol:
+    #         e = i + 1
+    #         break
+    # ind[0:e] = ind[0:e] - ind[0]
+    # i = 1
+    # num_segments = 0
+    # while i < N:
+    #     if np.abs(ind[i] - ind[i-1])/N > tol:
+    #         while i < N-1:
+    #             if np.abs(ind[i + 1] - ind[i])/N > tol:
+    #                 break
+    #             i = i + 1
+    #         num_segments += 1
+    #     i = i + 1
+    # i = 1
+    # count =1
+    # step = floor(N / (num_segments + 1))
+    # while i < N:
+    #     if np.abs(ind[i] - ind[i-1])/N > tol:
+    #         start = i
+    #         while i < N-1:
+    #             if np.abs(ind[i + 1] - ind[i])/N > tol:
+    #                 end = i + 1
+    #                 break
+    #             i = i + 1
+    #         # ind[start:end]  = ind[start:end]- (ind[start] - ind[start-1])
+    #         ind[start:end] = ind[start:end] - (ind[start] - step * count)
+    #     i = i + 1
+    # m = ind[-1]
+    # for i in range(N):
+    #     ind[i] = floor(ind[i] / m * (N-1))
     return ind
 
-    # max_diff = 0
-    # for i in range(ind.shape[0] - 1):
-    #     if ind[i+1] < ind[i] and ind[i] - ind[i+1] > max_diff:
-    #         max_diff = ind[i] - ind[i+1]
-    # i = 0
-    # while i < ind.shape[0]-1:
-    #     if ind[i+1] < ind[i] and ind[i] - ind[i+1] != max_diff:
-    #         ind[i+1] = ind[i]
-    #     i = i + 1
-    #
-    # plt.plot(np.arange(0, ind.shape[0]), ind, ".y")
-    #
-    # max_diff = 0
-    # for i in range(ind.shape[0] - 1):
-    #     if ind[i+1] < ind[i] and ind[i] - ind[i+1] > max_diff:
-    #         max_diff = ind[i] - ind[i+1]
-    # i = ind.shape[0] - 1
-    # while i > 0:
-    #     if ind[i-1] > ind[i] and ind[i-1] - ind[i] != max_diff:
-    #         ind[i-1] = ind[i]
-    #     i = i - 1
-    # # plt.plot(np.arange(0, ind.shape[0]), ind, ".g")
-    # plt.show()
-    # return ind
-
-
-# def ad_hoc(ind1, ind2):
-#     # ind1 is p queried on qtree. ind2 is q queried on ptree
-#     d = {}
-#     print(ind2)
-#     # inefficient for now
-#     for i in range(ind2.shape[0]):
-#         if ind2[i] not in d:
-#             d.update({ind2[i]:[i]})
-#         else:
-#             d[ind2[i]].append(i)
-#     print(d)
-#     for i in range(ind1.shape[0]-1):
-#         if ind1[i] > ind1[i+1]:
-#             if i+1 not in d:
-#                 print("missing value", i+1)
-#             else:
-#                 print("replaced", i+1)
-#                 a = d[i+1].pop(0)
-#                 ind1[i+1] = a
-#
-#     return ind1
+def smooth(x, N, tol = 0.01):
+    ret = np.zeros(x.size, dtype= np.int64)
+    for i in range(ret.size):
+        back = i - N if (i - N) >= 0 else 0
+        front = i + N if (i + N) < ret.size else ret.size - 1
+        ret[i] = floor(np.sum(x[back:front]) / (front - back))
+        if np.abs(ret[i] - x[back]) > tol:
+            ret[i] = ret[back]
+    return ret
 @njit
-def compute_dist(p, q, ind, t):
+def flat_dist(p, q, ind, t, start, end):
     s = 0
     arc = t
-    for i in range(p.shape[0]-1):
+    for i in range(start, end-1):
+        # trapezoidal method
+        s = s + 0.5 * (0.5 * norm(p[i], q[ind]) + 0.5 * norm(p[i + 1], q[ind])) * (arc[i + 1] - arc[i])
+    return s
+@njit
+def compute_dist(p, q, ind, t, start, end):
+    s = 0
+    arc = t
+    for i in range(start, end-1):
         # trapezoidal method
         s = s + 0.5 * (0.5 * norm(p[i], q[ind[i]]) + 0.5 * norm(p[i + 1], q[ind[i + 1]])) * (arc[i + 1] - arc[i])
     return s
+
+def get_partitions(ind, tol = 0.05):
+    N = ind.shape[0]
+    part = np.zeros(ind.shape, dtype = np.bool)
+    i = 0
+    decreasing=False
+    while i < N-1:
+        if ind[i] > ind[i + 1] and not decreasing:
+            part[i] = True
+            decreasing = True
+        if ind[i] < ind[i+1] and decreasing:
+            decreasing = False
+            part[i] = True
+        if  abs(ind[i] - ind[i+1])/N > tol:
+            part[i] = True
+        i = i + 1
+    endpoints = []
+    for i in range(1, N):
+        if part[i]==True and part[i-1] != True:
+            endpoints.append(i)
+
+    f = False
+    for i in range(endpoints[0] - 1):
+        if ind[i] > ind[i+1]:
+            f = True
+    if f:
+        endpoints = [1] + endpoints
+    return endpoints
+
+def rebalance(ind):
+    N = ind.shape[0]
+    while True:
+        diff = 0
+        t = 0
+        for i in range(N-1):
+            if ind[i] - ind[i+1] > diff:
+                diff = ind[i] - ind[i+1]
+                t = i+1
+        if diff < ind[-1] - ind[0]:
+            break
+        ind = np.append(ind[t:], ind[:t])
+    return ind
 
 
 def shape_dist(p, q):
@@ -151,26 +136,18 @@ def shape_dist(p, q):
     [t, p, q], mask = shapedist.build_hierarchy.hierarchical_curve_discretization(p, q,
                                                                                   t1, t2,
                                                                                   2e-4,
-                                                                                  True)
-
-    # qtree = KDTree(q, leaf_size=2)
-    # dist, ind1 = qtree.query(p, k=1)
-    # ptree = KDTree(p, leaf_size=2)
-    # dist, ind2 = ptree.query(q, k=1)
-    # ind1 = np.reshape(ind1, (-1))
-    # ind2 = np.reshape(ind2, (-1))
-    # plt.plot(np.arange(0, ind1.shape[0]) / (ind1.shape[0] - 1), ind1 / ind1.shape[0], ".")
-    # plt.plot(np.arange(0, ind2.shape[0]) / (ind2.shape[0] - 1), ind2 / ind2.shape[0], ".")
-    # plt.plot(ind2 / ind2.shape[0], np.arange(0, ind2.shape[0]) / (ind2.shape[0] - 1), ".y")
-    #
-    # gamma = ad_hoc(ind1, ind2)
-    # return gamma
+                                                                                  True, False)
 
     tree = KDTree(q, leaf_size=2)
     dist, ind = tree.query(p, k=1)
     ind = np.reshape(ind, (-1))
-    ind = ad_hoc(ind, p, q, dist)
-    return compute_dist(p, q, ind, t), ind    # (how should we define shape dist?)
+    #
+    # ind = rebalance(ind)
+    # ind = smooth(ind, 1)
+    # # partitions = get_partitions(ind)
+    #
+    # ind = ad_hoc(ind, p, q, t)
+    return compute_dist(p, q, ind, t, 0, p.shape[0]), ind    # (how should we define shape dist?)
 
 
 @njit

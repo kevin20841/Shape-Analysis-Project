@@ -11,7 +11,7 @@ from io import StringIO
 
 
 # One example shapdist compuation for gamma
-n = 2048  # number of points in domain
+n = 4096  # number of points in domain
 
 t = np.linspace(0., 1., n)
 q = ex.curve_example('limacon', t)[0]
@@ -34,9 +34,16 @@ q = q.T
 # energy, p_new, q_new, tg, gammay = shapedist.find_shapedist(p, q, 'd', t1=t, t2=t, shape_rep=shapedist.normals)
 # plt.plot(tg, gammay, "-r")
 
-energy1, p_new, q_new, tg, gammay = shapedist.find_shapedist(p, q,'d',  t1=t, t2=t, shape_rep=shapedist.coords)
-plt.plot(tg, gammay, ".b")
-plt.plot(tg, test(tg), "-r")
+energy1, p_new, q_new, tg, gammay = shapedist.find_shapedist(p, q, 'cmd', neigh = 5, tol=2e-6, t1=t, t2=t, shape_rep=shapedist.tangent)
+print(tg.shape)
+plt.plot(t, test(t), "-r")
+plt.plot(tg, gammay, "-b")
+
+print(energy1)
+plt.figure()
+plt.plot(p[:, 0], p[:, 1], "b")
+plt.plot(p_new[:, 0], p_new[:, 1], ".g")
+plt.show()
 # for i in range(q_new.shape[1]):
 #     interp_func = scipy.interpolate.CubicSpline(tg, q_new[:, i])
 #     q_new[:, i] = interp_func(gammay)
@@ -51,8 +58,7 @@ plt.plot(tg, test(tg), "-r")
 # plt.ylim(-0.2, 0.2)
 # plt.xlim(-0.2, 0.2)
 # plt.plot(q_new[:, 0], q_new[:, 1], ".-r")
-plt.show()
-print(energy1)
+
 # print(energy, energy1)
 # for i in range(q_new.shape[1]):
 #     interp_func = scipy.interpolate.CubicSpline(tg, q_new[:, i])

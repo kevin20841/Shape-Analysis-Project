@@ -1,5 +1,5 @@
 """
-Implementation of linear algorithm to determine shape elasticity as described by Bernal et al.
+Implementation of global solution algorithm to determine shape elasticity.
 """
 import numpy as np
 from numba import jit, types, float64, int16, generated_jit
@@ -9,8 +9,28 @@ from shapedist.comp import *
 
 @jit(cache=False, nopython=True)
 def find_gamma(t, p, q, height, width, energy_dot, u, dim):
+    """
+    Finds a global solution in O(n^2) time.
 
-    # Linear Iteration
+    Parameters
+    ----------
+    t : float
+        A joint parametrization of the two curves
+    p : numpy array of floats
+        The first curve
+    q : numpy array of floats
+        The second curve. The second curve is to be elastically matched to be as close as possible to the first curve.
+
+    Returns
+    -------
+    t : numpy array of floats
+        The domain of the reparametrization function gamma
+    path: numpy array of floats
+        The range of the reparametrization function gamma
+    float
+        The calculated energy
+    """
+
     gamma = t
     parametrization_size = p.shape[0]
     start = np.empty(dim, dtype=np.int64)
