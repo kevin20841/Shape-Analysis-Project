@@ -40,6 +40,7 @@ def find_shapedist(p, q, dr='m', neigh = 5, shape_rep=shapedist.coords, distfunc
     if len(p.shape) == 2 and p.shape[1] == 2:
         # p = shapedist.normalize(p)
         # q = shapedist.normalize(q)
+
         if t1 is None and t2 is None:
             t1 = arclen_fct_values(p)
             t2 = arclen_fct_values(q)
