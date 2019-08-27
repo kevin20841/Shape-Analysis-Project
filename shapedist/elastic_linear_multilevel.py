@@ -127,7 +127,7 @@ def find_gamma(t, p, q, parametrization_array, energy_dot, u, dim, neigh):
 @jit(cache=False, nopython=True)
 def calculate_search_area(new_domain, prev_domain, prev_path, parametrization_size, u, it):
     # strip_height = max(new_domain.shape[0] / (prev_domain.shape[0] * np.sqrt(2) / 2) + 3 + it * 2, 8)
-    strip_height = 12
+    strip_height = 8
     # strip_height = 2 * it + 4
     upper_bound_temp = np.zeros((prev_domain.size, 2), dtype=np.float64)
     lower_bound_temp = np.zeros((prev_domain.size, 2), dtype=np.float64)
@@ -232,7 +232,6 @@ def iteration(tp_temp, tq_temp, py_temp, qy_temp, temp_domain_gamma, upper_ind, 
             minimum = min_energy_values[i][j]
             while k > 0 and points_considered < toconsider:
                 l = min(upper_ind[k], j-1)
-                l = max(l, 1)
                 te = 0
                 while l > 0 and l >= lower_ind[k] and te < neighborhood_array[i][1]:
                     e = min_energy_values[k, l] + integrate(tp_temp, tq_temp, py_temp, qy_temp,

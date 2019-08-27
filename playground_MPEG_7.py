@@ -7,32 +7,42 @@ from scipy.io import loadmat
 from tqdm import tqdm
 import scipy.interpolate
 
-all_curves = loadmat('./data/Curve_data.mat')
-
-curves_1024 = all_curves['MPEG7_curves_1024']
-print(all_curves.keys())
-# curves = np.empty((100, 256, 2))
+# all_curves = loadmat('./data/Curve_data.mat')
 #
-# for i in range(100):
-#     curves[i] = curves_1024[i][0].T
+# curves_1024 = all_curves['MPEG7_curves_1024']
+# print(all_curves.keys())
+# # curves = np.empty((100, 256, 2))
+# #
+# # for i in range(100):
+# #     curves[i] = curves_1024[i][0].T
+#
+# p = curves_1024[13][0].T
+# q = curves_1024[17][0].T
+#
+# s = 0- np.argmax(q[:, 0])
+# q = np.roll(q, s, axis=0)
+# # R = np.array([[0.877, -0.479],[0.479, 0.877]])
+# # R = np.array([[0.877, -0.479],[0.479, 0.877]])
+# # q = np.zeros(p.shape)
+# # for i in range(256):
+# #     q[i] = R @ p[i]
 
-p = curves_1024[13][0].T
-q = curves_1024[17][0].T
+curves = np.load("./data/marrow_cell_curves_256.npy", allow_pickle=True)
+p = curves[0]
 
-s = 0- np.argmax(q[:, 0])
-q = np.roll(q, s, axis=0)
-# R = np.array([[0.877, -0.479],[0.479, 0.877]])
-# R = np.array([[0.877, -0.479],[0.479, 0.877]])
-# q = np.zeros(p.shape)
-# for i in range(256):
-#     q[i] = R @ p[i]
+print(p.shape)
+q = curves[26]
 t = np.linspace(0., 1., p.shape[0])
-dist, temp, temp, tg, gamma = shapedist.find_shapedist(p, q, dr="d", shape_rep=shapedist.coords)
-print(dist)
+dist = shapedist.closed_curve_shapedist(p, q, dr="2", t1=t, t2=t, shape_rep=shapedist.srvf)
+# for i in range(519):
+#     q = curves[i]
+#     dist, temp, temp, tg, gamma = shapedist.find_shapedist(p, q, t1=t, t2=t, dr="d", shape_rep=shapedist.srvf)
+#     print(dist)
+#     if 0 in np.gradient(gamma, tg):
+#         print(i)
+#         break
 # plt.plot(p[:, 0], p[:, 1])
 # plt.plot(q[:, 0], q[:, 1])
-plt.plot(tg, gamma, ".-")
-plt.show()
 
 # for i in tqdm(range(100)):
 #     p = curves[i]

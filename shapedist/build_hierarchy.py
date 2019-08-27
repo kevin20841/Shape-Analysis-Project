@@ -224,10 +224,11 @@ def parametrize_curve_pair(p, q, t, t1, t2,curvature):
         return ip, iq
     else:
         for d in range(p.shape[1]):
+            # N = t1.shape[0]
+            # print(t1[1:N] == t1[0:N-1])
             inter_p = CubicSpline(t1, p[:, d])
             ip[:, d] = inter_p(t)
-            N = t2.shape[0]
-            # print(t2[1:N] == t2[0:N-1])
+
             # print(t2)
             inter_q = CubicSpline(t2, q[:, d])
             iq[:, d] = inter_q(t)

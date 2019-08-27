@@ -63,22 +63,22 @@ for name in tqdm(images):
     mini = np.inf
     contours = measure.find_contours(img, level=0.5)
     sm = smooth_curve(contours[0], iter=10)
-    t = shapedist.arclen_fct_values(sm)
-    func1 = CubicSpline(t, sm[:, 0])
-    func2 = CubicSpline(t, sm[:, 1])
-    t_new = np.linspace(0., 1., 256)
-    sm_256 = np.zeros((256,2))
-    sm_256[:, 0] = func1(t_new)
-    sm_256[:, 1] = func2(t_new)
-    uncoarsened.append(sm_256)
+    # t = shapedist.arclen_fct_values(sm)
+    # func1 = CubicSpline(t, sm[:, 0])
+    # func2 = CubicSpline(t, sm[:, 1])
+    # t_new = np.linspace(0., 1., 256)
+    # sm_256 = np.zeros((256,2))
+    # sm_256[:, 0] = func1(t_new)
+    # sm_256[:, 1] = func2(t_new)
+    # uncoarsened.append(sm_256)
     #
-    # t = np.arange(sm.shape[0])
-    # temp, coarse = shapedist.build_hierarchy.coarsen_curve(t, sm, tol=2e-3, maxiter=15)
-    # uncoarsened.append(sm)
-    # unsizes.append(sm.shape[0])
-    # coarsesizes.append(coarse.shape[0])
-    # coarsened.append(coarse)
-    # percents.append(1 - coarse.shape[0] / sm.shape[0])
+    t = np.arange(sm.shape[0])
+    temp, coarse = shapedist.build_hierarchy.coarsen_curve(t, sm, tol=2e-3, maxiter=15)
+    uncoarsened.append(sm)
+    unsizes.append(sm.shape[0])
+    coarsesizes.append(coarse.shape[0])
+    coarsened.append(coarse)
+    percents.append(1 - coarse.shape[0] / sm.shape[0])
     #
     # for i in range(5):
     #     start = time.time()
@@ -93,26 +93,26 @@ for name in tqdm(images):
     #         mini = end - start
     # times.append(mini)
 
-uncoarsened = np.array(uncoarsened)
-
 np.save( "marrow_cell_curves_256", uncoarsened)
 #
-# uncoarsened = np.array(uncoarsened)
-# coarsened = np.array(coarsened)
-# unsizes = np.array(unsizes)
-# coarsesizes = np.array(coarsesizes)
-# percents = np.array(percents)
-# times = np.array(times)
-#
+uncoarsened = np.array(uncoarsened)
+coarsened = np.asarray(coarsened)
+print(coarsened.shape, coarsened.dtype)
+print(uncoarsened.shape, uncoarsened.dtype)
+unsizes = np.array(unsizes)
+coarsesizes = np.array(coarsesizes)
+percents = np.array(percents)
+times = np.array(times)
+
 # np.save("marrow_cell_curves_full", uncoarsened)
-# np.save("marrow_cell_curves_coarsened", coarsened)
+np.save("marrow_cell_curves_coarsened", coarsened)
 # np.savetxt("marrow_cell_curves_full_sizes", unsizes)
 # np.savetxt("marrow_cell_curves_coarsened_sizes", coarsesizes)
 # np.savetxt("marrow_cell_curves_percent_red", percents)
 # np.savetxt("marrow_cell_curves_process_times", times)
-#
-#
-# print("Average full size:", np.sum(unsizes) / unsizes.shape[0])
-# print("Average coarsened size (with tol 2e-3):", np.sum(coarsesizes) / coarsesizes.shape[0])
-# print("Average percent reduction:", np.sum(percents) / percents.shape[0])
+
+
+print("Average full size:", np.sum(unsizes) / unsizes.shape[0])
+print("Average coarsened size (with tol 2e-3):", np.sum(coarsesizes) / coarsesizes.shape[0])
+print("Average percent reduction:", np.sum(percents) / percents.shape[0])
 # print("Average Time", np.sum(times) / times.shape[0])

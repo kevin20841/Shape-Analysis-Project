@@ -8,10 +8,10 @@ import time
 import subprocess
 # host names
 names = ["magenta", "benson", "jeeves", "renfield", "bunter"]
-num_curves = 20
+num_curves = 200
 dirname = os.path.dirname(__file__)
 
-filename = "kd_tree_comp_1024_coords"
+filename = "cell_curves_256_n_2_srvf.txt"
 
 def printtime(t):
     if t < 60:
@@ -29,29 +29,32 @@ def cache():
     dfm = os.path.join(folder, 'data_memmap')
     from scipy.io import loadmat
 
-    all_curves = loadmat('../data/Curve_data.mat')
-    curves_raw = all_curves['MPEG7_curves_256']
-
-    curves = np.empty((20, 256, 2))
+    # all_curves = loadmat('../data/Curve_data.mat')
+    # curves_raw = all_curves['MPEG7_curves_256']
+    curves = np.load("../data/marrow_cell_curves_coarsened.npy", allow_pickle=True)
+    curves = curves[:200]
     # for i in range(100):
     #     curves[i] = curves_raw[i][0].T
-    for i in range(10):
-        for j in range(2):
-            curves[i * 2 + j] = curves_raw[i * 10 + j][0].T
+    # for i in range(10):
+    #     for j in range(2):
+    #         curves[i * 2 + j] = curves_raw[i * 10 + j][0].T
     dump(curves, dfm)
 
 def broadcast():
     N = len(names)
     for i in range(N):
         name = names[i]
-        step = int(np.ceil(num_curves/N))
+        step = int(np.floor(num_curves/N))
         start = step * i
         end = min(num_curves, step *(i + 1))
-        command = ["ssh","-f", name, "nohup","/users/kls6/anaconda3/envs/Shape-Analysis-Project/bin/python",
-                   "/users/kls6/Shape-Analysis-Project/distance_matrix_computation/worker.py", str(start), str(end), "&>", "/dev/null"]
-        print("Connected to", name)
-        time.sleep(2)
-        subprocess.Popen(command)
+        print(start, end)
+        # if i == N -1:
+        #     end = num_curves
+        # command = ["ssh","-f", name, "nohup","/users/kls6/anaconda3/envs/Shape-Analysis-Project/bin/python",
+        #            "/users/kls6/Shape-Analysis-Project/distance_matrix_computation/worker.py", str(start), str(end), "&>", "/dev/null"]
+        # print("Connected to", name)
+        # time.sleep(2)
+        # subprocess.Popen(command)
 
 
 def wait():

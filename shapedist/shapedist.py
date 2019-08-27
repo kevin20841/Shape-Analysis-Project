@@ -7,7 +7,7 @@ from scipy.integrate import trapz
 from scipy.linalg import svd
 import scipy.interpolate
 import sys
-from tqdm import tqdm
+from tqdm import tqdm, trange
 import matplotlib.pyplot as plt
 
 @jit(nopython=True)
@@ -43,6 +43,7 @@ def find_shapedist(p, q, dr='m', neigh = 5, shape_rep=shapedist.coords, distfunc
         if t1 is None and t2 is None:
             t1 = arclen_fct_values(p)
             t2 = arclen_fct_values(q)
+            uniform = False
         numparams = len(signature(shape_rep).parameters)
 
     if len(p.shape) == 1 and len(q.shape) == 1:
@@ -221,8 +222,8 @@ def find_shape_distance_SRVF(p, q, t, gamma):
         temp = 1
     return np.arccos(temp) / pi
 
-def curvature_shapedist(p, q, dr='', distfunc=None, t1=None, t2=None,
-                   init_coarsening_tol=2e-4, energy_dot=False):
+def curvature_shapedist(p, q, dr='', neigh=5, distfunc=None, t1=None, t2=None,
+                   tol=2e-3, energy_dot=False):
     shape_rep = shapedist.curvature
     p = np.copy(p)
     q = np.copy(q)
@@ -235,8 +236,8 @@ def curvature_shapedist(p, q, dr='', distfunc=None, t1=None, t2=None,
         t2= t1
     s = N // 100
     for i in range(100):
-        sdist, p_temp, q_temp, t, gamma = find_shapedist(p, q, dr, shape_rep, distfunc, t1, t2,
-                   init_coarsening_tol, energy_dot)
+        sdist, p_temp, q_temp, t, gamma = find_shapedist(p, q, dr, shape_rep=shape_rep, distfunc=distfunc, t1=t1, t2=t2,
+                   tol=tol, energy_dot=energy_dot, neigh=neigh)
         if sdist < m:
             m = sdist
         temp = p[N-s:]
@@ -245,8 +246,8 @@ def curvature_shapedist(p, q, dr='', distfunc=None, t1=None, t2=None,
     return m
 
 
-def closed_curve_shapedist(p, q, dr='', shape_rep=shapedist.coords, distfunc=None, t1=None, t2=None,
-                   init_coarsening_tol=2e-4, energy_dot=False):
+def closed_curve_shapedist(p, q, dr='', neigh=5, shape_rep=shapedist.coords, distfunc=None, t1=None, t2=None,
+                   tol=2e-3, energy_dot=False):
     p = np.copy(p)
     q = np.copy(q)
     N = p.shape[0]
@@ -256,13 +257,13 @@ def closed_curve_shapedist(p, q, dr='', shape_rep=shapedist.coords, distfunc=Non
     if 'u' in dr.lower():
         t1 = np.linspace(0., 1., N)
         t2= t1
-    s = N // 50
+    s = N // 25
     if shape_rep is shapedist.srvf:
         energy_dot = True
         distfunc = shapedist.find_shape_distance_SRVF
-    for i in range(50):
-        sdist, p_temp, q_temp, t, gamma = find_shapedist(p, q, dr, shape_rep, distfunc, t1, t2,
-                   init_coarsening_tol, energy_dot)
+    for i in range(25):
+        sdist, p_temp, q_temp, t, gamma = find_shapedist(p, q, dr, shape_rep=shape_rep, distfunc=distfunc, t1=t1, t2=t2,
+                   tol=tol, energy_dot=energy_dot, neigh=neigh)
         q_reparam = np.zeros(q_temp.shape)
         gammad = np.sqrt(np.gradient(gamma, t))
         for j in range(q.shape[1]):
@@ -274,13 +275,14 @@ def closed_curve_shapedist(p, q, dr='', shape_rep=shapedist.coords, distfunc=Non
         R = optimal_rotation(p_temp, q_reparam, t)
         for j in range(p_temp.shape[0]):
             p_temp[j] =  R @ p_temp[j]
-        sdist, p_temp, q_temp, t, gamma = find_shapedist(p_temp, q_temp, dr, shapedist.coords, distfunc, t1, t2,
-                   init_coarsening_tol, energy_dot)
+        sdist, p_temp, q_temp, t, gamma = find_shapedist(p_temp, q_temp, dr, shape_rep=shapedist.coords, distfunc=distfunc,
+                                                         t1=t1, t2=t2, tol=tol, energy_dot=energy_dot, neigh=neigh)
         if sdist < m:
             m = sdist
         temp = p[N - s:]
         p[s:N] = p[0:N-s]
         p[:s] = temp
+
     return m
 
 def closed_curve_tangent_shapedist(p, q, dr='', shape_rep=shapedist.coords, distfunc=None, t1=None, t2=None,

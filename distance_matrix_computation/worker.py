@@ -21,12 +21,12 @@ def job(start, end):
     np.savetxt(os.path.join(dirname, "./output/" + str(start) +"_"+str(end)), matrix)
 
 def task(p, q):
-    # t = np.linspace(0., 1., p.shape[0])
-    # dist = shapedist.closed_curve_shapedist(p, q, dr='', shape_rep=shapedist.coords)
+    t = np.linspace(0., 1., p.shape[0])
+    dist = shapedist.closed_curve_shapedist(p, q, dr='', shape_rep=shapedist.srvf)
 
     # kd_dist = 1e-14 if kd_dist < 1e-14 else kd_dist
-    kd_dist, temp = shapedist.kd_tree.shape_dist(p, q)
-    return kd_dist
+    # kd_dist, temp = shapedist.kd_tree.shape_dist(p, q)
+    return dist
 
 def main():
     start = int(sys.argv[1])
