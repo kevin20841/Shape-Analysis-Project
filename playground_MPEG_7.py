@@ -28,14 +28,14 @@ import scipy.interpolate
 #     q[i] = R @ p[i]
 
 curves = np.load("./data/marrow_cell_curves_full.npy", allow_pickle=True)
-p = curves[442]
+p = curves[403]
 
 print(p.shape)
-q = curves[43]
+q = curves[402]
 
 t1 = np.linspace(0., 1., p.shape[0])
 t2 = np.linspace(0., 1., q.shape[0])
-dist, temp, temp, tg, gamma = shapedist.find_shapedist(p, q, t1=t1, t2=t2, dr="cd", tol=2e-4, shape_rep=shapedist.srvf)
+dist, temp, temp, tg, gamma = shapedist.find_shapedist(p, q, dr="cd", tol=2e-3, shape_rep=shapedist.srvf)
 
 print(dist)
 print(tg.shape)

@@ -341,27 +341,26 @@ def MDPEM(tp, tq, p, q, upper_ind, lower_ind,
     i = n - 1
     j = m - 1
 
-    k = i - neighborhood_array[i][0]
-    if k <= 0:
-        k = 1
+    points_considered = 0
+    toconsider = neighborhood_array[i][0] * neighborhood_array[i][1]
+    k = i - 1
     minimum = min_energy_values[i][j]
-    while k < i:
-        l = j - neighborhood_array[i][1]
-        if l>= lower_ind[i]:
-            if l <= 0:
-                l = 1
-            while l < j and l < upper_ind[k]:
-                e = min_energy_values[k, l] + integrate(tp, tq, p, q,
-                                                        k, i, l, j,
-                                                        gamma, energy_dot,
-                                                        dim, start, end, val1, val2, u)
-                if e < minimum:
-                    minimum = e
-                    path_nodes[i][j][0] = k
-                    path_nodes[i][j][1] = l
-
-                l = l + 1
-        k = k + 1
+    while k > 0 and points_considered < toconsider:
+        l = min(upper_ind[k], j - 1)
+        te = 0
+        while l > 0 and l >= lower_ind[k] and te < neighborhood_array[i][1]:
+            e = min_energy_values[k, l] + integrate(tp, tq, p, q,
+                                                    k, i, l, j,
+                                                    gamma, energy_dot,
+                                                    dim, start, end, val1, val2, u)
+            if e < minimum:
+                minimum = e
+                path_nodes[i][j][0] = k
+                path_nodes[i][j][1] = l
+            points_considered = points_considered + 1
+            te = te + 1
+            l = l - 1
+        k = k - 1
     min_energy_values[i][j] = minimum
 
     # !! Interpolate

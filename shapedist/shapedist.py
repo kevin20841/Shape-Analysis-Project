@@ -128,9 +128,9 @@ def find_shapedist(p, q, dr='m', neigh = 5, shape_rep=shapedist.coords, distfunc
         tg, gammay, sdist = shapedist.elastic_n_2.find_gamma(t, p, q, neigh, neigh, energy_dot, uniform, dim)
     else:
         tg, gammay, sdist = shapedist.elastic_linear_multilevel.find_gamma(t, p, q, mask, energy_dot, uniform, dim, neigh, strip_height)
-
     if distfunc is not None:
         sdist = distfunc(p, q, tg, gammay)
+
     if 'd' in dr.lower():
         if 't' in dr.lower():
             p = p.T

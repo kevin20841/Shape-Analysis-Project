@@ -20,8 +20,7 @@ def cache():
 
     # all_curves = loadmat('../data/Curve_data.mat')
     # curves_raw = all_curves['MPEG7_curves_256']
-    curves = np.load("../data/marrow_cell_curves_coarsened.npy", allow_pickle=True)
-    curves = curves[:200]
+    curves = np.load("../data/marrow_cell_curves_full.npy", allow_pickle=True)
     # for i in range(100):
     #     curves[i] = curves_raw[i][0].T
     # for i in range(10):
@@ -42,10 +41,11 @@ def job():
 
     np.save(os.path.join(dirname, "./output/" +filename), matrix)
 
+
 def task(p, q):
     t = np.linspace(0., 1., p.shape[0])
     # dist = shapedist.closed_curve_shapedist(p, q, t1=t, t2=t, dr='', shape_rep=shapedist.srvf)
-    dist = shapedist.find_shapedist(p, q, t1=t, t2=t, dr='', shape_rep=shapedist.coords)
+    dist = shapedist.find_shapedist(p, q, tol=2e-3, dr='cm', shape_rep=shapedist.srvf)
     return dist
     # kd_dist, temp = shapedist.kd_tree.shape_dist(p, q)
     # return kd_dist
@@ -61,6 +61,8 @@ def main():
         cache()
     if "-j" in args:
         job()
+    input()
+
 
 if __name__ == "__main__":
     sys.exit(main())
