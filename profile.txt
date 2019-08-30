@@ -1,0 +1,294 @@
+Timer unit: 1e-06 s
+
+Total time: 628.556 s
+File: /users/kls6/Shape-Analysis-Project/shapedist/elastic_linear_hierarchy.py
+Function: integrate at line 33
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    33                                           
+    34                                           @profile
+    35   1904605    1641507.0      0.9      0.3  def integrate(tp, tq, py, qy, k, i, l, j, gamma_interval, energy_dot):
+    36   1904605    1440975.0      0.8      0.2      e = 0
+    37   1904605   11666070.0      6.1      1.9      a = k
+    38   1904605   17484462.0      9.2      2.8      gammak_1 = gamma_interval * l + (tp[a] - tp[k]) * \
+    39   1904605   11265810.0      5.9      1.8                 (gamma_interval * j - gamma_interval * l) / (tp[i] - tp[k])
+    40   1904605   16545314.0      8.7      2.6      gammak_end = gamma_interval * l + (tp[i] - tp[k]) * \
+    41   1904605    6954579.0      3.7      1.1                   (gamma_interval * j - gamma_interval * l) / (tp[i] - tp[k])
+    42   1904605    4067013.0      2.1      0.6      val1, start = interp(gammak_1, tq, qy, 0, tq.size)
+    43                                               val2, end = interp(gammak_end, tq, qy, start, tq.size)
+    44  33911987   31761085.0      0.9      5.1  
+    45  32007382  187985176.0      5.9     29.9      while a < i:
+    46                                                   gammak_2 = gamma_interval * l + (tp[a + 1] - tp[k]) * (gamma_interval * j - gamma_interval * l) / (
+    47  32007382   84493714.0      2.6     13.4                      tp[i] - tp[k])
+    48  32007382   23567001.0      0.7      3.7  
+    49  32007382  171531727.0      5.4     27.3          val2, temp = interp(gammak_2, tq, qy, start, end)
+    50  32007382   27530136.0      0.9      4.4          e = e + (0.5 * (py[a] - val1) ** 2 + 0.5 *
+    51  32007382   29175722.0      0.9      4.6                   (py[a + 1] - val2) ** 2) * (tp[a + 1] - tp[a]) * 0.5
+    52   1904605    1446094.0      0.8      0.2          val1 = val2
+    53                                                   a = a + 1
+    54                                               return e
+
+Total time: 911.346 s
+File: /users/kls6/Shape-Analysis-Project/shapedist/elastic_linear_hierarchy.py
+Function: find_gamma at line 131
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+   131                                               return ret
+   132                                           
+   133                                           
+   134                                           @profile
+   135         1          5.0      5.0      0.0  # @jit(cache=True, nopython=True, fastmath=True)
+   136         1          2.0      2.0      0.0  def find_gamma(t, p, q, parametrization_array, energy_dot, gamma_tol):
+   137         1          2.0      2.0      0.0      # Initialize variables
+   138         1          3.0      3.0      0.0      tp = t
+   139         1          2.0      2.0      0.0      tq = t
+   140                                               py = p
+   141         1          2.0      2.0      0.0      qy = q
+   142         1          2.0      2.0      0.0      n_2_precision = 6
+   143      1401       3326.0      2.4      0.0  
+   144      1400       3302.0      2.4      0.0      initial_size = 0
+   145        60        105.0      1.8      0.0      i = 0
+   146      1400       2447.0      1.7      0.0      while i < parametrization_array[0].shape[0]:
+   147                                                   if parametrization_array[0][i]:
+   148         1          1.0      1.0      0.0              initial_size = initial_size + 1
+   149         1          1.0      1.0      0.0          i = i + 1
+   150         1          1.0      1.0      0.0  
+   151      1401       2279.0      1.6      0.0      previous_n = initial_size
+   152      1400       2696.0      1.9      0.0      parametrization_size = 0
+   153       201        722.0      3.6      0.0      i = 0
+   154      1400       2102.0      1.5      0.0      while i < parametrization_array.shape[1]:
+   155         1          2.0      2.0      0.0          if parametrization_array[1][i]:
+   156         1         25.0     25.0      0.0              parametrization_size = parametrization_size + 1
+   157         1        186.0    186.0      0.0          i = i + 1
+   158         1        101.0    101.0      0.0      n = tp.size
+   159         1         12.0     12.0      0.0      path = np.zeros(parametrization_size, dtype=np.float64)
+   160                                               tg = np.linspace(0., 1., n).astype(np.float64)
+   161         1          9.0      9.0      0.0      g = np.linspace(0., 1., initial_size).astype(np.float64)
+   162         1          9.0      9.0      0.0      temp_domain_gamma = tg[parametrization_array[1]]
+   163         1          8.0      8.0      0.0  
+   164         1          9.0      9.0      0.0      tp_temp = tp[parametrization_array[1]]
+   165                                               py_temp = py[parametrization_array[1]]
+   166                                               tq_temp = tq[parametrization_array[1]]
+   167         1          1.0      1.0      0.0      qy_temp = qy[parametrization_array[1]]
+   168         1          3.0      3.0      0.0  
+   169         1          9.0      9.0      0.0      # Find coarsest solution
+   170         1          9.0      9.0      0.0      current_iteration = 0
+   171         1    4452920.0 4452920.0      0.5      gamma_domain, gamma_range, energy = shapedist.elastic_n_2.find_gamma(
+   172                                                   tp[parametrization_array[0]], py[parametrization_array[0]],
+   173         1          3.0      3.0      0.0          qy[parametrization_array[0]], tg[parametrization_array[0]],
+   174         1          1.0      1.0      0.0          g, n_2_precision, n_2_precision, energy_dot)
+   175         1          2.0      2.0      0.0  
+   176         1         27.0     27.0      0.0      count = 0
+   177       202        295.0      1.5      0.0      i = 0
+   178       201       1911.0      9.5      0.0      cont = True
+   179       201        316.0      1.6      0.0      previous_path = np.zeros(parametrization_size, dtype=np.float64)
+   180                                               while i < parametrization_size:
+   181         1         10.0     10.0      0.0          previous_path[i], temp = interp(temp_domain_gamma[i], gamma_domain, gamma_range, 0, previous_n)
+   182         1         33.0     33.0      0.0          i = i + 1
+   183         1          2.0      2.0      0.0  
+   184         1          2.0      2.0      0.0      neighborhood_array = np.zeros((parametrization_size, 2), dtype=np.int64)
+   185         1          2.0      2.0      0.0      neighborhood_array = neighborhood_array + 8
+   186         1    3215527.0 3215527.0      0.4      gamma_interval = 1 / (parametrization_size - 1)
+   187                                               strip_height = 16
+   188                                               upper_bound, lower_bound = calculate_search_area(temp_domain_gamma,
+   189         2          7.0      3.5      0.0                                                       temp_domain_gamma, previous_path, strip_height,
+   190                                                                                                parametrization_size)
+   191         1          3.0      3.0      0.0  
+   192         1  127646692.0 127646692.0     14.0      # Iteratively find the medium coarse solution
+   193                                               while cont:
+   194         1         62.0     62.0      0.0  
+   195         1         26.0     26.0      0.0          path, shape_energy = iteration(tp_temp, tq_temp, py_temp, qy_temp, temp_domain_gamma, upper_bound, lower_bound,
+   196         1         20.0     20.0      0.0                                         neighborhood_array, parametrization_size, energy_dot)
+   197                                           
+   198         1          2.0      2.0      0.0          outside_boundary = (path[:-1] > upper_bound[:-1]).any() or (path[1:] < lower_bound[1:]).any()
+   199                                                   pushing_boundary = (np.abs((upper_bound[:-1] - path[:-1])) < gamma_interval).any() or \
+   200         1          1.0      1.0      0.0                             (np.abs((lower_bound[1:] - path[1:])) < gamma_interval).any()
+   201                                                   # print(outside_boundary, pushing_boundary)
+   202                                                   if count >= 4:
+   203                                                       raise RuntimeWarning("Solution could not converge after 4 iterations.")
+   204                                                   cont = pushing_boundary or outside_boundary
+   205                                                   # print(pushing_boundary, outside_boundary)
+   206         1          2.0      2.0      0.0          # plt.plot(temp_domain_gamma, path, ".-r")
+   207                                                   # plt.plot(temp_domain_gamma, upper_bound, "-y")
+   208                                                   # plt.plot(temp_domain_gamma, lower_bound, "-y")
+   209         1          1.0      1.0      0.0          # plt.show()
+   210                                                   count = count + 1
+   211                                           
+   212                                                   # print(count)
+   213                                                   if pushing_boundary:
+   214                                                       upper_bound, lower_bound = calculate_search_area(temp_domain_gamma,
+   215                                                                                                        temp_domain_gamma, path, strip_height,
+   216         1          1.0      1.0      0.0                                                               parametrization_size)
+   217         1          4.0      4.0      0.0              strip_height = strip_height + 4
+   218                                           
+   219         1          2.0      2.0      0.0      # Calculate super fine solution, if needed
+   220                                               previous_n = parametrization_size
+   221         1          1.0      1.0      0.0      if parametrization_array.shape[0] == 2:
+   222         1          1.0      1.0      0.0          current_iteration = 1
+   223         1         16.0     16.0      0.0      elif parametrization_array.shape[0] == 3:
+   224                                           
+   225         1         12.0     12.0      0.0          strip_height = 8
+   226         1         12.0     12.0      0.0          current_iteration = 2
+   227         1         10.0     10.0      0.0          domain_gamma = tg[parametrization_array[2]]
+   228         1         11.0     11.0      0.0  
+   229         1          2.0      2.0      0.0          tp_temp = tp[parametrization_array[2]]
+   230         1         12.0     12.0      0.0          py_temp = py[parametrization_array[2]]
+   231         1         13.0     13.0      0.0          tq_temp = tq[parametrization_array[2]]
+   232         1         10.0     10.0      0.0          qy_temp = qy[parametrization_array[2]]
+   233         1          1.0      1.0      0.0          parametrization_size = tp_temp.size
+   234                                                   neighborhood_array_final = np.zeros((parametrization_size, 2), dtype=np.int64)
+   235      1401       2078.0      1.5      0.0          neighborhood_array_final = neighborhood_array_final + 8
+   236      1400       4851.0      3.5      0.0          previous_path = np.zeros(parametrization_size, dtype=np.float64)
+   237      1400       2308.0      1.6      0.0          i = 0
+   238                                           
+   239         1          2.0      2.0      0.0          while i < parametrization_size:
+   240         1        675.0    675.0      0.0              previous_path[i], temp = interp(domain_gamma[i], temp_domain_gamma, path, 0, previous_n)
+   241                                                       i = i + 1
+   242         1          2.0      2.0      0.0  
+   243         1  776000982.0 776000982.0     85.1          upper_bound, lower_bound = calculate_search_area(domain_gamma, domain_gamma,
+   244                                                                                                    previous_path, strip_height, parametrization_size)
+   245         1         18.0     18.0      0.0  
+   246                                                   path, shape_energy = iteration(tp_temp, tq_temp, py_temp, qy_temp, domain_gamma, upper_bound, lower_bound,
+   247                                                                                  neighborhood_array_final, parametrization_size, energy_dot)
+   248                                           
+   249                                               return tg[parametrization_array[current_iteration]], path, shape_energy
+
+Total time: 884.89 s
+File: /users/kls6/Shape-Analysis-Project/shapedist/elastic_linear_hierarchy.py
+Function: iteration at line 288
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+   288                                               # return prev_path_interp + (rotation_matrix @ unit_up) * strip_height / parametrization_size,\
+   289                                               #        prev_path_interp - (rotation_matrix @ unit_up) * strip_height / parametrization_size
+   290                                           
+   291                                               return upper_bound, lower_bound
+   292                                           
+   293         2         31.0     15.5      0.0  
+   294                                           @profile
+   295         2          2.0      1.0      0.0  # @jit(cache=True, nopython=True, fastmath=True)
+   296         2          2.0      1.0      0.0  def iteration(tp_temp, tq_temp, py_temp, qy_temp, temp_domain_gamma, upper_bound, lower_bound,
+   297                                                         neighborhood_array, parametrization_size, energy_dot):
+   298         2        593.0    296.5      0.0      # Linear Iteration
+   299         2       1112.0    556.0      0.0      path = np.zeros(parametrization_size, dtype=np.float64)
+   300         2          5.0      2.5      0.0  
+   301         2        180.0     90.0      0.0      m = parametrization_size
+   302                                               n = parametrization_size
+   303         2         11.0      5.5      0.0  
+   304         2          6.0      3.0      0.0      min_energy_values = np.zeros((n, n), dtype=np.float64)
+   305         2          2.0      1.0      0.0      path_nodes = np.zeros((n, n, 2), dtype=np.int64)
+   306         2          3.0      1.5      0.0      gamma_interval = 1 / (m - 1)
+   307         2          3.0      1.5      0.0      min_energy_values[0][0] = integrate(tp_temp, tq_temp, py_temp, qy_temp, 0, 1, 0, 1, gamma_interval, energy_dot)
+   308                                           
+   309      1599       1732.0      1.1      0.0      path_nodes[1][1][0] = 0
+   310                                               path_nodes[1][1][1] = 0
+   311                                               i, j, k, l = 1, 1, 1, 1
+   312      1597       3789.0      2.4      0.0      val = 0
+   313      1597       1925.0      1.2      0.0      val2 = 0
+   314        26         27.0      1.0      0.0  
+   315     41832      94627.0      2.3      0.0      while i < n - 1:
+   316     40235      51887.0      1.3      0.0          # val = interp(tp_temp[i], prev_temp_domain_gamma,
+   317     40235  476820153.0  11850.9     53.9          #              gamma_range, 0, previous_n)
+   318                                                   j = floor(lower_bound[i] / gamma_interval)
+   319     40235     110028.0      2.7      0.0          if j <= 0:
+   320     40235      69744.0      1.7      0.0              j = 1
+   321       462        528.0      1.1      0.0          while j < m - 1 and j * gamma_interval < upper_bound[i]:
+   322     40235      72643.0      1.8      0.0              min_energy_values[i][j] = integrate(tp_temp, tq_temp, py_temp, qy_temp, 0, i, 0, j,
+   323    360122     487477.0      1.4      0.1                                                  gamma_interval, energy_dot)
+   324                                           
+   325                                                       k = i - neighborhood_array[i][0]
+   326                                                       if k <= 0:
+   327                                                           k = 1
+   328    319887     823964.0      2.6      0.1              minimum = min_energy_values[i][j]
+   329    319887     914997.0      2.9      0.1              while k < i:
+   330    113304     232167.0      2.0      0.0                  # val2 = interp(tp_temp[k],
+   331    319887     432965.0      1.4      0.0                  #               prev_temp_domain_gamma,
+   332      1088       1163.0      1.1      0.0                  #               gamma_range, 0, previous_n)
+   333   2184125   15967568.0      7.3      1.8  
+   334   1864238    3563640.0      1.9      0.4                  l = j - neighborhood_array[i][1]
+   335   1864238    2010097.0      1.1      0.2                  if l <= floor(lower_bound[i] / gamma_interval):
+   336   1864238  375703998.0    201.5     42.5                      l = floor(lower_bound[i] / gamma_interval)
+   337   1864238    2435977.0      1.3      0.3                  if l <= 0:
+   338    279180     316128.0      1.1      0.0                      l = 1
+   339    279180     763307.0      2.7      0.1                  while l < j and l * gamma_interval < upper_bound[k]:
+   340    279180     529421.0      1.9      0.1                      e = min_energy_values[k, l] + integrate(tp_temp, tq_temp, py_temp, qy_temp,
+   341                                                                                                       k, i, l, j,
+   342   1864238    2739792.0      1.5      0.3                                                              gamma_interval, energy_dot)
+   343    319887     502290.0      1.6      0.1                      if e < minimum:
+   344     40235      88566.0      2.2      0.0                          minimum = e
+   345     40235      48212.0      1.2      0.0                          path_nodes[i][j][0] = k
+   346      1597       1910.0      1.2      0.0                          path_nodes[i][j][1] = l
+   347                                           
+   348         2          2.0      1.0      0.0                      l = l + 1
+   349         2          2.0      1.0      0.0                  k = k + 1
+   350         2          4.0      2.0      0.0              min_energy_values[i][j] = minimum
+   351         2      31513.0  15756.5      0.0              j = j + 1
+   352                                                   i = i + 1
+   353         2          7.0      3.5      0.0      # !!
+   354         2          4.0      2.0      0.0      i = n - 1
+   355                                               j = m - 1
+   356         2          3.0      1.5      0.0      min_energy_values[i][j] = integrate(tp_temp, tq_temp, py_temp, qy_temp, 0, i, 0, j,
+   357        18         26.0      1.4      0.0                                          gamma_interval, energy_dot)
+   358                                           
+   359                                               k = i - neighborhood_array[i][0]
+   360                                               if k <= 0:
+   361        16         43.0      2.7      0.0          k = 1
+   362        16         47.0      2.9      0.0      minimum = min_energy_values[i][j]
+   363                                               while k < i:
+   364        16         24.0      1.5      0.0          # val2 = interp(tp_temp[k],
+   365                                                   #               prev_temp_domain_gamma,
+   366       144       1310.0      9.1      0.0          #               gamma_range, 0, previous_n)
+   367       128        257.0      2.0      0.0          l = j - neighborhood_array[i][1]
+   368       128        146.0      1.1      0.0          if l <= floor(lower_bound[i] / gamma_interval):
+   369       128      29870.0    233.4      0.0              l = floor(lower_bound[i] / gamma_interval)
+   370       128        172.0      1.3      0.0          if l <= 0:
+   371        12         16.0      1.3      0.0              l = 1
+   372        12         39.0      3.2      0.0          while l < j and l * gamma_interval < upper_bound[k]:
+   373        12         25.0      2.1      0.0              e = min_energy_values[k, l] + integrate(tp_temp, tq_temp, py_temp, qy_temp,
+   374       128        202.0      1.6      0.0                                                      k, i, l, j,
+   375        16         27.0      1.7      0.0                                                      gamma_interval, energy_dot)
+   376                                                       if e < minimum:
+   377         2          6.0      3.0      0.0                  minimum = e
+   378                                                           path_nodes[i][j][0] = k
+   379                                                           path_nodes[i][j][1] = l
+   380         2         31.0     15.5      0.0              l = l + 1
+   381         2          6.0      3.0      0.0          k = k + 1
+   382         2          3.0      1.5      0.0  
+   383                                               min_energy_values[i][j] = minimum
+   384         2          2.0      1.0      0.0  
+   385       411        804.0      2.0      0.0      # !! Interpolate
+   386       409       1216.0      3.0      0.0      path_indices = np.zeros((n, 2), dtype=np.int64)
+   387       409        846.0      2.1      0.0      path_indices[0][0] = n - 1
+   388       409        763.0      1.9      0.0      path_indices[0][1] = m - 1
+   389       409        482.0      1.2      0.0  
+   390         2          3.0      1.5      0.0      i = 0
+   391         2          2.0      1.0      0.0      while path_indices[i][0] != 0 or path_indices[i][1] != 0 and i + 1 < path.size:
+   392         2          2.0      1.0      0.0          result = path_nodes[path_indices[i][0]][path_indices[i][1]]
+   393         2          4.0      2.0      0.0          path_indices[i + 1][0] = result[0]
+   394                                                   path_indices[i + 1][1] = result[1]
+   395         2         24.0     12.0      0.0          i = i + 1
+   396       413        868.0      2.1      0.0      i = 0
+   397       411       4229.0     10.3      0.0      previous = 1
+   398       411       1226.0      3.0      0.0      previousIndex_domain = n - 1
+   399       299        372.0      1.2      0.0      previousIndex_gamma = n - 1
+   400       299       2640.0      8.8      0.0  
+   401       299       1178.0      3.9      0.0      path[path_indices[0][0]] = gamma_interval * path_indices[0][1]
+   402      1788       4421.0      2.5      0.0      while i < path_indices.size // 2 and previousIndex_domain != 0:
+   403      1489       2233.0      1.5      0.0          path[path_indices[i][0]] = gamma_interval * path_indices[i][1]
+   404      1489       4790.0      3.2      0.0          if previousIndex_domain - path_indices[i][0] > 1:
+   405                                                       j = 0
+   406      1489       1881.0      1.3      0.0              val = (gamma_interval * (previousIndex_gamma - path_indices[i][1])) / \
+   407       411        778.0      1.9      0.0                    (temp_domain_gamma[previousIndex_domain] - temp_domain_gamma[path_indices[i][0]])
+   408       411        706.0      1.7      0.0              while j < previousIndex_domain - path_indices[i][0]:
+   409       411       3598.0      8.8      0.0                  path[previousIndex_domain - j] = previous - (temp_domain_gamma[previousIndex_domain] -
+   410       411        644.0      1.6      0.0                                                               temp_domain_gamma[previousIndex_domain - j]) * val
+   411         2          5.0      2.5      0.0  
+   412                                                           j = j + 1
+   413                                                   previousIndex_domain = path_indices[i][0]
+   414                                                   previousIndex_gamma = path_indices[i][1]
+   415                                                   previous = gamma_interval * path_indices[i][1]
+   416                                                   i = i + 1
+   417                                               return path, min_energy_values[n - 1][m - 1]
+

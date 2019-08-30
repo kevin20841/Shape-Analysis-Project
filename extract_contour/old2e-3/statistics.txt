@@ -1,0 +1,4 @@
+Average full size: 866.6893203883495
+Average coarsened size (with tol 2e-3): 135.7242718446602
+Average percent reduction: 0.8210045405404004
+Average Time 0.0596509701997331

@@ -21,41 +21,27 @@ def hierarchical_curve_discretization(p, q, t1, t2, coarsen,  tol = 2e-3, curvat
 
         return [t, p, q], get_uniform_mask(t.shape[0])
     else:
-        t = combine_t(t1, t2)
+        m = max(t1.shape[0], t2.shape[0])
+        t = np.linspace(0., 1., m)
         p, q = parametrize_curve_pair(p, q, t, t1, t2, curvature)
         return [t, p, q], get_uniform_mask(t.shape[0])
 
 
-# def get_adaptive_mask(p, q, t1, t2, curvature, init_coarsening_tol=None):
-#     tol = [0.03, 2e-2]
-#     t = combine_t(t1, t2)
-#     boolean_mask = np.zeros((3, t.shape[0])) < 1
-#     for i in range(len(tol)):
-#         t_p, temp = coarsen_curve(t1, p, tol[i])
-#         boolean_mask[i] = np.in1d(t, t_p)
-#         t_q, temp = coarsen_curve(t2, q, tol[i])
-#         boolean_mask[i] = np.logical_or(boolean_mask[i], np.in1d(t, t_q))
-#         boolean_mask[i] = np.logical_or(boolean_mask[i], np.in1d(t, t_q))
-#         boolean_mask[i][0] = True
-#         boolean_mask[i][-1] = True
-#     # if t.shape[0] < 300:
-#     #     ret = np.array([boolean_mask[0], boolean_mask[-1]])
-#     # else:
-#     #     ret = boolean_mask
-#     ret = boolean_mask
-#     p, q = parametrize_curve_pair(p, q, t, t1, t2, curvature)
-#     # for i in boolean_mask:
-#     #     print(p[i].shape)
-#     return [t, p, q], ret
-
-
 def combine_t(t1, t2, t_spacing_tol=1e-4):
-    t_spacing_tol = min(np.min(t1[1:]-t1[0:-1]), np.min(t2[1:]-t2[0:-1]))/2
+    t_spacing_tol = 1e-4
     t = np.union1d(t1, t2)
     N = t.shape[0]
     remove = np.zeros(N, dtype=bool)
     remove[1:N - 1] = (t[1:N - 1] - t[0:N - 2]) < t_spacing_tol
+    k = 1
+    while k < remove.shape[0]-2:
+        if remove[k] and remove[k+1]:
+            remove[k+1] = False
+        k = k + 1
+
     t = t[np.logical_not(remove)]
+    if t.shape[0] < 40:
+        return np.union1d(t1, t2)
     return t
 
 
@@ -73,21 +59,9 @@ def get_uniform_mask(n):
         c = (c)//2
 
     boolean_mask= boolean_mask[::-1]
-    # if not multi:
-    #     boolean_mask = [boolean_mask[0], boolean_mask[2], boolean_mask[-1]]
     boolean_mask = np.array(boolean_mask, dtype=np.bool)
 
     return boolean_mask
-    # boolean_mask = np.zeros((3, n), dtype=np.bool)
-    # level_numbers = [70, 400, n]
-    # for j in range(3):
-    #     for i in range(level_numbers[j]):
-    #         step_size = np.int(np.floor(n / level_numbers[j]))
-    #         if i * step_size < n:
-    #             boolean_mask[j][i * step_size] = True
-    #     boolean_mask[j][0] = True
-    #     boolean_mask[j][-1] = True
-    # return boolean_mask
 
 
 def mark_nodes_for_coarsening_pair(element_errors_1, element_errors_2, t, tol, t_spacing_tol=0.0001):
@@ -134,22 +108,6 @@ def geometric_discretization_error(b):
     e = np.multiply(max_k, element_sizes**2)
 
     return e
-#
-# def curvature(p, error=0.1):
-#     x = p[:, 0]
-#     y = p[:, 1]
-#     t = np.arange(x.shape[0])
-#     std = error * np.ones_like(x)
-#
-#     fx = UnivariateSpline(t, x, k=4, w=1 / np.sqrt(std))
-#     fy = UnivariateSpline(t, y, k=4, w=1 / np.sqrt(std))
-#
-#     xp = fx.derivative(1)(t)
-#     xpp = fx.derivative(2)(t)
-#     yp = fy.derivative(1)(t)
-#     ypp = fy.derivative(2)(t)
-#     curvature = (xp* ypp - yp* xpp) / np.power(xp** 2 + ypp** 2, 3 / 2)
-#     return curvature
 
 def curvature(p):
     n = p.shape[0]
@@ -181,7 +139,6 @@ def curvature(p):
 
 def coarsen_curve(t, b, tol=2e-3, maxiter=15):
     i = 0
-
     while i < maxiter:
         element_errors_1 = geometric_discretization_error(b)
         markers = mark_nodes_for_coarsening(element_errors_1,  tol)

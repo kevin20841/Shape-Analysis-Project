@@ -1,0 +1,39 @@
+Took 5 seconds!
+Took 220 seconds!
+Took 835 seconds
+Took 840 seconds! N_2 SRVF 256
+Took 3315 seconds! N_2 SRV 512
+Took 795 seconds!
+Took 5 seconds!
+Took 5 seconds!
+Took 680 seconds!
+Took 855 seconds!
+Took 175 seconds! red5_small_256_coords
+Took 310 seconds! n2_5_small_256_curvature
+Took 105 seconds! red5_small_256_curvature
+Took 5 seconds! red5_small_256_curvature_arclen
+Took 60 seconds! red5_small_256_curvature_arclen
+Took 95 seconds! red5_small_256_curvature_arclen
+Took 5 seconds! red5_small_256_curvature
+Took 875 seconds! n2_5_small_256_tangent
+Took 175 seconds! red5_small_256_tangent
+Took 140 seconds! red5_small_256_tangent
+Took 865 seconds! n2_5_small_256_tangent
+Took 865 seconds! n2_5_small_256_srvf
+Took 125 seconds! red5_small_256_srvf
+Took 855 seconds! n2_5_small_256_coords
+Took 130 seconds! red5_small_256_coords
+Took 9885 seconds! red5_full_1024_SRVF
+Took 15 seconds! kd_tree_comp_1024_coords
+Took 25 seconds! kd_tree_comp_1024_coords
+Took 40 seconds! marrow_cell_curves_256_multilevel_test
+Took 40 seconds! marrow_cell_curves_256_multilevel_test
+Took 15410 seconds! cell_curves_coarsenedmulti_srvf.txt
+Took 40935 seconds! cell_curves_uniformN_2_srvf.txt
+Took 5590 seconds! cell_curves_uniformN_2_srvf_noR.txt
+Took 1465 seconds! cell_curves_ccem_srvf_noR.txt
+Took 5180 seconds! cell_curves_cem_srvf_noR.txt
+Took 885 seconds! cell_curves_ccem_srvf_noR.txt
+Took 1345 seconds! cell_curves_ccem_srvf_noR.txt
+Took 6145 seconds! cell_curves_cem_srvf_noR.txt
+Took 2880 seconds! cell_curves_ccem1e-4_srvf_noR.txt

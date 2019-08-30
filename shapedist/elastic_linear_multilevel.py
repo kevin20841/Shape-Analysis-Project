@@ -73,7 +73,40 @@ def get_neighborhood(tg, gamma, neigh):
 
 
 @jit(nopython=True, cache=False)
-def find_gamma(t, p, q, parametrization_array, energy_dot, u, dim, neigh):
+def find_gamma(t, p, q, parametrization_array, energy_dot, u, dim, neigh, strip_height):
+    """
+    Finds a local solution in O(nd) time.
+
+    Parameters
+    ----------
+    t : float
+        A joint parametrization of the two curves
+    p : numpy array of floats
+        The first curve
+    q : numpy array of floats
+        The second curve. The second curve is to be elastically matched to be as close as possible to the first curve.
+    parametrization_array : numpy array of bools
+        An array that contains boolean values that tells the algorithm what each layer is
+    energy_dot : bool
+        Should we utilize the derivative of gamma in our shape distance calculation. Applicable to SRVFS
+    u : bool
+        Is the domain unifomr. If so, we save a log n factor in our calculations
+    dim : int
+        The dimension of the curve inputted.
+    neigh : int
+        The neighborhood size of the algorithm. width = neigh, height = neigh
+    strip_height : int
+        Half strip height of the search area (8 means strip height of 16)
+
+    Returns
+    -------
+    t : numpy array of floats
+        The domain of the reparametrization function gamma
+    path: numpy array of floats
+        The range of the reparametrization function gamma
+    float
+        The calculated energy. Not recommended to use as shape distance
+    """
     # Initialize variables
     tp = t
     tq = t
@@ -115,9 +148,9 @@ def find_gamma(t, p, q, parametrization_array, energy_dot, u, dim, neigh):
 
         neighborhood_array_final = get_neighborhood(domain_gamma, previous_path, neigh)
         upper_bound, lower_bound = calculate_search_area(domain_gamma, domain_gamma,
-                                                         previous_path, parametrization_size, u, current_iteration)
-        path, shape_energy = iteration(domain_gamma, domain_gamma, py_temp, qy_temp, domain_gamma, upper_bound, lower_bound,
-                                       neighborhood_array_final, parametrization_size, energy_dot, dim, u)
+                                                         previous_path, parametrization_size, u, strip_height)
+        path, shape_energy = MDPEM(domain_gamma, domain_gamma, py_temp, qy_temp, upper_bound, lower_bound,
+                                   neighborhood_array_final, parametrization_size, energy_dot, dim, u)
         current_iteration = current_iteration + 1
 
 
@@ -125,9 +158,31 @@ def find_gamma(t, p, q, parametrization_array, energy_dot, u, dim, neigh):
 
 
 @jit(cache=False, nopython=True)
-def calculate_search_area(new_domain, prev_domain, prev_path, parametrization_size, u, it):
+def calculate_search_area(new_domain, prev_domain, prev_path, parametrization_size, u, strip_height):
+    """
+    Calculates the search area.
+
+    Parameters
+    ----------
+    new_domain : array of floats
+        The new domain of the search area
+    prev_domain : array of floats
+        The previous domain ofthe search area
+    parametrization_size : int
+        The amount of points in our parametrization
+    u : bool
+        Is the domain uniform
+    strip_height : int
+        The height of the search area
+
+    Returns
+    -------
+    upper_ind : numpy array of ints
+        Array containing the uppermost indices to search over
+    lower_ind : numpy array of ints
+        Array containing the lowermost indices to search over
+    """
     # strip_height = max(new_domain.shape[0] / (prev_domain.shape[0] * np.sqrt(2) / 2) + 3 + it * 2, 8)
-    strip_height = 8
     # strip_height = 2 * it + 4
     upper_bound_temp = np.zeros((prev_domain.size, 2), dtype=np.float64)
     lower_bound_temp = np.zeros((prev_domain.size, 2), dtype=np.float64)
@@ -176,6 +231,7 @@ def calculate_search_area(new_domain, prev_domain, prev_path, parametrization_si
 
 @jit(cache=False, nopython=True)
 def search(t, x, lower, upper, u):
+
     i = 0
     if not u:
         while lower < upper:
@@ -197,15 +253,48 @@ def search(t, x, lower, upper, u):
         return floor(t / interval)
 
 @jit(cache=False, nopython=True)
-def iteration(tp_temp, tq_temp, py_temp, qy_temp, temp_domain_gamma, upper_ind, lower_ind,
-              neighborhood_array, parametrization_size, energy_dot, dim, u):
+def MDPEM(tp, tq, p, q, upper_ind, lower_ind,
+          neighborhood_array, parametrization_size, energy_dot, dim, u):
+    """
+    Modified version of DPEM to only search on a defined search envelope
+
+    Parameters
+    ----------
+    tp : float
+        A  parametrization of p
+    tq : float
+        A parametrizatoin of q
+    p : numpy array of floats
+        The first curve
+    q : numpy array of floats
+        The second curve. The second curve is to be elastically matched to be as close as possible to the first curve.
+    neighborhood_array : array of ints
+        An array containing what neighborhood should be searched over at every point
+    parametrization_size : int
+        The amount of points in the parametrization
+    energy_dot : bool
+        Should we utilize the derivative of gamma in our shape distance calculation. Applicable to SRVFS
+    dim : int
+        The dimension of the curve inputted.
+    u : bool
+        Is the domain unifomr. If so, we save a log n factor in our calculations
+
+    Returns
+    -------
+    t : numpy array of floats
+        The domain of the reparametrization function gamma
+    path: numpy array of floats
+        The range of the reparametrization function gamma
+    float
+        The calculated energy. Not recommended to use as shape distance
+    """
     # Linear Iteration
     start = np.empty(dim, dtype=np.int64)
     val1 = np.empty(dim, dtype=np.float64)
     end = np.empty(dim, dtype=np.int64)
     val2 = np.empty(dim, dtype=np.float64)
     path = np.zeros(parametrization_size, dtype=np.float64)
-    gamma = tp_temp
+    gamma = tp
     m = parametrization_size
     n = parametrization_size
 
@@ -213,13 +302,13 @@ def iteration(tp_temp, tq_temp, py_temp, qy_temp, temp_domain_gamma, upper_ind, 
     path_nodes = np.zeros((n, n, 2), dtype=np.int64)
     j = 1
     while j < upper_ind[1]:
-        min_energy_values[1][j] = integrate(tp_temp, tp_temp, py_temp, qy_temp, 0, 1, 0, j, gamma, energy_dot,
-                                                dim, start, end, val1, val2, u)
+        min_energy_values[1][j] = integrate(tp, tp, p, q, 0, 1, 0, j, gamma, energy_dot,
+                                            dim, start, end, val1, val2, u)
         j = j + 1
     i = 1
     while lower_ind[i] < j:
-        min_energy_values[i][1] = integrate(tp_temp, tp_temp, py_temp, qy_temp, 0, i, 0, 1, gamma, energy_dot,
-                                                dim, start, end, val1, val2, u)
+        min_energy_values[i][1] = integrate(tp, tp, p, q, 0, i, 0, 1, gamma, energy_dot,
+                                            dim, start, end, val1, val2, u)
         i = i + 1
     i, j, k, l = 1, 1, 1, 1
 
@@ -234,7 +323,7 @@ def iteration(tp_temp, tq_temp, py_temp, qy_temp, temp_domain_gamma, upper_ind, 
                 l = min(upper_ind[k], j-1)
                 te = 0
                 while l > 0 and l >= lower_ind[k] and te < neighborhood_array[i][1]:
-                    e = min_energy_values[k, l] + integrate(tp_temp, tq_temp, py_temp, qy_temp,
+                    e = min_energy_values[k, l] + integrate(tp, tq, p, q,
                                                             k, i, l, j,
                                                             gamma, energy_dot,
                                                             dim, start, end, val1, val2, u)
@@ -262,7 +351,7 @@ def iteration(tp_temp, tq_temp, py_temp, qy_temp, temp_domain_gamma, upper_ind, 
             if l <= 0:
                 l = 1
             while l < j and l < upper_ind[k]:
-                e = min_energy_values[k, l] + integrate(tp_temp, tq_temp, py_temp, qy_temp,
+                e = min_energy_values[k, l] + integrate(tp, tq, p, q,
                                                         k, i, l, j,
                                                         gamma, energy_dot,
                                                         dim, start, end, val1, val2, u)

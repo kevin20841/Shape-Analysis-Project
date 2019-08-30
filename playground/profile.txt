@@ -1,0 +1,16 @@
+Timer unit: 1e-06 s
+
+Total time: 0.574742 s
+File: comparesum.py
+Function: main at line 11
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    11                                           @profile
+    12                                           def main():
+    13         1      97903.0  97903.0     17.0      arr = np.linspace(0., 1., 10000000)
+    14         1     463765.0 463765.0     80.7      nsum(arr)
+    15         1          6.0      6.0      0.0      nsum(arr)
+    16         1      12978.0  12978.0      2.3      np.sum(arr)
+    17         1         90.0     90.0      0.0      print("Hello World!")
+

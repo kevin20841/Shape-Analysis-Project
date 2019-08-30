@@ -1,0 +1,67 @@
+UNCOARSENED CASE
+-------------------------------------------------------------------------
+
+CIRCLE curve, IDENTITY gamma, in 2 dimensions with coords representation
+Size           | Energy         | Error          | Time(seconds)  
+1024           | 0.0000000000   | 0.0000000000   | 1.2163960934   
+CIRCLE curve, SINE gamma, in 2 dimensions with coords representation
+Size           | Energy         | Error          | Time(seconds)  
+1024           | 0.0000000215   | 0.0000032434   | 1.2049648762   
+CIRCLE curve, FLAT gamma, in 2 dimensions with coords representation
+Size           | Energy         | Error          | Time(seconds)  
+1024           | 0.0000300553   | 0.0001212393   | 1.4780566692   
+CIRCLE curve, STEEP gamma, in 2 dimensions with coords representation
+Size           | Energy         | Error          | Time(seconds)  
+1024           | 0.0004782682   | 0.0004917020   | 1.3302311897   
+CIRCLE curve, BUMPY gamma, in 2 dimensions with coords representation
+Size           | Energy         | Error          | Time(seconds)  
+1024           | 0.0000017656   | 0.0000294378   | 1.4154715538   
+
+CIRCLE curve, IDENTITY gamma, in 2 dimensions with srvf representation
+Size           | Energy         | Error          | Time(seconds)  
+1024           | 0.0000000000   | 0.0000000000   | 1.1842222214   
+CIRCLE curve, SINE gamma, in 2 dimensions with srvf representation
+Size           | Energy         | Error          | Time(seconds)  
+1024           | 0.0111056110   | 0.0001285716   | 1.2066507339   
+CIRCLE curve, FLAT gamma, in 2 dimensions with srvf representation
+Size           | Energy         | Error          | Time(seconds)  
+1024           | 0.3222906164   | 0.0009970689   | 1.3594789505   
+CIRCLE curve, STEEP gamma, in 2 dimensions with srvf representation
+Size           | Energy         | Error          | Time(seconds)  
+1024           | 1.0525559060   | 0.0031378138   | 1.3360447884   
+CIRCLE curve, BUMPY gamma, in 2 dimensions with srvf representation
+Size           | Energy         | Error          | Time(seconds)  
+1024           | 0.1151170205   | 0.0008269220   | 1.2904860973   
+
+CIRCLE curve, IDENTITY gamma, in 2 dimensions with normals representation
+Size           | Energy         | Error          | Time(seconds)  
+1024           | 0.0000000000   | 0.0000000000   | 1.2341480255   
+CIRCLE curve, SINE gamma, in 2 dimensions with normals representation
+Size           | Energy         | Error          | Time(seconds)  
+1024           | 0.0000008513   | 0.0000032444   | 1.2564995289   
+CIRCLE curve, FLAT gamma, in 2 dimensions with normals representation
+Size           | Energy         | Error          | Time(seconds)  
+1024           | 0.0207760827   | 0.0001253853   | 1.5365180969   
+CIRCLE curve, STEEP gamma, in 2 dimensions with normals representation
+Size           | Energy         | Error          | Time(seconds)  
+1024           | 0.0185010708   | 0.0004917043   | 1.3821637630   
+CIRCLE curve, BUMPY gamma, in 2 dimensions with normals representation
+Size           | Energy         | Error          | Time(seconds)  
+1024           | 0.0000581250   | 0.0000354601   | 1.4609141350   
+
+CIRCLE curve, IDENTITY gamma, in 2 dimensions with tangent representation
+Size           | Energy         | Error          | Time(seconds)  
+1024           | 0.0000000000   | 0.0000000000   | 1.1832890511   
+CIRCLE curve, SINE gamma, in 2 dimensions with tangent representation
+Size           | Energy         | Error          | Time(seconds)  
+1024           | 0.0000008493   | 0.0000032435   | 1.2068734169   
+CIRCLE curve, FLAT gamma, in 2 dimensions with tangent representation
+Size           | Energy         | Error          | Time(seconds)  
+1024           | 0.0011864317   | 0.0001212394   | 1.4816849232   
+CIRCLE curve, STEEP gamma, in 2 dimensions with tangent representation
+Size           | Energy         | Error          | Time(seconds)  
+1024           | 0.0186851067   | 0.0004917020   | 1.3316106796   
+CIRCLE curve, BUMPY gamma, in 2 dimensions with tangent representation
+Size           | Energy         | Error          | Time(seconds)  
+1024           | 0.0000636063   | 0.0000294450   | 1.4140961170   
+

@@ -1,0 +1,64 @@
+LIMACON curve, IDENTITY gamma, in 2 dimensions with coords representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+256            | 256            | 0.0000000000   | 0.0000000000   | 0.6932699680   
+512            | 512            | 0.0000000000   | 0.0000000000   | 2.8146116734   
+1024           | 1024           | 0.0000000000   | 0.0000000000   | 11.8119585514  
+LIMACON curve, SINE gamma, in 2 dimensions with coords representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+256            | 256            | 0.0000003754   | 0.0000598620   | 0.6931006908   
+512            | 512            | 0.0000000868   | 0.0000209410   | 2.8152670860   
+1024           | 1024           | 0.0000000209   | 0.0000073830   | 11.8087587357  
+LIMACON curve, BUMPY gamma, in 2 dimensions with coords representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+256            | 256            | 0.0000261331   | 0.0005256363   | 0.6931414604   
+512            | 512            | 0.0000258282   | 0.0003567325   | 2.8242642879   
+1024           | 1024           | 0.0000257382   | 0.0002477085   | 11.7214367390  
+
+LIMACON curve, IDENTITY gamma, in 2 dimensions with tangent representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+256            | 256            | 0.0000000000   | 0.0000000000   | 0.2266273499   
+512            | 512            | 0.0000000000   | 0.0000000000   | 0.9241571426   
+1024           | 1024           | 0.0000000000   | 0.0000000000   | 3.7262184620   
+LIMACON curve, SINE gamma, in 2 dimensions with tangent representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+256            | 256            | 0.0000117169   | 0.0000599889   | 0.2266776562   
+512            | 512            | 0.0000025962   | 0.0000209415   | 0.9240865707   
+1024           | 1024           | 0.0000006205   | 0.0000073830   | 3.7264101505   
+LIMACON curve, BUMPY gamma, in 2 dimensions with tangent representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+256            | 256            | 0.0015140826   | 0.0005223251   | 0.2267782688   
+512            | 512            | 0.0017455513   | 0.0003563404   | 0.9240634441   
+1024           | 1024           | 0.0020062993   | 0.0002498143   | 3.7261636257   
+
+LIMACON curve, IDENTITY gamma, in 2 dimensions with curvature representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+256            | 256            | 0.0000000000   | 0.0000000000   | 0.2288670540   
+512            | 512            | 0.0000000000   | 0.0000000000   | 0.9210557938   
+1024           | 1024           | 0.0000000000   | 0.0000000000   | 3.7161328793   
+LIMACON curve, SINE gamma, in 2 dimensions with curvature representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+256            | 256            | 0.0873346431   | 0.0001820264   | 0.2257754803   
+512            | 512            | 0.0165507777   | 0.0000647804   | 0.9214801788   
+1024           | 1024           | 0.0053240011   | 0.0000230247   | 3.9139819145   
+LIMACON curve, BUMPY gamma, in 2 dimensions with curvature representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+256            | 256            | 169.7533333579 | 0.0009633550   | 0.2257342339   
+512            | 512            | 161.7467457491 | 0.0005112196   | 0.9214098454   
+1024           | 1024           | 161.9470055193 | 0.0003383835   | 3.7169282436   
+
+LIMACON curve, IDENTITY gamma, in 2 dimensions with srvf representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+256            | 256            | 0.0000000000   | 0.0000000000   | 0.6954672337   
+512            | 512            | 0.0000000000   | 0.0000000000   | 2.8076183796   
+1024           | 1024           | 0.0000000000   | 0.0000000000   | 11.4157807827  
+LIMACON curve, SINE gamma, in 2 dimensions with srvf representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+256            | 256            | 0.0358841499   | 0.0000653709   | 0.7044138908   
+512            | 512            | 0.0358145046   | 0.0000302038   | 2.8294954300   
+1024           | 1024           | 0.0358411355   | 0.0000125614   | 11.4106307030  
+LIMACON curve, BUMPY gamma, in 2 dimensions with srvf representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+256            | 256            | 0.1604998994   | 0.0005854966   | 0.6960451603   
+512            | 512            | 0.1615449275   | 0.0004064211   | 2.9493517876   
+1024           | 1024           | 0.1622185778   | 0.0002797066   | 11.4084284306  
+

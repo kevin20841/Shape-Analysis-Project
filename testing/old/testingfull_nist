@@ -1,0 +1,185 @@
+CIRCLE curve, IDENTITY gamma, in 1 dimensions with coords representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0000000000   | 0.0000000000   | 0.1342868805   
+512            | 0.0000000000   | 0.0000000000   | 0.3252902031   
+1024           | 0.0000000000   | 0.0000000000   | 0.9240641594   
+2048           | 0.0000000000   | 0.0000000000   | 3.4412658215   
+CIRCLE curve, SINE gamma, in 1 dimensions with coords representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0000001078   | 0.0000270444   | 0.1372346878   
+512            | 0.0000000273   | 0.0000096579   | 0.3382067680   
+1024           | 0.0000000067   | 0.0000033770   | 0.9796893597   
+2048           | 0.0000000012   | 0.0000010543   | 3.6637187004   
+CIRCLE curve, FLAT gamma, in 1 dimensions with coords representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0000001372   | 0.0002733752   | 0.1681678295   
+512            | 0.0000000902   | 0.0001918540   | 0.3932754993   
+1024           | 0.0000000986   | 0.0001441010   | 1.0759186745   
+2048           | 0.0000001669   | 0.0001183660   | 3.8682615757   
+CIRCLE curve, STEEP gamma, in 1 dimensions with coords representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0001834800   | 0.0009766695   | 0.1598708630   
+512            | 0.0002177998   | 0.0007453190   | 0.3784432411   
+1024           | 0.0002537859   | 0.0005623929   | 1.0422496796   
+2048           | 0.0003215783   | 0.0004437859   | 3.7522287369   
+CIRCLE curve, BUMPY gamma, in 1 dimensions with coords representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0000009033   | 0.0000957871   | 0.1618316174  
+512            | 0.0000007955   | 0.0000629813   | 0.3879039288   
+1024           | 0.0000007443   | 0.0000422676   | 1.0823693275   
+2048           | 0.0000001995   | 0.0000220765   | 3.9189977646   
+
+CIRCLE curve, IDENTITY gamma, in 2 dimensions with coords representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0000000000   | 0.0000000000   | 0.4172916412   
+512            | 0.0000000000   | 0.0000000000   | 1.0264363289   
+1024           | 0.0000000000   | 0.0000000000   | 2.9441468716   
+2048           | 0.0000000000   | 0.0000000000   | 10.7725739479  
+CIRCLE curve, SINE gamma, in 2 dimensions with coords representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0000003701   | 0.0000270444   | 0.4270513058   
+512            | 0.0000000948   | 0.0000096512   | 1.0682322979   
+1024           | 0.0000000232   | 0.0000033670   | 3.1273522377   
+2048           | 0.0000000045   | 0.0000010522   | 11.5391521454  
+CIRCLE curve, FLAT gamma, in 2 dimensions with coords representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0000376571   | 0.0002733752   | 0.5607013702   
+512            | 0.0000375382   | 0.0001918381   | 1.3059632778   
+1024           | 0.0000422217   | 0.0001436975   | 3.5584774017   
+2048           | 0.0000573272   | 0.0001183657   | 12.4436125755  
+CIRCLE curve, STEEP gamma, in 2 dimensions with coords representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0004719209   | 0.0009753386   | 0.5172741413   
+512            | 0.0005461092   | 0.0007453191   | 1.2432544231   
+1024           | 0.0006215101   | 0.0005621997   | 3.4382383823   
+2048           | 0.0007693573   | 0.0004437816   | 12.1146559715  
+CIRCLE curve, BUMPY gamma, in 2 dimensions with coords representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0000027052   | 0.0000733799   | 0.5318315029   
+512            | 0.0000021438   | 0.0000460431   | 1.2769296169   
+1024           | 0.0000019950   | 0.0000312851   | 3.5656523705   
+2048           | 0.0000011187   | 0.0000165335   | 12.6150159836  
+
+CIRCLE curve, IDENTITY gamma, in 2 dimensions with srvf representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0000000000   | 0.0000000000   | 0.4196765423   
+512            | 0.0000000000   | 0.0000000000   | 1.0322418213   
+1024           | 0.0000000000   | 0.0000000000   | 2.9627695084   
+2048           | 0.0000000000   | 0.0000000000   | 10.8435733318  
+CIRCLE curve, SINE gamma, in 2 dimensions with srvf representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0119001625   | 0.0002412515   | 0.4322240353   
+512            | 0.0118466628   | 0.0001916494   | 1.0735847950   
+1024           | 0.0118264563   | 0.0001342210   | 3.1427357197   
+2048           | 0.0118222355   | 0.0000950661   | 11.5848057270  
+CIRCLE curve, FLAT gamma, in 2 dimensions with srvf representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.3221074372   | 0.0020721602   | 0.5154201984   
+512            | 0.3224400526   | 0.0014283772   | 1.2283425331   
+1024           | 0.3222880247   | 0.0009973783   | 3.3961873055   
+2048           | 0.3220924451   | 0.0007080887   | 12.0855073929  
+CIRCLE curve, STEEP gamma, in 2 dimensions with srvf representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 1.0240552518   | 0.0061079186   | 0.5922334194   
+512            | 1.0461040377   | 0.0044206501   | 1.6182811260   
+1024           | 1.0527570168   | 0.0031412175   | 3.7159554958   
+2048           | 1.0540459591   | 0.0022351804   | 12.3092563152  
+CIRCLE curve, BUMPY gamma, in 2 dimensions with srvf representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.1155410631   | 0.0016029796   | 0.4814338684   
+512            | 0.1155413233   | 0.0011681061   | 1.4005534649   
+1024           | 0.1153085434   | 0.0008244766   | 3.5665793419   
+2048           | 0.1156556596   | 0.0005786959   | 12.3463461399  
+
+CIRCLE curve, IDENTITY gamma, in 2 dimensions with normals representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0000000000   | 0.0000000000   | 0.4473536015   
+512            | 0.0000000000   | 0.0000000000   | 1.0977771282   
+1024           | 0.0000000000   | 0.0000000000   | 3.0672545433   
+2048           | 0.0000000000   | 0.0000000000   | 11.0110101700  
+CIRCLE curve, SINE gamma, in 2 dimensions with normals representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0000148746   | 0.0000278967   | 0.4581265450   
+512            | 0.0000038110   | 0.0000096550   | 1.1313638687   
+1024           | 0.0000009166   | 0.0000033679   | 3.2702379227   
+2048           | 0.0000001792   | 0.0000010523   | 11.7697114944  
+CIRCLE curve, FLAT gamma, in 2 dimensions with normals representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0015056459   | 0.0003300142   | 0.5940353870   
+512            | 0.0053975961   | 0.0002019721   | 1.3668692112   
+1024           | 0.0222281596   | 0.0001474394   | 3.6872742176   
+2048           | 0.0140733220   | 0.0001205385   | 12.6727504730  
+CIRCLE curve, STEEP gamma, in 2 dimensions with normals representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0133239751   | 0.0009754843   | 0.5478920937   
+512            | 0.0199987011   | 0.0007453950   | 1.3030788898   
+1024           | 0.0241228708   | 0.0005622016   | 3.5604376793   
+2048           | 0.0302640353   | 0.0004437816   | 12.6586935520  
+CIRCLE curve, BUMPY gamma, in 2 dimensions with normals representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0000322490   | 0.0001911542   | 0.5609164238   
+512            | 0.0000440423   | 0.0000734678   | 1.3382468224   
+1024           | 0.0000664774   | 0.0000370008   | 3.7018551826   
+2048           | 0.0000422468   | 0.0000165372   | 12.8526430130  
+
+CIRCLE curve, IDENTITY gamma, in 2 dimensions with tangent representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0000000000   | 0.0000000000   | 0.4188899994   
+512            | 0.0000000000   | 0.0000000000   | 1.0285117626   
+1024           | 0.0000000000   | 0.0000000000   | 2.9473259449   
+2048           | 0.0000000000   | 0.0000000000   | 10.7752363682  
+CIRCLE curve, SINE gamma, in 2 dimensions with tangent representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0000147521   | 0.0000270644   | 0.4283959866   
+512            | 0.0000037699   | 0.0000096550   | 1.0703480244   
+1024           | 0.0000009149   | 0.0000033670   | 3.1339347363   
+2048           | 0.0000001789   | 0.0000010522   | 11.5318183899  
+CIRCLE curve, FLAT gamma, in 2 dimensions with tangent representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0014901742   | 0.0002733896   | 0.5613548756   
+512            | 0.0014820627   | 0.0001918416   | 1.3157269955   
+1024           | 0.0016666389   | 0.0001436977   | 3.5614161491   
+2048           | 0.0022630981   | 0.0001183657   | 12.4454305172  
+CIRCLE curve, STEEP gamma, in 2 dimensions with tangent representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0156005451   | 0.0009753862   | 0.5198881626   
+512            | 0.0207327331   | 0.0007453191   | 1.2433223724   
+1024           | 0.0243221534   | 0.0005621997   | 3.4456465244   
+2048           | 0.0303166341   | 0.0004437816   | 12.1201305389  
+CIRCLE curve, BUMPY gamma, in 2 dimensions with tangent representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0000350740   | 0.0000809874   | 0.5311579704   
+512            | 0.0000602786   | 0.0000461873   | 1.2794198990   
+1024           | 0.0000723096   | 0.0000312897   | 3.5639348030   
+2048           | 0.0000431891   | 0.0000165344   | 12.6202933788  
+
+CIRCLE curve, IDENTITY gamma, in 2 dimensions with curvature representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0000000000   | 0.0000000000   | 0.1359510422   
+512            | 0.0000000000   | 0.0000000000   | 0.3273763657   
+1024           | 0.0000000000   | 0.0000000000   | 0.9265327454   
+2048           | 0.0000000000   | 0.0000000000   | 3.4441978931   
+CIRCLE curve, SINE gamma, in 2 dimensions with curvature representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0000078234   | 0.0011244203   | 0.1974105835   
+512            | 0.0000004853   | 0.0006374134   | 0.4223539829   
+1024           | 0.0000000302   | 0.0028810019   | 1.2468900681   
+2048           | 0.0000000019   | 0.0002808781   | 3.5498259068   
+CIRCLE curve, FLAT gamma, in 2 dimensions with curvature representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 1520266.3493812294| 0.0080215350   | 0.1959271431   
+512            | 721345570110.7896728516| 0.0063802752   | 0.5172195435   
+1024           | 1.9938575895   | 0.0040877695   | 1.0556805134   
+2048           | 53673857196100512.0000000000| 0.0029107265   | 3.5488660336   
+CIRCLE curve, STEEP gamma, in 2 dimensions with curvature representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0638915352   | 0.0089616936   | 0.1359000206   
+512            | 0.0047299498   | 0.0063379970   | 0.4254121780   
+1024           | 0.0003146045   | 0.0044838039   | 1.1970586777   
+2048           | 0.0000199970   | 0.0031611389   | 3.5505814552   
+CIRCLE curve, BUMPY gamma, in 2 dimensions with curvature representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.1520908130   | 0.0037338337   | 0.2000164986   
+512            | 0.0103423653   | 0.0026839000   | 0.4254753590   
+1024           | 0.0006698603   | 0.0021232096   | 1.2400107384   
+2048           | 0.0000423646   | 0.0013991134   | 3.5377631187 

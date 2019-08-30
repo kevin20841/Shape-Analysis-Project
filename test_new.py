@@ -34,7 +34,7 @@ q = q.T
 # energy, p_new, q_new, tg, gammay = shapedist.find_shapedist(p, q, 'd', t1=t, t2=t, shape_rep=shapedist.normals)
 # plt.plot(tg, gammay, "-r")
 
-energy1, p_new, q_new, tg, gammay = shapedist.find_shapedist(p, q, 'cmd', neigh = 5, tol=2e-6, t1=t, t2=t, shape_rep=shapedist.tangent)
+energy1, p_new, q_new, tg, gammay = shapedist.find_shapedist(p, q, 'cmd', neigh = 5, tol=5e-4, t1=t, t2=t, shape_rep=shapedist.coords)
 print(tg.shape)
 plt.plot(t, test(t), "-r")
 plt.plot(tg, gammay, "-b")

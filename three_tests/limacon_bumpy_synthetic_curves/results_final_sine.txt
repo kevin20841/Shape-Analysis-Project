@@ -1,0 +1,82 @@
+TESTING COARSENED NON-UNIFORM MULTILEVEL
+0.002
+LIMACON curve, SINE gamma, in 2 dimensions with coords representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+8192           | 74             | 0.0000000000   | 0.0002909022   | 0.1615335941   
+---------------------------------------------------------------------------------
+LIMACON curve, SINE gamma, in 2 dimensions with tangent representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+8192           | 74             | 0.0075056961   | 0.0004639897   | 0.1629092693   
+---------------------------------------------------------------------------------
+LIMACON curve, SINE gamma, in 2 dimensions with srvf representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+8192           | 74             | 0.0149950554   | 0.0004720723   | 0.1630318165   
+---------------------------------------------------------------------------------
+0.001
+LIMACON curve, SINE gamma, in 2 dimensions with coords representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+8192           | 126            | 0.0000006060   | 0.0000596056   | 0.2073659897   
+---------------------------------------------------------------------------------
+LIMACON curve, SINE gamma, in 2 dimensions with tangent representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+8192           | 126            | 0.0034266001   | 0.0001362070   | 0.2089874744   
+---------------------------------------------------------------------------------
+LIMACON curve, SINE gamma, in 2 dimensions with srvf representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+8192           | 126            | 0.0083896787   | 0.0000889244   | 0.2099480629   
+---------------------------------------------------------------------------------
+0.0005
+LIMACON curve, SINE gamma, in 2 dimensions with coords representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+8192           | 256            | 0.0000005094   | 0.0000470966   | 0.4129884243   
+---------------------------------------------------------------------------------
+LIMACON curve, SINE gamma, in 2 dimensions with tangent representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+8192           | 256            | 0.0047185152   | 0.0001766208   | 0.4151253700   
+---------------------------------------------------------------------------------
+LIMACON curve, SINE gamma, in 2 dimensions with srvf representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+8192           | 256            | 0.0160804149   | 0.0000604338   | 0.4164669514   
+---------------------------------------------------------------------------------
+0.0001
+LIMACON curve, SINE gamma, in 2 dimensions with coords representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+8192           | 370            | 0.0000000859   | 0.0000144648   | 0.5815563202   
+---------------------------------------------------------------------------------
+LIMACON curve, SINE gamma, in 2 dimensions with tangent representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+8192           | 370            | 0.0021572212   | 0.0000667763   | 0.5855669975   
+---------------------------------------------------------------------------------
+LIMACON curve, SINE gamma, in 2 dimensions with srvf representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+8192           | 370            | 0.0072057676   | 0.0000225782   | 0.5830192566   
+---------------------------------------------------------------------------------
+5e-05
+LIMACON curve, SINE gamma, in 2 dimensions with coords representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+8192           | 260            | 0.0000003458   | 0.0000349876   | 0.4342257977   
+---------------------------------------------------------------------------------
+LIMACON curve, SINE gamma, in 2 dimensions with tangent representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+8192           | 260            | 0.0017403787   | 0.0000360141   | 0.4346704483   
+---------------------------------------------------------------------------------
+LIMACON curve, SINE gamma, in 2 dimensions with srvf representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+8192           | 260            | 0.0067561508   | 0.0000392098   | 0.4387826920   
+---------------------------------------------------------------------------------
+1e-05
+LIMACON curve, SINE gamma, in 2 dimensions with coords representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+8192           | 356            | 0.0000001482   | 0.0000232754   | 0.6688714027   
+---------------------------------------------------------------------------------
+LIMACON curve, SINE gamma, in 2 dimensions with tangent representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+8192           | 356            | 0.0013701490   | 0.0000351972   | 0.6696491241   
+---------------------------------------------------------------------------------
+LIMACON curve, SINE gamma, in 2 dimensions with srvf representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+8192           | 356            | 0.0082858972   | 0.0000396358   | 0.6708149910   
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+

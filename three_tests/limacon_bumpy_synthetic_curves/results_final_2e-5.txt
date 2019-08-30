@@ -1,0 +1,25 @@
+TESTING N_2
+LIMACON curve, BUMPY gamma, in 2 dimensions with coords representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+256            | 256            | 0.0000259674   | 0.0004951889   | 0.7140007019   
+512            | 512            | 0.0000258096   | 0.0003505986   | 2.9165463448   
+1024           | 1024           | 0.0000257365   | 0.0002465992   | 11.8383703232  
+---------------------------------------------------------------------------------
+LIMACON curve, BUMPY gamma, in 2 dimensions with tangent representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+256            | 256            | 0.0166183308   | 0.0005002509   | 0.7159676552   
+512            | 512            | 0.0183383626   | 0.0003557067   | 2.9264004230   
+1024           | 1024           | 0.0188099693   | 0.0002512546   | 11.8386032581  
+---------------------------------------------------------------------------------
+LIMACON curve, BUMPY gamma, in 2 dimensions with srvf representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  
+256            | 256            | 0.0562232446   | 0.0005552699   | 0.7173571587   
+512            | 512            | 0.0605619713   | 0.0004009588   | 2.9261045456   
+1024           | 1024           | 0.0617330498   | 0.0002787142   | 11.8064963818  
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+
+TESTING UNIFORM MULTILEVEL
+LIMACON curve, BUMPY gamma, in 2 dimensions with coords representation
+Size           | Coarsened Size | Energy         | Error          | Time(seconds)  

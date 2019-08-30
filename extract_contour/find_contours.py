@@ -58,61 +58,75 @@ unsizes = []
 coarsesizes = []
 percents = []
 times = []
+uniform_256 = []
 for name in tqdm(images):
     img = io.imread(dir + "/" + name)
     mini = np.inf
-    contours = measure.find_contours(img, level=0.5)
-    sm = smooth_curve(contours[0], iter=10)
-    # t = shapedist.arclen_fct_values(sm)
-    # func1 = CubicSpline(t, sm[:, 0])
-    # func2 = CubicSpline(t, sm[:, 1])
-    # t_new = np.linspace(0., 1., 256)
-    # sm_256 = np.zeros((256,2))
-    # sm_256[:, 0] = func1(t_new)
-    # sm_256[:, 1] = func2(t_new)
-    # uncoarsened.append(sm_256)
-    #
-    t = np.arange(sm.shape[0])
-    temp, coarse = shapedist.build_hierarchy.coarsen_curve(t, sm, tol=2e-3, maxiter=15)
-    uncoarsened.append(sm)
+    contours = measure.find_contours(img, level=0.8)
+    max = 0
+    index = 0
+    for i in range(len(contours)):
+        if contours[i].shape[0] > max:
+            index = i
+            max = contours[i].shape[0]
+    if max < 100:
+        continue
+
+    sm = smooth_curve(contours[index], iter=10)
+    t = shapedist.arclen_fct_values(sm)
+    func1 = CubicSpline(t, sm[:, 0])
+    func2 = CubicSpline(t, sm[:, 1])
+    t_new = np.linspace(0., 1., 1024)
+    sm_uniform = np.zeros((1024, 2))
+    sm_uniform[:, 0] = func1(t_new)
+    sm_uniform[:, 1] = func2(t_new)
+
+
+    uncoarsened.append(sm_uniform)
+    t_256 = np.linspace(0., 1., 256)
+    sm_256 = np.zeros((256, 2))
+    sm_256[:, 0] = func1(t_256)
+    sm_256[:, 1] = func2(t_256)
+    uniform_256.append(sm_256)
+
+    temp, coarse = shapedist.build_hierarchy.coarsen_curve(t_new, sm_uniform, tol=1e-4, maxiter=15)
     unsizes.append(sm.shape[0])
     coarsesizes.append(coarse.shape[0])
     coarsened.append(coarse)
-    percents.append(1 - coarse.shape[0] / sm.shape[0])
-    #
-    # for i in range(5):
-    #     start = time.time()
-    #     contours = measure.find_contours(img, level=0.5)
-    #     sm = smooth_curve(contours[0], iter=10)
-    #
-    #     t = np.arange(sm.shape[0])
-    #     temp, coarse = shapedist.build_hierarchy.coarsen_curve(t, sm, tol=2e-3, maxiter=15)
-    #     end = time.time()
-    #
-    #     if end - start < mini:
-    #         mini = end - start
-    # times.append(mini)
+    percents.append(1 - coarse.shape[0] / sm_uniform.shape[0])
 
-np.save( "marrow_cell_curves_256", uncoarsened)
+    for i in range(5):
+        start = time.time()
+        contours = measure.find_contours(img, level=0.5)
+        sm = smooth_curve(contours[0], iter=10)
+
+        t = np.arange(sm_uniform.shape[0])
+        temp, coarse = shapedist.build_hierarchy.coarsen_curve(t, sm_uniform, tol=1e-4, maxiter=15)
+        end = time.time()
+
+        if end - start < mini:
+            mini = end - start
+    times.append(mini)
+
 #
+uniform_256 = np.array(uniform_256)
 uncoarsened = np.array(uncoarsened)
 coarsened = np.asarray(coarsened)
-print(coarsened.shape, coarsened.dtype)
-print(uncoarsened.shape, uncoarsened.dtype)
 unsizes = np.array(unsizes)
 coarsesizes = np.array(coarsesizes)
 percents = np.array(percents)
 times = np.array(times)
 
-# np.save("marrow_cell_curves_full", uncoarsened)
+np.save("marrow_cell_curves_256", uniform_256)
+np.save("marrow_cell_curves_1024", uncoarsened)
 np.save("marrow_cell_curves_coarsened", coarsened)
-# np.savetxt("marrow_cell_curves_full_sizes", unsizes)
-# np.savetxt("marrow_cell_curves_coarsened_sizes", coarsesizes)
-# np.savetxt("marrow_cell_curves_percent_red", percents)
-# np.savetxt("marrow_cell_curves_process_times", times)
+np.savetxt("marrow_cell_curves_full_sizes", unsizes)
+np.savetxt("marrow_cell_curves_coarsened_sizes", coarsesizes)
+np.savetxt("marrow_cell_curves_percent_red", percents)
+np.savetxt("marrow_cell_curves_process_times", times)
 
-
+print("Num Curves:", uniform_256.shape[0])
 print("Average full size:", np.sum(unsizes) / unsizes.shape[0])
 print("Average coarsened size (with tol 2e-3):", np.sum(coarsesizes) / coarsesizes.shape[0])
 print("Average percent reduction:", np.sum(percents) / percents.shape[0])
-# print("Average Time", np.sum(times) / times.shape[0])
+print("Average Time", np.sum(times) / times.shape[0])

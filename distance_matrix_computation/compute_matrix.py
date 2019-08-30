@@ -8,10 +8,10 @@ import time
 import subprocess
 # host names
 names = ["magenta", "benson", "jeeves", "renfield", "bunter"]
-num_curves = 200
+num_curves = 515
 dirname = os.path.dirname(__file__)
 
-filename = "cell_curves_256_n_2_srvf.txt"
+filename = "cell_curves_ccem1e-4_srvf_noR.txt"
 
 def printtime(t):
     if t < 60:
@@ -31,8 +31,8 @@ def cache():
 
     # all_curves = loadmat('../data/Curve_data.mat')
     # curves_raw = all_curves['MPEG7_curves_256']
-    curves = np.load("../data/marrow_cell_curves_coarsened.npy", allow_pickle=True)
-    curves = curves[:200]
+    curves = np.load("../data/marrow_cell_curves_full.npy", allow_pickle=True)
+
     # for i in range(100):
     #     curves[i] = curves_raw[i][0].T
     # for i in range(10):
@@ -47,14 +47,14 @@ def broadcast():
         step = int(np.floor(num_curves/N))
         start = step * i
         end = min(num_curves, step *(i + 1))
-        print(start, end)
-        # if i == N -1:
-        #     end = num_curves
-        # command = ["ssh","-f", name, "nohup","/users/kls6/anaconda3/envs/Shape-Analysis-Project/bin/python",
-        #            "/users/kls6/Shape-Analysis-Project/distance_matrix_computation/worker.py", str(start), str(end), "&>", "/dev/null"]
-        # print("Connected to", name)
-        # time.sleep(2)
-        # subprocess.Popen(command)
+        # print(start, end)
+        if i == N -1:
+            end = num_curves
+        command = ["ssh","-f", name, "nohup","/users/kls6/anaconda3/envs/Shape-Analysis-Project/bin/python",
+                   "/users/kls6/Shape-Analysis-Project/distance_matrix_computation/worker.py", str(start), str(end), "&>", "/dev/null"]
+        print("Connected to", name)
+        time.sleep(2)
+        subprocess.Popen(command)
 
 
 def wait():

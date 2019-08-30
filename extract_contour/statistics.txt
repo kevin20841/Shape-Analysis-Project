@@ -1,14 +1,5 @@
-Average full size: 861.0038684719535
-Average coarsened size (with tol 2e-3): 189.76208897485492
-Average percent reduction: 0.7493026091279128
-
-
-Average full size: 861.0038684719535
-Average coarsened size (with tol 2e-3): 140.54158607350098
-Average percent reduction: 0.8083267776277739
-Average Time 0.06018523828665108
-
-Average full size: 861.0038684719535
-Average coarsened size (with tol 2e-3): 140.54158607350098
-Average percent reduction: 0.8083267776277739
-Average Time 0.05723975705454843
+Num Curves: 515
+Average full size: 866.6893203883495
+Average coarsened size (with tol 2e-3): 124.89514563106796
+Average percent reduction: 0.8780320843446602
+Average Time 0.060978376981124134

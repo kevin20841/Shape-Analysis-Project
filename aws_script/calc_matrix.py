@@ -20,7 +20,7 @@ def cache():
 
     # all_curves = loadmat('../data/Curve_data.mat')
     # curves_raw = all_curves['MPEG7_curves_256']
-    curves = np.load("../data/marrow_cell_curves_256.npy", allow_pickle=True)
+    curves = np.load("../data/marrow_cell_curves_coarsened.npy", allow_pickle=True)
     curves = curves[:200]
     # for i in range(100):
     #     curves[i] = curves_raw[i][0].T

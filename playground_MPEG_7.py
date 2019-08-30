@@ -21,19 +21,29 @@ import scipy.interpolate
 #
 # s = 0- np.argmax(q[:, 0])
 # q = np.roll(q, s, axis=0)
-# # R = np.array([[0.877, -0.479],[0.479, 0.877]])
-# # R = np.array([[0.877, -0.479],[0.479, 0.877]])
-# # q = np.zeros(p.shape)
-# # for i in range(256):
-# #     q[i] = R @ p[i]
+# R = np.array([[0.877, -0.479],[0.479, 0.877]])
+# R = np.array([[0.877, -0.479],[0.479, 0.877]])
+# q = np.zeros(p.shape)
+# for i in range(256):
+#     q[i] = R @ p[i]
 
-curves = np.load("./data/marrow_cell_curves_256.npy", allow_pickle=True)
-p = curves[0]
+curves = np.load("./data/marrow_cell_curves_full.npy", allow_pickle=True)
+p = curves[442]
 
 print(p.shape)
-q = curves[26]
-t = np.linspace(0., 1., p.shape[0])
-dist = shapedist.closed_curve_shapedist(p, q, dr="2", t1=t, t2=t, shape_rep=shapedist.srvf)
+q = curves[43]
+
+t1 = np.linspace(0., 1., p.shape[0])
+t2 = np.linspace(0., 1., q.shape[0])
+dist, temp, temp, tg, gamma = shapedist.find_shapedist(p, q, t1=t1, t2=t2, dr="cd", tol=2e-4, shape_rep=shapedist.srvf)
+
+print(dist)
+print(tg.shape)
+plt.plot(tg, gamma, "-")
+plt.figure()
+plt.plot(p[:, 0], p[:, 1], "r")
+plt.plot(q[:, 0], q[:, 1], "g")
+plt.show()
 # for i in range(519):
 #     q = curves[i]
 #     dist, temp, temp, tg, gamma = shapedist.find_shapedist(p, q, t1=t, t2=t, dr="d", shape_rep=shapedist.srvf)

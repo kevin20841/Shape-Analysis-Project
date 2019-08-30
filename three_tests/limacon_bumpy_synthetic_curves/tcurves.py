@@ -54,7 +54,7 @@ def run_tests(ndim, test_cases, curve_name, test_sizes, n_iter, shape_reps, mode
 
 def main():
     # test_cases = ["identity", "sine", "flat", "steep", "bumpy"]
-    test_cases = ["bumpy"]
+    test_cases = ["sine"]
     test_sizes = [256, 512, 1024, 2048, 4096, 8192]
     # test_sizes= [i for i in range(60, 200, 10)]
     curve_name = "limacon"
@@ -62,26 +62,27 @@ def main():
     # 1d test
     # shape_reps = [shapedist.coords]
     # run_tests(1, test_cases, curve_name, test_sizes, n_iter, shape_reps)
-
-    # 2d test
-    test_sizes = [256, 512, 1024]
-    shape_reps = [shapedist.coords, shapedist.tangent,  shapedist.srvf]
-    eprint("TESTING N_2")
-
-    run_tests(2, test_cases, curve_name, test_sizes, n_iter, shape_reps, "u2", 2e-3)
-    eprint("-" * 81)
-    eprint("-" * 81)
-    eprint()
-    eprint("TESTING UNIFORM MULTILEVEL")
-    test_sizes = [256, 512, 1024, 2048, 4096, 8192]
-    # # # shape_reps = [shapedist.curvature]
-    run_tests(2, test_cases, curve_name, test_sizes, n_iter, shape_reps, "um", 2e-3)
-    eprint("-" * 81)
-    eprint("-" * 81)
-    eprint()
+    #
+    # # 2d test
+    # test_sizes = [256, 512, 1024]
+    # shape_reps = [shapedist.coords, shapedist.tangent,  shapedist.srvf]
+    # eprint("TESTING N_2")
+    #
+    # run_tests(2, test_cases, curve_name, test_sizes, n_iter, shape_reps, "u2", 2e-3)
+    # eprint("-" * 81)
+    # eprint("-" * 81)
+    # eprint()
+    # eprint("TESTING UNIFORM MULTILEVEL")
+    # test_sizes = [256, 512, 1024, 2048, 4096, 8192]
+    # # # # shape_reps = [shapedist.curvature]
+    # run_tests(2, test_cases, curve_name, test_sizes, n_iter, shape_reps, "um", 2e-3)
+    # eprint("-" * 81)
+    # eprint("-" * 81)
+    # eprint()
     eprint("TESTING COARSENED NON-UNIFORM MULTILEVEL")
     test_sizes = [8192]
     tols = [2e-3, 1e-3, 5e-4, 1e-4, 5e-5, 1e-5]
+    shape_reps = [shapedist.coords, shapedist.tangent,  shapedist.srvf]
     for tol in tols:
         eprint(tol)
         run_tests(2, test_cases, curve_name, test_sizes, n_iter, shape_reps, "cm", tol)

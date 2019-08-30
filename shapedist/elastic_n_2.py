@@ -1,5 +1,5 @@
 """
-Implementation of global solution algorithm to determine shape elasticity.
+Implementation of global solution algorithm to elastically match curves. Uses
 """
 import numpy as np
 from numba import jit, types, float64, int16, generated_jit
@@ -10,7 +10,7 @@ from shapedist.comp import *
 @jit(cache=False, nopython=True)
 def find_gamma(t, p, q, height, width, energy_dot, u, dim):
     """
-    Finds a global solution in O(n^2) time.
+    Finds a global solution in O(n^2 d) time.
 
     Parameters
     ----------
@@ -20,6 +20,16 @@ def find_gamma(t, p, q, height, width, energy_dot, u, dim):
         The first curve
     q : numpy array of floats
         The second curve. The second curve is to be elastically matched to be as close as possible to the first curve.
+    height : int
+        The height of the neighborhood . width * height forms a search rectangle in the DP algorithm.
+    width : int
+        The width of the neighborhood. width * height forms a search rectangle in the DP algorithm.
+    energy_dot : bool
+        Should we utilize the derivative of gamma in our shape distance calculation. Applicable to SRVFS
+    u : bool
+        Is the domain unifomr. If so, we save a log n factor in our calculations
+    dim : int
+        The dimension of the curve inputted.
 
     Returns
     -------
@@ -28,7 +38,7 @@ def find_gamma(t, p, q, height, width, energy_dot, u, dim):
     path: numpy array of floats
         The range of the reparametrization function gamma
     float
-        The calculated energy
+        The calculated energy. Not recommended to use as shape distance
     """
 
     gamma = t

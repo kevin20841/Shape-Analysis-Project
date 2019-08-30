@@ -1,0 +1,31 @@
+CIRCLE curve, IDENTITY gamma, in 2 dimensions with curvature representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0000000000   | 0.0000000000   | 0.1359510422   
+512            | 0.0000000000   | 0.0000000000   | 0.3273763657   
+1024           | 0.0000000000   | 0.0000000000   | 0.9265327454   
+2048           | 0.0000000000   | 0.0000000000   | 3.4441978931   
+CIRCLE curve, SINE gamma, in 2 dimensions with curvature representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0000078234   | 0.0011244203   | 0.1974105835   
+512            | 0.0000004853   | 0.0006374134   | 0.4223539829   
+1024           | 0.0000000302   | 0.0028810019   | 1.2468900681   
+2048           | 0.0000000019   | 0.0002808781   | 3.5498259068   
+CIRCLE curve, FLAT gamma, in 2 dimensions with curvature representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 1520266.3493812294| 0.0080215350   | 0.1959271431   
+512            | 721345570110.7896728516| 0.0063802752   | 0.5172195435   
+1024           | 1.9938575895   | 0.0040877695   | 1.0556805134   
+2048           | 53673857196100512.0000000000| 0.0029107265   | 3.5488660336   
+CIRCLE curve, STEEP gamma, in 2 dimensions with curvature representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.0638915352   | 0.0089616936   | 0.1359000206   
+512            | 0.0047299498   | 0.0063379970   | 0.4254121780   
+1024           | 0.0003146045   | 0.0044838039   | 1.1970586777   
+2048           | 0.0000199970   | 0.0031611389   | 3.5505814552   
+CIRCLE curve, BUMPY gamma, in 2 dimensions with curvature representation
+Size           | Energy         | Error          | Time(seconds)  
+256            | 0.1520908130   | 0.0037338337   | 0.2000164986   
+512            | 0.0103423653   | 0.0026839000   | 0.4254753590   
+1024           | 0.0006698603   | 0.0021232096   | 1.2400107384   
+2048           | 0.0000423646   | 0.0013991134   | 3.5377631187   
+

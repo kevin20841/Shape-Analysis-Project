@@ -1,9 +1,34 @@
+"""
+Holds all of the computation machinery of the package.
+"""
 from numba import jit, generated_jit
 from math import floor, pi, sqrt
 
 
 @jit(nopython=True)
 def interpu(t, x, y, lower, upper, u):
+    """
+    Interpolation assuming uniform domain. Has placeholder arguments to work with @generated_jit
+    Parameters
+    ----------
+    t : float
+        The value to be interpolated
+    x : array of floats
+        The domain of the original curve
+    y : array of floats
+        The range of the original curve
+    lower
+    upper
+    u
+
+    Returns
+    -------
+    val : float
+        The value interpolated
+    i : float
+        The index of the most near smallest domain value. Usefull for optimization.
+
+    """
     interval = x[1] - x[0]
     i = floor(t / interval)
     if i == floor(1/interval):
@@ -13,6 +38,30 @@ def interpu(t, x, y, lower, upper, u):
 
 @jit(nopython=True)
 def interpn(t, x, y, lower, upper, u):
+    """
+    Interpolation assuming nonuniform domain. Performs a binary search.
+    Parameters
+    ----------
+    t : float
+        The value to be interpolated
+    x : array of floats
+        The domain of the original curve
+    y : array of floats
+        The range of the original curve
+    lower : int
+        The index of the lower portion of the search window
+    upper : int
+        The index of the upper portion of the search window
+    u
+
+    Returns
+    -------
+    val : float
+        The value interpolated
+    i : float
+        The index of the most near smallest domain value. Usefull for optimization.
+
+    """
     i = 0
     while lower < upper:
         i = lower + (upper - lower) // 2
@@ -27,14 +76,17 @@ def interpn(t, x, y, lower, upper, u):
             upper = i
 
     if i == x.size - 1:
-        temp = y[i]
+        val = y[i]
     else:
-        temp = (t - x[i]) * (y[i + 1] - y[i]) / (x[i + 1] - x[i]) + y[i]
-    return temp, i
+        val = (t - x[i]) * (y[i + 1] - y[i]) / (x[i + 1] - x[i]) + y[i]
+    return val, i
 
 
 @jit(nopython=True, cache=False)
 def interp(t, x, y, lower, upper, u):
+    """
+    Wrapper function that selects which interpolation funciton to use based on if it is uniform or not.
+    """
     if u:
         return interpu(t, x, y, lower, upper, u)
     else:
@@ -43,6 +95,22 @@ def interp(t, x, y, lower, upper, u):
 
 @jit(nopython=True)
 def norm(x, y):
+    """
+    Caluclates a norm between two curves
+
+    Parameters
+    ----------
+    x
+        The first curve
+    y
+        The second curve
+
+    Returns
+    -------
+    s
+        The value
+
+    """
     s = 0
     for i in range(x.shape[0]):
         s = s + (x[i] - y[i])**2
@@ -51,6 +119,22 @@ def norm(x, y):
 
 @jit(nopython=True)
 def srvfnorm(x, y, gammad):
+    """
+    Caluclates a norm between two curves, but multiplies it by a factor (for the SRVF case).
+
+    Parameters
+    ----------
+    x
+        The first curve
+    y
+        The second curve
+
+    Returns
+    -------
+    s
+        The value
+
+    """
     s = 0
     for i in range(x.shape[0]):
         s = s + (x[i] - sqrt(gammad) * y[i]) ** 2
@@ -59,6 +143,31 @@ def srvfnorm(x, y, gammad):
 
 @jit(nopython=True, cache=False)
 def integrate_nd(tp, tq, py, qy, k, i, l, j, gamma, energy_dot, dim, start, end, val1, val2, u):
+    """
+    Calculates E_i mentioned in the paper for n dimensions.
+    Parameters
+    ----------
+    tp
+    tq
+    py
+    qy
+    k
+    i
+    l
+    j
+    gamma
+    energy_dot
+    dim
+    start
+    end
+    val1
+    val2
+    u
+
+    Returns
+    -------
+
+    """
     e = 0
     a = k
     gammad = (gamma[j] - gamma[l]) / (tp[i] - tp[k])
@@ -86,8 +195,33 @@ def integrate_nd(tp, tq, py, qy, k, i, l, j, gamma, energy_dot, dim, start, end,
 
     return e
 
-
+@jit(nopython=True, cache=False)
 def integrate_1d(tp, tq, py, qy, k, i, l, j, gamma, energy_dot, dim, start, end, val1, val2, u):
+    """
+    Calculates E_i mentioned in paper for 1 dimension.
+    Parameters
+    ----------
+    tp
+    tq
+    py
+    qy
+    k
+    i
+    l
+    j
+    gamma
+    energy_dot
+    dim
+    start
+    end
+    val1
+    val2
+    u
+
+    Returns
+    -------
+
+    """
     e = 0
     a = k
     gammak_1 = gamma[l] + (tp[a] - tp[k]) * \
@@ -112,6 +246,31 @@ def integrate_1d(tp, tq, py, qy, k, i, l, j, gamma, energy_dot, dim, start, end,
 
 @generated_jit(nopython=True, cache=False)
 def integrate(tp, tq, py, qy, k, i, l, j, gamma, energy_dot, dim, start, end, val1, val2, u):
+    """
+    Wrapper class for integration.
+    Parameters
+    ----------
+    tp
+    tq
+    py
+    qy
+    k
+    i
+    l
+    j
+    gamma
+    energy_dot
+    dim
+    start
+    end
+    val1
+    val2
+    u
+
+    Returns
+    -------
+
+    """
     if py.ndim == 1:
         return integrate_1d
     elif py.ndim == 2:

@@ -1,0 +1,24 @@
+CIRCLE curve, IDENTITY gamma, in 2 dimensions with coords representation
+Size           | Coarsened Size | Energy          Error          | Time(seconds)  
+1024           | 68             | 0.0000000000   | 0.0000000000   | 0.1146445274   
+CIRCLE curve, SINE gamma, in 2 dimensions with coords representation
+Size           | Coarsened Size | Energy          Error          | Time(seconds)  
+1024           | 131            | 0.0000010515   | 0.0000641381   | 0.2068529129   
+CIRCLE curve, FLAT gamma, in 2 dimensions with coords representation
+Size           | Coarsened Size | Energy          Error          | Time(seconds)  
+1024           | 1024           | 0.0000639007   | 0.0001767882   | 12.3611047268  
+CIRCLE curve, STEEP gamma, in 2 dimensions with coords representation
+Size           | Coarsened Size | Energy          Error          | Time(seconds)  
+1024           | 314            | 0.0000021699   | 0.0000505460   | 1.9609341621   
+CIRCLE curve, BUMPY gamma, in 2 dimensions with coords representation
+Size           | Coarsened Size | Energy          Error          | Time(seconds)  
+1024           | 1024           | 0.0000252993   | 0.0001113200   | 12.0456109047  
+
+CIRCLE curve, IDENTITY gamma, in 2 dimensions with srvf representation
+Size           | Coarsened Size | Energy          Error          | Time(seconds)  
+1024           | 257            | 0.0000000000   | 0.0000000000   | 0.5053765774   
+CIRCLE curve, SINE gamma, in 2 dimensions with srvf representation
+Size           | Coarsened Size | Energy          Error          | Time(seconds)  
+1024           | 513            | 0.0117012099   | 0.0001885621   | 1.5584578514   
+CIRCLE curve, FLAT gamma, in 2 dimensions with srvf representation
+Size           | Coarsened Size | Energy          Error          | Time(seconds)  

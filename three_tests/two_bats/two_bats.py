@@ -86,7 +86,7 @@ def run_tests():
     # names = ["256", "1024"]
     # tolerance: 0.02
     for i in range(len(bat_1)):
-        eprint("Discretization: " + names[i])
+        eprint("Discretization: " + names[i] + " " + str(bat_1[i].shape[0]) + " " + str(bat_2[i].shape[0]))
         eprint("-" * 162)
         eprint("{: <15}| {: <15}| {: <15}| {: <15}| {: <15}".format("Shape rep:", "N_2", "Uni-Multi",
                                                            "N_2 t", "Uni-Multi t"))
